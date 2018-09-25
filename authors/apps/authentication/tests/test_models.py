@@ -21,3 +21,10 @@ class UserManagerTest(TestCase):
         self.assertIsInstance(
             self.userManager.create_user(username="username", email="username@mail.com", password="password"), User)
 
+    def test_cannot_create_user_without_password(self):
+        """
+        Ensure that user manager cannot create a user with no password
+        :return:
+        """
+        with self.assertRaises(TypeError):
+            self.userManager.create_user(username="username", email="username@mail.com")
