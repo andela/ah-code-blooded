@@ -28,3 +28,18 @@ class UserManagerTest(TestCase):
         """
         with self.assertRaises(TypeError):
             self.userManager.create_user(username="username", email="username@mail.com")
+
+    def test_create_superuser(self):
+        """
+        Checks whether the UserManager class creates a super user
+        :return:
+        """
+        user = self.userManager.create_superuser(username="admin", email="admin@admin.com", password="password")
+        self.assertTrue(user.is_staff)
+        self.assertTrue(user.is_superuser)
+
+    def test_cannot_create_superuser_without_password(self):
+        """
+        Ensures the
+        :return:
+        """
