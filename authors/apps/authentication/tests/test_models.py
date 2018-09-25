@@ -11,7 +11,10 @@ class UserManagerTest(TestCase):
     """
 
     def setUp(self):
-        self.userManager = UserManager()
+        """"
+        Initializes all our test variables.
+        """
+        self.UserManager = UserManager()
 
     def test_create_user(self):
         """
