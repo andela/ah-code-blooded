@@ -24,7 +24,7 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         :return:
         """
         response = self.client.get(reverse("authentication:user_ru"), data={}, format="json")
-        self.none = self.assertIsNotNone(response.data['user'])
+        self.assertIsNotNone(response.data['user'])
 
     def test_can_update_user_details(self):
         """
