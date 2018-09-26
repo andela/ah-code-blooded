@@ -18,7 +18,7 @@ class UserManagerTest(TestCase):
 
     def test_create_user(self):
         """
-        Checks whether the User manager class creates a user with a username, email and password
+        Checks whether a user can be created with username email and password
         :return:
         """
         self.assertIsInstance(
@@ -26,7 +26,7 @@ class UserManagerTest(TestCase):
 
     def test_cannot_create_user_without_email(self):
         """
-        Ensure that user manager cannot create a user with no email
+        Ensure a user cannot be created without an email
         :return:
         """
         with self.assertRaises(TypeError):
@@ -34,7 +34,7 @@ class UserManagerTest(TestCase):
 
     def test_create_superuser(self):
         """
-        Checks whether the UserManager class creates a super user
+        Ensure a superuser can be created
         :return:
         """
         user = User.objects.create_superuser(username="admin", email="admin@admin.com", password="password")
@@ -43,7 +43,7 @@ class UserManagerTest(TestCase):
 
     def test_cannot_create_superuser_without_password(self):
         """
-        Ensures the
+        Ensures a superuser must have a password
         :return:
         """
         with self.assertRaises(TypeError):
