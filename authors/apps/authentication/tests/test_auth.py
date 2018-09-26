@@ -1,20 +1,29 @@
 from django.test import TestCase
 from rest_framework import status
 
+
 class AuthenticationTestCase(TestCase):
+    """
+    Extend this class in order to use the helper functions to login and sign up a user
+    """
 
     def setUp(self):
         self.user = {"username": "bev", "password": "password", "email": "beverly@gmail.com"}
 
-    def register(self, user = self.user):
+    def register(self, user=None):
+        if user is None:
+            user = self.user
         return self.client.post("/api/users", data=user, format="json")
 
-    def login(self, user=self.user):
+    def login(self, user=None):
+        if user is None:
+            user = self.user
         return self.client.post("/api/users/login", data=user, format="json")
 
-class ViewsTestCase(AuthenticationTestCase):
+
+class RegistrationViewTestCase(AuthenticationTestCase):
     """
-    Tests if a user can be registered suessfully with username, email and password
+    Tests if a user can be registered successfully with username, email and password
     
     """
 
@@ -22,8 +31,6 @@ class ViewsTestCase(AuthenticationTestCase):
         """"
         Tests if user can register successfully
         """
-
-        # registering a new user
         res = self.register()
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertIn(b'User registered successfully', res.data)
@@ -43,26 +50,25 @@ class ViewsTestCase(AuthenticationTestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(b'User already exists. Please login.', res.data)
 
+
+class LoginViewTestCase(AuthenticationTestCase):
+    """
+    Test for authentication in username and password login
+    """
+
     def test_user_cannot_login_before_registering(self):
         """
         Test user cannot login before registering
         """
-
-        # login a user
         res = self.login()
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn(b'User not found. Please register before you login.', res.data)
-        
+
     def test_user_can_login(self):
         """
-        Test user can login suessfully
+        Test user can login successfully
         """
         res = self.login()
-        self.assertEqual(rv.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(res.data['user'])
         self.assertIsNotNone(res.data['user']['token'])
-
-
-
-
-         
