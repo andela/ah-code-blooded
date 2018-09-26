@@ -2,18 +2,35 @@ from django.test import TestCase
 from rest_framework import status
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from .helpers import register_user, login_user
+=======
+from rest_framework.reverse import reverse
+from rest_framework.test import APITestCase
+>>>>>>> [Chore #160577595] Remove hardcoded URLs
 
 class AuthenticationTestCase(TestCase):
 
     def setUp(self):
         self.user = {"username": "bev", "password": "password", "email": "beverly@gmail.com"}
 
+<<<<<<< HEAD
     def register(self, user = self.user):
         return self.client.post("/api/users", data=user, format="json")
 
     def login(self, user=self.user):
         return self.client.post("/api/users/login", data=user, format="json")
+=======
+    def register(self, user=None):
+        if user is None:
+            user = self.user
+        return self.client.post(reverse("authentication:user_register"), data=user, format="json")
+
+    def login(self, user=None):
+        if user is None:
+            user = self.user
+        return self.client.post(reverse("authentication:user_login"), data=user, format="json")
+>>>>>>> [Chore #160577595] Remove hardcoded URLs
 
 class ViewsTestCase(AuthenticationTestCase):
     """
