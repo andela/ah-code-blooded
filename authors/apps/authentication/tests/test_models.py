@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from authors.apps.authentication.models import (
     User, UserManager
 )
@@ -14,7 +15,7 @@ class UserManagerTest(TestCase):
         """"
         Initializes all our test variables.
         """
-        self.UserManager = UserManager()
+        self.userManager = UserManager()
 
     def test_create_user(self):
         """
@@ -24,13 +25,13 @@ class UserManagerTest(TestCase):
         self.assertIsInstance(
             self.userManager.create_user(username="username", email="username@mail.com", password="password"), User)
 
-    def test_cannot_create_user_without_password(self):
+    def test_cannot_create_user_without_email(self):
         """
-        Ensure that user manager cannot create a user with no password
+        Ensure that user manager cannot create a user with no email
         :return:
         """
         with self.assertRaises(TypeError):
-            self.userManager.create_user(username="username", email="username@mail.com")
+            self.userManager.create_user(username="username", password="password", email=None)
 
     def test_create_superuser(self):
         """
@@ -46,3 +47,5 @@ class UserManagerTest(TestCase):
         Ensures the
         :return:
         """
+        with self.assertRaises(TypeError):
+            self.userManager.create_superuser(username="admin", email="admin@admin.com")
