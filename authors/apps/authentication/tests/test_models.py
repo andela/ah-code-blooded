@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from authors.apps.authentication.models import (
-    User, UserManager
+    User
 )
 
 
@@ -15,7 +15,6 @@ class UserManagerTest(TestCase):
         """"
         Initializes all our test variables.
         """
-        self.userManager = UserManager()
 
     def test_create_user(self):
         """
@@ -23,7 +22,7 @@ class UserManagerTest(TestCase):
         :return:
         """
         self.assertIsInstance(
-            self.userManager.create_user(username="username", email="username@mail.com", password="password"), User)
+            User.objects.create_user(username="username", email="username@mail.com", password="password"), User)
 
     def test_cannot_create_user_without_email(self):
         """
@@ -31,14 +30,14 @@ class UserManagerTest(TestCase):
         :return:
         """
         with self.assertRaises(TypeError):
-            self.userManager.create_user(username="username", password="password", email=None)
+            User.objects.create_user(username="username", password="password", email=None)
 
     def test_create_superuser(self):
         """
         Checks whether the UserManager class creates a super user
         :return:
         """
-        user = self.userManager.create_superuser(username="admin", email="admin@admin.com", password="password")
+        user = User.objects.create_superuser(username="admin", email="admin@admin.com", password="password")
         self.assertTrue(user.is_staff)
         self.assertTrue(user.is_superuser)
 
@@ -48,4 +47,4 @@ class UserManagerTest(TestCase):
         :return:
         """
         with self.assertRaises(TypeError):
-            self.userManager.create_superuser(username="admin", email="admin@admin.com")
+            User.objects.create_superuser(username="admin", email="admin@admin.com")
