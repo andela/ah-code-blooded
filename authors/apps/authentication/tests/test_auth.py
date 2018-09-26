@@ -50,15 +50,15 @@ class ViewsTestCase(AuthenticationTestCase):
         """
 
         # login a user
-        rv = self.login()
-        self.assertEqual(rv.status_code, status.HTTP_403_FORBIDDEN)
+        res = self.login()
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn(b'User not found. Please register before you login.', res.data)
         
     def test_user_can_login(self):
-        rv = self.login()
+        res = self.login()
         self.assertEqual(rv.status_code, status.HTTP_200_OK)
-        self.assertIsNotNone(rv.data['user'])
-        self.assertIsNotNone(rv.data['user']['token'])
+        self.assertIsNotNone(res.data['user'])
+        self.assertIsNotNone(res.data['user']['token'])
 
 
 
