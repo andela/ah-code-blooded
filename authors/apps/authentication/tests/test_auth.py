@@ -57,6 +57,9 @@ class ViewsTestCase(AuthenticationTestCase):
         self.assertIn(b'User not found. Please register before you login.', res.data)
         
     def test_user_can_login(self):
+        """
+        Test user can login suessfully
+        """
         res = self.login()
         self.assertEqual(rv.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(res.data['user'])
