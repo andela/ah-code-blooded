@@ -37,11 +37,7 @@ class ViewsTestCase(AuthenticationTestCase):
         """
 
         # registering a new user
-        res = self.register()
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertIn(b'User registered successfully', res.data)
-
-        # registering the same user again
+        self.register()
         res = self.register()
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(b'User already exists. Please login.', res.data)
