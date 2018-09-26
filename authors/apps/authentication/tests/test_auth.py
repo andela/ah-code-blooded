@@ -13,7 +13,7 @@ class AuthenticationTestCase(TestCase):
         return self.client.post("/api/users", data=user, format="json")
 
     def login(self, user=self.user):
-        return self.client.post("/api/users/login", dat=user, format="json")
+        return self.client.post("/api/users/login", data=user, format="json")
 
 class ViewsTestCase(AuthenticationTestCase):
     """
