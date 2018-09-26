@@ -23,7 +23,7 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         Retrieve user details - the user has to be authenticated
         :return:
         """
-        response = self.client.get(reverse("authentication:user_ru"), data={}, format="json")
+        response = self.client.get(reverse("user-retrieve-update"), data={}, format="json")
         self.assertIsNotNone(response.data['user'])
 
     def test_can_update_user_details(self):
@@ -31,7 +31,7 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         Update the user's profile - the user has to be authenticated
         :return:
         """
-        response = self.client.put(reverse("authentication:user_ru"), data=self.userDetails, format="json")
+        response = self.client.put(reverse("user-retrieve-update"), data=self.userDetails, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.data['user'])
 
@@ -41,7 +41,7 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         :return:
         """
         self.logout()
-        response = self.client.get(reverse("authentication:user_ru"), data={}, format="json")
+        response = self.client.get(reverse("user-retrieve-update"), data={}, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_cannot_update_unauthenticated_user_details(self):
@@ -50,5 +50,5 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         :return:
         """
         self.logout()
-        response = self.client.put(reverse("authentication:user_ru"), data=self.userDetails, format="json")
+        response = self.client.put(reverse("user-retrieve-update"), data=self.userDetails, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

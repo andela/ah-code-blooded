@@ -15,12 +15,12 @@ class AuthenticationTestCase(APITestCase):
     def register(self, user=None):
         if user is None:
             user = self.user
-        return self.client.post(reverse("authentication:user_register"), data=user, format="json")
+        return self.client.post(reverse("user-register"), data=user, format="json")
 
     def login(self, user=None):
         if user is None:
             user = self.user
-        return self.client.post(reverse("authentication:user_login"), data=user, format="json")
+        return self.client.post(reverse("user-login"), data=user, format="json")
 
 
 class AuthenticatedTestCase(AuthenticationTestCase):
