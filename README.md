@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/andela/ah-code-blooded/badge.svg?branch=develop)](https://coveralls.io/github/andela/ah-code-blooded?branch=develop)
+
 Authors Haven - A Social platform for the creative at heart.
 =======
 
