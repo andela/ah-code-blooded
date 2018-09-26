@@ -1,8 +1,9 @@
 from django.test import TestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
 
-class AuthenticationTestCase(TestCase):
+class AuthenticationTestCase(APITestCase):
     """
     Extend this class in order to use the helper functions to login and sign up a user
     """
@@ -19,6 +20,37 @@ class AuthenticationTestCase(TestCase):
         if user is None:
             user = self.user
         return self.client.post("/api/users/login", data=user, format="json")
+
+
+class AuthenticatedTestCase(AuthenticationTestCase):
+    """
+    Extend this class in order to perform tests for an authenticated user
+    """
+
+    def setUp(self):
+        """
+        Register the user for further authentication
+        :return:
+        """
+        self.register()  # register the user
+        self.login()
+
+    def logout(self):
+        """
+        Unset the HTTP Authorization header whenever you need to use an unauthenticated user
+        :return:
+        """
+        self.client.credentials(HTTP_AUTHORIZATION="")
+
+    def login(self, user=None):
+        """
+        Login the user to the system and also set the authorization headers
+        :param user:
+        :return:
+        """
+        response = super().login(user)  # login the user
+        self.client.credentials(HTTP_AUTHORIZATION="JWT " + response.data['user']['token'])
+        return response
 
 
 class RegistrationViewTestCase(AuthenticationTestCase):
