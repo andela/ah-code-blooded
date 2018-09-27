@@ -5,9 +5,9 @@ from authors.apps.authentication.models import (
 )
 
 
-class UserManagerTest(TestCase):
+class UserModelTest(TestCase):
     """
-    This tests the UserManager class, ability to create a user and create a super user.
+    This tests the User model class, ability to create a user and create a super user.
 
     """
 
