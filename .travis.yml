@@ -3,17 +3,16 @@ language: python
 python:
   - "3.6"
 
-#service:
-  #- postgresql
+service:
+  - postgresql
 
 install:
   - pip3 install -r requirements.txt
   - pip3 install coverage
   - pip3 install coveralls
 
-#before_script:
- #- python manage.py makemigrations
-  #- python manage.py migrate
+before_script:
+  - export DB_NAME = "ah_code_blooded"
 
 script:
   - coverage run --source='.' ./manage.py test 
@@ -21,4 +20,3 @@ script:
 
 after_script:
   - coveralls
-  
