@@ -12,7 +12,7 @@ install:
   - pip3 install coveralls
 
 before_script:
-  - export DB_NAME = "ah_code_blooded"
+  - export DB_NAME="ah_code_blooded"
 
 script:
   - coverage run --source='.' ./manage.py test 
