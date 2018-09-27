@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/andela/ah-code-blooded.svg?branch=develop)](https://travis-ci.org/andela/ah-code-blooded)
 
 [![Coverage Status](https://coveralls.io/repos/github/andela/ah-code-blooded/badge.svg?branch=develop)](https://coveralls.io/github/andela/ah-code-blooded?branch=develop)
-[![Build Status](https://travis-ci.org/andela/ah-code-blooded.svg?branch=master)](https://travis-ci.org/andela/ah-code-blooded)
+
 
 Authors Haven - A Social platform for the creative at heart.
 =======
