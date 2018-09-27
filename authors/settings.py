@@ -90,6 +90,13 @@ DATABASES = {
     }
 }
 
+# sendGrid API Settings
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'ah-code-blooded'
+EMAIL_HOST_PASSWORD = 'code-blooded1'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
