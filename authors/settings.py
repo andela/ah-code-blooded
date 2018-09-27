@@ -24,13 +24,7 @@ SECRET_KEY = '7pgozr2jn7zs_o%i8id6=rddie!*0f0qy3$oy$(8231i^4*@u3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'ah-code-blooded.herokuapp.com',  # the production host
-    'ah-code-blooded-staging.herokuapp.com',  # the staging host
-    'ah-code-blooded-staging-pr-*.herokuapp.com'  # the pr dynamic host
-]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
