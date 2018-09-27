@@ -11,9 +11,6 @@ install:
   - pip3 install coverage
   - pip3 install coveralls
 
-before_script:
-  - psql -c 'create database test;' -U postgres
-
 script:
   - coverage run --source='.' ./manage.py test 
   - coverage report
