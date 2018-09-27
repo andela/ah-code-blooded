@@ -1,5 +1,6 @@
 from django.test import TestCase
 from rest_framework import status
+from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
 
@@ -14,12 +15,13 @@ class AuthenticationTestCase(APITestCase):
     def register(self, user=None):
         if user is None:
             user = self.user
-        return self.client.post("/api/users", data=user, format="json")
+        return self.client.post(reverse("user-register"), data=user, format="json")
+
 
     def login(self, user=None):
         if user is None:
             user = self.user
-        return self.client.post("/api/users/login", data=user, format="json")
+        return self.client.post(reverse("user-login"), data=user, format="json")
 
 
 class AuthenticatedTestCase(AuthenticationTestCase):
@@ -56,7 +58,6 @@ class AuthenticatedTestCase(AuthenticationTestCase):
 class RegistrationViewTestCase(AuthenticationTestCase):
     """
     Tests if a user can be registered successfully with username, email and password
-    
     """
 
     def test_user_can_register(self):
@@ -73,11 +74,7 @@ class RegistrationViewTestCase(AuthenticationTestCase):
         """
 
         # registering a new user
-        res = self.register()
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertIn(b'User registered successfully', res.data)
-
-        # registering the same user again
+        self.register()
         res = self.register()
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(b'User already exists. Please login.', res.data)
