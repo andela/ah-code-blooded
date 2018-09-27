@@ -11,11 +11,6 @@ class UserManagerTest(TestCase):
 
     """
 
-    def setUp(self):
-        """"
-        Initializes all our test variables.
-        """
-
     def test_create_user(self):
         """
         Checks whether a user can be created with username email and password
