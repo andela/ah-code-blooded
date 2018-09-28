@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 
+from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
 
 from .models import User
@@ -143,3 +144,44 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+class ForgotPasswordSerializer(serializers.ModelSerializer):
+    """Performs email serialization."""
+    email = serializers.EmailField()
+
+class ResetPasswordSerializers(serializers.ModelSerializer):
+    """
+    Performs reset password fields serialization.
+    """
+    email = serializers.EmailField(max_length=255)
+    password = serializers.CharField(
+        max_length=128,
+        min_length=8
+    )
+    confirm_password = serializers.CharField(
+        max_length=128,
+        min_length=8
+    )
+    token = serializers.CharField(max_length=255)
+
+    def validate(self, data):
+        """
+        Validates passwords match and
+        token can only be used once
+        """
+         # Query user from DB using email
+        email = data.get('email')
+        user = User.objects.filter(email).first()
+        if data.get('password') != data.get('confirm_password'):
+            msg = "Passwords do not match"
+            raise serializers.ValidationError(msg)
+         # Confirm if token is valid
+        token = data.get('token')
+        validate_token = default_token_generator.check_token(user, token)
+        if not validate_token:
+            msg = "Token is not valid or it has already expired"
+            raise serializers.ValidationError(msg)
+        user.set_password(data.get('password'))
+        user.save()
+        return data
+
