@@ -106,7 +106,7 @@ class RegistrationViewTestCase(AuthenticationTestCase):
         """
         res = self.register()
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertIsNotNone(json.loads(res.content)['user']['token'])
+        self.assertEqual(json.loads(res.content)['user']['email'], self.user['user']['email'])
 
     def test_user_cannot_register_twice(self):
         """
@@ -140,4 +140,4 @@ class LoginViewTestCase(AuthenticationTestCase):
         self.register()
         res = self.login()
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIsNotNone(json.loads(res.content)['user']['token'])
+        self.assertEqual(json.loads(res.content)['user']['email'], self.user['user']['email'])
