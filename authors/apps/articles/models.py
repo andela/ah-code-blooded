@@ -4,8 +4,6 @@ import string
 from django.db import models
 
 # Create your models here.
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 
 from authors.apps.core.models import BaseModel
@@ -36,10 +34,10 @@ class Article(BaseModel):
     def save(self, *args, **kwargs):
         # create the slug only when the article is being saved to avoid broken links
         if not self.id:
-            unique = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+            unique = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(12))
             self.slug = slugify(self.title)
             self.slug = self.slug[:250]
-            self.slug = unique
+            self.slug = self.slug + '-' + unique
         super().save(*args, **kwargs)
 
     def __str__(self):
