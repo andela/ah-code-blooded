@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'authors.apps.profiles',
     'django_inlinecss',
     'rest_framework_swagger',
+    'sendgrid',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +63,7 @@ ROOT_URLCONF = 'authors.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['/templates/'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

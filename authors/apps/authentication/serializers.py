@@ -145,7 +145,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         return instance
 
-class ForgotPasswordSerializer(serializers.ModelSerializer):
+class ForgotPasswordSerializer(serializers.Serializer):
     """Performs email serialization."""
     email = serializers.EmailField()
 
