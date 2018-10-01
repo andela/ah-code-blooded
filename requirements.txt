@@ -10,3 +10,4 @@ pytz==2018.5
 six==1.11.0
 django-rest-swagger==2.2.0
 whitenoise==4.1
+flake8==3.5.0
