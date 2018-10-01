@@ -1,15 +1,15 @@
-from django.test import TestCase
+"""imports modules."""
+# from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
 
 class AuthenticationTestCase(APITestCase):
-    """
-    Extend this class in order to use the helper functions to login and sign up a user
-    """
+    """Extend this class in order to use the helper functions to login and sign up a user."""
 
     def setUp(self):
+        """Create test user."""
         self.user = {
             "user": {
                 "username": "bev",
@@ -19,24 +19,25 @@ class AuthenticationTestCase(APITestCase):
         }
 
     def register(self, user=None):
+        """Register the user if user does not exist."""
         if user is None:
             user = self.user
         return self.client.post(reverse("authentication:user-register"), data=user, format="json")
 
     def login(self, user=None):
+        """Login user."""
         if user is None:
             user = self.user
         return self.client.post(reverse("authentication:user-login"), data=user, format="json")
 
 
 class AuthenticatedTestCase(AuthenticationTestCase):
-    """
-    Extend this class in order to perform tests for an authenticated user
-    """
+    """Extend this class in order to perform tests for an authenticated user."""
 
     def setUp(self):
         """
-        Register the user for further authentication
+        Register the user for further authentication.
+
         :return:
         """
         self.register()  # register the user
@@ -44,14 +45,16 @@ class AuthenticatedTestCase(AuthenticationTestCase):
 
     def logout(self):
         """
-        Unset the HTTP Authorization header whenever you need to use an unauthenticated user
+        Unset the HTTP Authorization header whenever you need to use an unauthenticated user.
+
         :return:
         """
         self.client.credentials(HTTP_AUTHORIZATION="")
 
     def login(self, user=None):
         """
-        Login the user to the system and also set the authorization headers
+        Login the user to the system and also set the authorization headers.
+
         :param user:
         :return:
         """
@@ -61,14 +64,11 @@ class AuthenticatedTestCase(AuthenticationTestCase):
 
 
 class RegistrationViewTestCase(AuthenticationTestCase):
-    """
-    Tests if a user can be registered successfully with username, email and password
-    """
+      """Tests if a user can be registered successfully with username, email and password."""
 
     def test_user_can_register(self):
-        """"
-        Tests if user can register successfully
-        """
+        """"Test if user can register successfully."""
+
         res = self.register()
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertIn(b'User registered successfully', res.data)

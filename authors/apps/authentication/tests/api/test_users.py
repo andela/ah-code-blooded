@@ -1,3 +1,4 @@
+"""imports modules."""
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -5,11 +6,10 @@ from authors.apps.authentication.tests.test_auth import AuthenticatedTestCase
 
 
 class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
-    """
-    Test the ability for a user to update their profile and retrieve their profile details
-    """
+    """Test the ability for a user to update their profile and retrieve their profile details."""
 
     def setUp(self):
+        """Create a test user."""
         self.userDetails = {
             "user": {
                 "email": "anotheremail@gmail.com",
@@ -20,7 +20,8 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
 
     def test_can_retrieve_user_details(self):
         """
-        Retrieve user details - the user has to be authenticated
+        Retrieve user details - the user has to be authenticated.
+
         :return:
         """
         response = self.client.get(reverse("authentication:user-retrieve-update"), data={}, format="json")
@@ -28,7 +29,8 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
 
     def test_can_update_user_details(self):
         """
-        Update the user's profile - the user has to be authenticated
+        Update the user's profile - the user has to be authenticated.
+
         :return:
         """
         response = self.client.put(reverse("authentication:user-retrieve-update"), data=self.userDetails, format="json")
@@ -37,7 +39,8 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
 
     def test_cannot_retrieve_unauthenticated_user_details(self):
         """
-        Try to retrieve details of a user that is not authenticated. Should not be an authorized operation
+        Try to retrieve details of a user that is not authenticated. Should not be an authorized operation.
+
         :return:
         """
         self.logout()
@@ -46,7 +49,8 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
 
     def test_cannot_update_unauthenticated_user_details(self):
         """
-        Try to update the details of a unauthenticated user
+        Try to update the details of a unauthenticated user.
+
         :return:
         """
         self.logout()

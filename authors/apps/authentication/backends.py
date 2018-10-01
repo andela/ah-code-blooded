@@ -6,8 +6,11 @@
 #
 # from .models import User
 
-"""Configure JWT Here"""
-class JWTAuthentication:
-    def authenticate(self, another):
-        pass
 
+class JWTAuthentication:
+	"""Configure JWT Here."""
+
+    def authenticate(self, another):
+    	"""authentication function goes here."""
+    	
+        pass

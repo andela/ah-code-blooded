@@ -1,20 +1,27 @@
-import jwt
+"""imports modules."""
+# import jwt
 
-from datetime import datetime, timedelta
+# from datetime import datetime
 
-from django.conf import settings
+# from django.conf import settings
+
+
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
 from django.db import models
 
+
 class UserManager(BaseUserManager):
     """
-    Django requires that custom users define their own Manager class. By
-    inheriting from `BaseUserManager`, we get a lot of the same code used by
-    Django to create a `User` for free. 
+    Django requires that custom users define their own Manager class. By.
+
+    inheriting from `BaseUserManager`, we get a lot of the same code used by.
+
+    Django to create a `User` for free.
 
     All we have to do is override the `create_user` function which we will use
+
     to create `User` objects.
     """
 
@@ -33,12 +40,12 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, email, password):
-      """
-      Create and return a `User` with superuser powers.
+        """
+        Create and return a `User` with superuser powers.
 
-      Superuser powers means that this use is an admin that can do anything
-      they want.
-      """
+        Superuser powers means that this use is an admin that can do anything they want.
+        """
+
       if password is None:
           raise TypeError('Superusers must have a password.')
 
@@ -116,5 +123,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         the user's real name, we return their username instead.
         """
         return self.username
-
-

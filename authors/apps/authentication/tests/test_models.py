@@ -1,3 +1,4 @@
+"""imports modules."""
 from django.test import TestCase
 
 from authors.apps.authentication.models import (
@@ -6,14 +7,12 @@ from authors.apps.authentication.models import (
 
 
 class UserModelTest(TestCase):
-    """
-    This tests the User model class, ability to create a user and create a super user.
-
-    """
+    """This tests the User model class, ability to create a user and create a super user."""
 
     def test_create_user(self):
         """
-        Checks whether a user can be created with username email and password
+        Check whether a user can be created with username email and password.
+
         :return:
         """
         self.assertIsInstance(
@@ -21,7 +20,8 @@ class UserModelTest(TestCase):
 
     def test_cannot_create_user_without_email(self):
         """
-        Ensure a user cannot be created without an email
+        Ensure a user cannot be created without an email.
+
         :return:
         """
         with self.assertRaises(TypeError):
@@ -29,7 +29,8 @@ class UserModelTest(TestCase):
 
     def test_create_superuser(self):
         """
-        Ensure a superuser can be created
+        Ensure a superuser can be created.
+
         :return:
         """
         user = User.objects.create_superuser(username="admin", email="admin@admin.com", password="password")
@@ -38,7 +39,8 @@ class UserModelTest(TestCase):
 
     def test_cannot_create_superuser_without_password(self):
         """
-        Ensures a superuser must have a password
+        Ensure a superuser must have a password.
+
         :return:
         """
         with self.assertRaises(TypeError):
