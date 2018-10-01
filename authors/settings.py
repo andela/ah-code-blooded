@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'authors.apps.core',
     'authors.apps.profiles',
     'django_inlinecss',
+    'authors.apps.articles',
     'rest_framework_swagger',
     'cloudinary',
 ]

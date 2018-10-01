@@ -4,6 +4,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
+from authors.apps.authentication.models import User
+
 
 class AuthenticationTestCase(APITestCase):
     """
@@ -41,8 +43,12 @@ class AuthenticatedTestCase(AuthenticationTestCase):
         Register the user for further authentication
         :return:
         """
-        self.register()  # register the user
-        self.login()
+        self.register_and_login()
+
+    def register_and_login(self, user=None):
+        self.register(user)
+        self.verify_user(None if user is None else user['user']['email'])
+        self.login(user)
 
     def logout(self):
         """
@@ -60,6 +66,33 @@ class AuthenticatedTestCase(AuthenticationTestCase):
         response = super().login(user)  # login the user
         self.client.credentials(HTTP_AUTHORIZATION="Token " + (json.loads(response.content))['user']['token'])
         return response
+
+    def get_current_user(self, email=None):
+        return User.objects.get(email=email or self.user['user']['email'])
+
+    def verify_user(self, email=None):
+        """
+        Verify the user
+        :param email:
+        :return:
+        """
+        if email is None:
+            email = self.user['user']['email']
+        user = User.objects.get(email=email)
+        user.is_verified = True
+        user.save()
+
+    def unverify_user(self, email=None):
+        """
+        Unverify a user's account in order to perform some tests
+        :param email:
+        :return:
+        """
+        if email is None:
+            email = self.user['user']['email']
+        user = User.objects.get(email=email)
+        user.is_verified = False
+        user.save()
 
 
 class RegistrationViewTestCase(AuthenticationTestCase):
