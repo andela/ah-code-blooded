@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'authors.apps.authentication',
     'authors.apps.core',
     'authors.apps.profiles',
+    'django_inlinecss',
     'rest_framework_swagger',
 ]
 
@@ -89,6 +90,17 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+# sendGrid API Settings
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_SENDER = os.getenv("EMAIL_HOST_SENDER")
+EMAIL_USE_TLS = True
+
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
