@@ -12,6 +12,8 @@ class Article(BaseModel):
     title = models.CharField(max_length=128)
     description = models.TextField()
     body = models.TextField()
+
+    # The author Foreign Key should be bound to a user profile
     author = models.ForeignKey(
         'authentication.User',
         related_name='articles',
@@ -20,4 +22,8 @@ class Article(BaseModel):
     image = models.URLField(blank=True, null=True)
 
     def __str__(self):
+        """
+        Use the Article title to represent this object
+        :return:
+        """
         return self.title
