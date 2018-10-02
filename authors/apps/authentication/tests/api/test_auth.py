@@ -52,19 +52,15 @@ class AuthenticatedTestCase(AuthenticationTestCase):
         self.client.credentials(HTTP_AUTHORIZATION="")
 
     def login(self, user=None):
-        """
-        Login the user to the system and also set the authorization headers.
+        """Login the user to the system and also set the authorization headers."""
 
-        :param user:
-        :return:
-        """
         response = super().login(user)  # login the user
         self.client.credentials(HTTP_AUTHORIZATION="JWT " + response.data['user']['token'])
         return response
 
 
 class RegistrationViewTestCase(AuthenticationTestCase):
-      """Tests if a user can be registered successfully with username, email and password."""
+    """Tests if a user can be registered successfully with username, email and password."""
 
     def test_user_can_register(self):
         """"Test if user can register successfully."""
@@ -86,9 +82,7 @@ class RegistrationViewTestCase(AuthenticationTestCase):
 
 
 class LoginViewTestCase(AuthenticationTestCase):
-    """
-    Test for authentication in username and password login
-    """
+    """Test for authentication in username and password login."""
 
     def test_user_cannot_login_before_registering(self):
         """
