@@ -42,9 +42,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, username, email, password):
         """
         Create and return a `User` with superuser powers.
-
         Superuser powers means that this use is an admin that can do anything they want.
-        """
         if password is None:
             raise TypeError('Superusers must have a password.')
 
@@ -79,6 +77,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     # letting them delete it. That way they won't show up on the site anymore,
     # but we can still analyze the data.
     is_active = models.BooleanField(default=True)
+
+    # When a user registers, the verified flag is set to false,
+    # This is updated to true once the user has verified their account
+    is_verified = models.BooleanField(default=False)
 
     # The `is_staff` flag is expected by Django to determine who can and cannot
     # log into the Django admin site. For most users, this flag will always be
@@ -115,8 +117,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Required by Django for things like handling emails.
 
-        Typically, this would be the user's first and last name. Since we do.
-
+        Typically, this would be the user's first and last name. Since we do
         not store the user's real name, we return their username instead.
         """
         return self.username
