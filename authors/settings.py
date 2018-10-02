@@ -99,9 +99,6 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_HOST_SENDER = os.getenv("EMAIL_HOST_SENDER")
 EMAIL_USE_TLS = True
 
-
-
-
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 

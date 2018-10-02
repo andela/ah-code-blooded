@@ -28,7 +28,7 @@ class RegistrationAPIView(CreateAPIView):
     renderer_classes = (UserJSONRenderer,)
     serializer_class = RegistrationSerializer
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         user = request.data.get('user', {})
 
         # The create serializer, validate serializer, save serializer pattern
@@ -86,7 +86,7 @@ class LoginAPIView(CreateAPIView):
     renderer_classes = (UserJSONRenderer,)
     serializer_class = LoginSerializer
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         user = request.data.get('user', {})
 
         # Notice here that we do not call `serializer.save()` like we did for

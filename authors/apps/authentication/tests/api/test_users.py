@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from authors.apps.authentication.tests.test_auth import AuthenticatedTestCase
+from authors.apps.authentication.tests.api.test_auth import AuthenticatedTestCase
 
 
 class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
