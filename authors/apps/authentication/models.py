@@ -45,22 +45,25 @@ class UserManager(BaseUserManager):
 
         Superuser powers means that this use is an admin that can do anything they want.
         """
+        if password is None:
+            raise TypeError('Superusers must have a password.')
 
-      if password is None:
-          raise TypeError('Superusers must have a password.')
+        user = self.create_user(username, email, password)
+        user.is_superuser = True
+        user.is_staff = True
+        user.save()
 
-      user = self.create_user(username, email, password)
-      user.is_superuser = True
-      user.is_staff = True
-      user.save()
-
-      return user
+        return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    # Each `User` needs a human-readable unique identifier that we can use to
-    # represent the `User` in the UI. We want to index this column in the
-    # database to improve lookup performance.
+    """Each `User` needs a human-readable unique identifier that we can use to.
+
+    represent the `User` in the UI. We want to index this column in the.
+
+    database to improve lookup performance.
+    """
+
     username = models.CharField(db_index=True, max_length=255, unique=True)
 
     # We also need a way to contact the user and a way for the user to identify
@@ -101,7 +104,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         """
-        Returns a string representation of this `User`.
+        Return a string representation of this `User`.
 
         This string is used when a `User` is printed in the console.
         """
@@ -109,17 +112,21 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def get_full_name(self):
-      """
-      This method is required by Django for things like handling emails.
-      Typically, this would be the user's first and last name. Since we do
-      not store the user's real name, we return their username instead.
-      """
-      return self.username
+        """
+        Required by Django for things like handling emails.
+
+        Typically, this would be the user's first and last name. Since we do.
+
+        not store the user's real name, we return their username instead.
+        """
+        return self.username
 
     def get_short_name(self):
         """
-        This method is required by Django for things like handling emails.
-        Typically, this would be the user's first name. Since we do not store
+        Required by Django for things like handling emails.
+
+        Typically, this would be the user's first name. Since we do not store.
+
         the user's real name, we return their username instead.
         """
         return self.username

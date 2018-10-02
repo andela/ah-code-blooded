@@ -1,3 +1,4 @@
+"""imports modules."""
 # import jwt
 #
 # from django.conf import settings
@@ -8,9 +9,8 @@
 
 
 class JWTAuthentication:
-	"""Configure JWT Here."""
+    """Configure JWT Here."""
 
     def authenticate(self, another):
-    	"""authentication function goes here."""
-    	
+        """Authentication function goes here."""
         pass

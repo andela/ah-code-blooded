@@ -30,22 +30,29 @@ class RegistrationSerializer(serializers.ModelSerializer):
         fields = ['email', 'username', 'password']
 
         def create(self, validated_data):
-        """Use the `create_user` method we wrote earlier to create a new user."""
-
-        return User.objects.create_user(**validated_data)
+            """Use the `create_user` method we wrote earlier to create a new user."""
+            return User.objects.create_user(**validated_data)
 
 
 class LoginSerializer(serializers.Serializer):
+    """Serializers login requests and logs in a new user."""
+
     email = serializers.CharField(max_length=255)
     username = serializers.CharField(max_length=255, read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
 
     def validate(self, data):
-        # The `validate` method is where we make sure that the current
-        # instance of `LoginSerializer` has "valid". In the case of logging a
-        # user in, this means validating that they've provided an email
-        # and password and that this combination matches one of the users in
-        # our database.
+        """
+        The `validate` method is where we make sure that the current.
+
+        instance of `LoginSerializer` has "valid". In the case of logging a.
+
+        user in, this means validating that they've provided an email.
+
+        and password and that this combination matches one of the users in.
+
+        our database.
+        """
         email = data.get('email', None)
         password = data.get('password', None)
 
@@ -109,6 +116,12 @@ class UserSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """
+        List all of the fields that could possibly be included in a request.
+
+        or response, including fields specified explicitly below.
+        """
+
         model = User
         fields = ('email', 'username', 'password')
 
@@ -122,11 +135,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     """Performs an update on a User."""
     def update(self, instance, validated_data):
-        # Passwords should not be handled with `setattr`, unlike other fields.
-        # This is because Django provides a function that handles hashing and
-        # salting passwords, which is important for security. What that means
-        # here is that we need to remove the password field from the
-        # `validated_data` dictionary before iterating over it.
+        """
+        Password should not be handled with `setattr`, unlike other fields.
+
+        This is because Django provides a function that handles hashing and.
+
+        salting passwords, which is important for security. What that means.
+
+        here is that we need to remove the password field from the.
+
+        `validated_data` dictionary before iterating over it.
+        """
         password = validated_data.pop('password', None)
 
         for (key, value) in validated_data.items():
