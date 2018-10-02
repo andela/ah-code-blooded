@@ -34,20 +34,20 @@ class RegistrationAPIView(CreateAPIView):
 
 
 class LoginAPIView(CreateAPIView):
-    """jkl."""
+    """Allow any user (authenticated or not) to hit this endpoint."""
 
     permission_classes = (AllowAny,)
     renderer_classes = (UserJSONRenderer,)
     serializer_class = LoginSerializer
 
     def post(self, request):
-        """jkl."""
+        """
+        Notice here that we do not call `serializer.save()` like we did for.
+        the registration endpoint. This is because we don't actually have.
+        anything to save. Instead, the `validate` method on our serializer.
+        handles everything we need.
+        """
         user = request.data.get('user', {})
-
-        # Notice here that we do not call `serializer.save()` like we did for
-        # the registration endpoint. This is because we don't actually have
-        # anything to save. Instead, the `validate` method on our serializer
-        # handles everything we need.
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
@@ -55,7 +55,7 @@ class LoginAPIView(CreateAPIView):
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
-    """jkl."""
+    """Allow any user (authenticated) to hit this endpoint."""
 
     permission_classes = (IsAuthenticated,)
     renderer_classes = (UserJSONRenderer,)
