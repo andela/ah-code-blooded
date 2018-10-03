@@ -24,20 +24,21 @@ class Article(BaseModel):
         related_name='articles',
         on_delete=models.CASCADE
     )
-    image = models.URLField(blank=True, null=True)
     # a article contains many tags
-    tagList = models.ManyToManyField(
+    tags = models.ManyToManyField(
         'articles.Tag',
         related_name='articles',
     )
+    published = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # create the slug only when the article is being saved to avoid broken links
-        if not self.id:
+        if not self.id or not self.published:
             unique = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(12))
-            self.slug = slugify(self.title)
-            self.slug = self.slug[:250]
-            self.slug = self.slug + '-' + unique
+            if self.slug[:-13] != slugify(self.title):
+                self.slug = slugify(self.title)
+                self.slug = self.slug[:250]
+                self.slug = self.slug + '-' + unique
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -64,3 +65,17 @@ class Tag(BaseModel):
 
     def __str__(self):
         return self.tag
+
+
+class ArticleImage(BaseModel):
+    """
+    Allow an article to have many images
+    """
+    image = models.URLField(max_length=255, db_index=True)
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return self.image
