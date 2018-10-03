@@ -1,6 +1,10 @@
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
+import jwt
+import os
+from datetime import datetime, timedelta
+from django.conf import settings
 from django.db import models
 
 
@@ -30,11 +34,11 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, username, email, password):
         """
-        Create and return a `User` with superuser powers.
+      Create and return a `User` with superuser powers.
 
-        Superuser powers means that this use is an admin that can do anything
-        they want.
-        """
+      Superuser powers means that this use is an admin that can do anything
+      they want.
+      """
         if password is None:
             raise TypeError('Superusers must have a password.')
 
@@ -116,3 +120,21 @@ class User(AbstractBaseUser, PermissionsMixin):
         the user's real name, we return their username instead.
         """
         return self.username
+
+    @property
+    def token(self):
+        """
+        Generates the token and allows the token
+        to be called by `user.token`
+        :return string
+        """
+        token = jwt.encode(
+            {
+                "id": self.pk,
+                "username": self.get_full_name,
+                "email": self.email,
+                "iat": datetime.utcnow(),
+                "exp": datetime.utcnow() + timedelta(minutes=int(os.getenv('TIME_DELTA')))
+            },
+            settings.SECRET_KEY, algorithm='HS256').decode()
+        return token

@@ -42,8 +42,9 @@ class RegistrationAPIView(CreateAPIView):
 
         RegistrationAPIView.send_account_activation_email(user, request)
 
-        msg = 'We have sent you an activation link'
-        return Response({"message": msg}, status=status.HTTP_201_CREATED)
+        data = serializer.data
+        data['message'] = 'We have sent you an activation link'
+        return Response(data, status=status.HTTP_201_CREATED)
 
     @staticmethod
     def send_account_activation_email(user, request=None, send_email=True):
@@ -96,7 +97,12 @@ class LoginAPIView(CreateAPIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # return jwt as the response
+        resp = {
+            "token": serializer.data['token']
+        }
+
+        return Response(resp, status=status.HTTP_200_OK)
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
