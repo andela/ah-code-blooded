@@ -7,7 +7,7 @@ from cloudinary.models import CloudinaryField
 
 class Profile(models.Model):
     """
-    This model creater a user profile with bio and
+    This model creates a user profile with bio and
     image field once a user creates an account.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -22,11 +22,16 @@ class Profile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
+    """
+    This is triggered when a user is created in order to create their profile.
+    """
     if created:
         Profile.objects.create(user=instance)
 
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
+    """
+    This is triggered when a user is saved in order to save their profile.
+    """
     instance.profile.save()
-
