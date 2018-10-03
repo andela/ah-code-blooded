@@ -16,6 +16,13 @@ class Profile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def image_url(self):
+        """
+        Get the image url. This spits a url that resolves to the image.
+        """
+        return self.image.url
+
     def __str__(self):
         return self.user.username
 
