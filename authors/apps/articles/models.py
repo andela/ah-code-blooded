@@ -1,6 +1,13 @@
+import random
+import string
+
 from django.db import models
 
 # Create your models here.
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.template.defaultfilters import slugify
+
 from authors.apps.core.models import BaseModel
 
 
@@ -8,8 +15,8 @@ class Article(BaseModel):
     """
     Model for an article, extends a basemodel since the created and updated times are required
     """
-    slug = models.SlugField(max_length=128, unique=True, db_index=True)
-    title = models.CharField(max_length=128)
+    slug = models.SlugField(max_length=255, unique=True, db_index=True)
+    title = models.CharField(max_length=255)
     description = models.TextField()
     body = models.TextField()
 
@@ -20,6 +27,20 @@ class Article(BaseModel):
         on_delete=models.CASCADE
     )
     image = models.URLField(blank=True, null=True)
+    # a article contains many tags
+    tagList = models.ManyToManyField(
+        'articles.Tag',
+        related_name='articles',
+    )
+
+    def save(self, *args, **kwargs):
+        # create the slug only when the article is being saved to avoid broken links
+        if not self.id:
+            unique = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+            self.slug = slugify(self.title)
+            self.slug = self.slug[:250]
+            self.slug = unique
+        super().save(*args, **kwargs)
 
     def __str__(self):
         """
@@ -27,3 +48,21 @@ class Article(BaseModel):
         :return:
         """
         return self.title
+
+
+class Tag(BaseModel):
+    """
+    Every article contains a tag
+
+    A tag has a unique slug
+    """
+    tag = models.CharField(max_length=128)
+    slug = models.SlugField(db_index=True, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.tag)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.tag

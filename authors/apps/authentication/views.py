@@ -63,7 +63,7 @@ class RegistrationAPIView(CreateAPIView):
             email = user.email
             username = user.username
             domain = get_current_site(request).domain
-            from_email = os.getenv("EMAIL_HOST_SENDER ")
+            from_email = os.getenv("EMAIL_HOST_SENDER")
 
             email_subject = 'Activate your Author\'s Haven account.'
             activation_link = "http://" + domain + reverse("authentication:activate-account",

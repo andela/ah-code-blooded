@@ -7,10 +7,10 @@ class ArticleSerializer(serializers.ModelSerializer):
     """
     Creates articles, updates and validated data for the articles created and retrieved.
     """
-    slug = serializers.CharField(required=False)
+    slug = serializers.CharField(read_only=True, max_length=255)
     title = serializers.CharField(
         required=True,
-        max_length=128,
+        max_length=255,
         allow_blank=False,
     )
     description = serializers.CharField(
