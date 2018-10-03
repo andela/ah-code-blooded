@@ -16,13 +16,40 @@ class ArticleJSONRenderer(JSONRenderer):
         :param renderer_context:
         :return:
         """
-        errors = None
-        if not isinstance(data, ReturnList):
-            errors = data.get('errors', None)
+        if hasattr(data, 'get'):
+            status = 'success'
+            errors = data.get('errors', data.get('detail', None))
+            if errors is not None:
+                status = 'error'
+            else:
+                errors = data.get('message', None)
 
-        if errors is not None:
-            return super().render(data)
+            # if there exist errors, set the status as error
+            if errors is not None:
+                message = errors
+                # if there is only one error, use 'message' field to display the response
+                if isinstance(message, str):
+                    return json.dumps({
+                        'status': status,
+                        'message': message
+                    })
+                else:
+                    # for dictionary or list, use data to display the response
+                    return json.dumps({
+                        'status': status,
+                        'data': message
+                    })
+        if isinstance(data, ReturnList):
+            return json.dumps({
+                'status': 'success',
+                'data': {
+                    'articles': data
+                }
+            })
 
         return json.dumps({
-            'article': data
+            'status': 'success',
+            'data': {
+                'article': data
+            }
         })
