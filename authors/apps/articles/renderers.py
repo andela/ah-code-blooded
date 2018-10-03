@@ -1,6 +1,7 @@
 import json
 
 from rest_framework.renderers import JSONRenderer
+from rest_framework.utils.serializer_helpers import ReturnList
 
 
 class ArticleJSONRenderer(JSONRenderer):
@@ -15,7 +16,10 @@ class ArticleJSONRenderer(JSONRenderer):
         :param renderer_context:
         :return:
         """
-        errors = data.get('errors', None)
+        errors = None
+        if not isinstance(data, ReturnList):
+            errors = data.get('errors', None)
+
         if errors is not None:
             return super().render(data)
 
