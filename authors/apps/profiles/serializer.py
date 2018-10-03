@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Profile
+from django.db.models import ImageField
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -10,8 +11,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     # Profile specific fields
     bio = serializers.CharField()
-    image = serializers.ImageField()
+    image = ImageField()
 
     class Meta:
         model = Profile
-        fields = ['username', 'bio', 'image']
+        fields = ['username', 'bio', 'image_url']

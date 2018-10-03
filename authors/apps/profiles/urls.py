@@ -5,5 +5,5 @@ app_name = 'profiles'
 
 urlpatterns = [
     path('profiles/', ProfileListView.as_view()),
-    path('profiles/<str:username>/',  ProfileGetView.as_view()),
+    path('profiles/<str:username>/', ProfileGetView.as_view()),
 ]

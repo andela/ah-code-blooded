@@ -11,7 +11,7 @@ from authors.apps.core.exceptions import ProfileDoesNotExist
 
 
 class ProfileListView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    # Remember to only permit authenticated users
     serializer_class = ProfileSerializer
     renderer_classes = (ProfileJSONRenderer,)
 
