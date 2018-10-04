@@ -3,6 +3,7 @@ import string
 
 from django.db import models
 from django.db.models.signals import pre_save
+from authors.apps.authentication.models import User
 
 from django.template.defaultfilters import slugify
 
@@ -71,3 +72,14 @@ class Tag(BaseModel):
 
 # register the pre_save signal
 pre_save.connect(Article.pre_save, Article, dispatch_uid="authors.apps.articles.models.Article")
+class ArticleRating(models.Model):
+    """
+    Ratings that users give Articles
+    """
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    rating = models.IntegerField(default=0)
+    rated_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+
+
