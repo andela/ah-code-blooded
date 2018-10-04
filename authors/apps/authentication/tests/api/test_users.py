@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -10,6 +12,7 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
     """
 
     def setUp(self):
+        super().setUp()
         self.userDetails = {
             "user": {
                 "email": "anotheremail@gmail.com",
@@ -24,7 +27,7 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         :return:
         """
         response = self.client.get(reverse("authentication:user-retrieve-update"), data={}, format="json")
-        self.assertIsNotNone(response.data['user'])
+        self.assertIsNotNone(json.loads(response.content)['user'])
 
     def test_can_update_user_details(self):
         """
@@ -33,7 +36,7 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         """
         response = self.client.put(reverse("authentication:user-retrieve-update"), data=self.userDetails, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsNotNone(response.data['user'])
+        self.assertIsNotNone(json.loads(response.content)['user'])
 
     def test_cannot_retrieve_unauthenticated_user_details(self):
         """
@@ -42,7 +45,7 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         """
         self.logout()
         response = self.client.get(reverse("authentication:user-retrieve-update"), data={}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cannot_update_unauthenticated_user_details(self):
         """
@@ -51,4 +54,4 @@ class UserRetrieveUpdateAPIViewTest(AuthenticatedTestCase):
         """
         self.logout()
         response = self.client.put(reverse("authentication:user-retrieve-update"), data=self.userDetails, format="json")
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

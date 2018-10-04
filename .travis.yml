@@ -12,7 +12,11 @@ install:
   - pip3 install coveralls
 
 before_script:
+  - python manage.py collectstatic
   - export DB_NAME="ah_code_blooded"
+  - psql -c 'create database ah_code_blooded;' -U postgres
+  - python manage.py migrate
+  - export TIME_DELTA=100
 
 script:
   - coverage run --source='.' ./manage.py test 

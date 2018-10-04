@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
@@ -34,6 +36,7 @@ class AuthenticatedTestCase(AuthenticationTestCase):
     """
 
     def setUp(self):
+        super().setUp()
         """
         Register the user for further authentication
         :return:
@@ -55,7 +58,7 @@ class AuthenticatedTestCase(AuthenticationTestCase):
         :return:
         """
         response = super().login(user)  # login the user
-        self.client.credentials(HTTP_AUTHORIZATION="JWT " + response.data['user']['token'])
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + (json.loads(response.content))['user']['token'])
         return response
 
 
@@ -70,7 +73,7 @@ class RegistrationViewTestCase(AuthenticationTestCase):
         """
         res = self.register()
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertIn(b'User registered successfully', res.data)
+        self.assertIsNotNone(json.loads(res.content)['user']['token'])
 
     def test_user_cannot_register_twice(self):
         """
@@ -81,7 +84,7 @@ class RegistrationViewTestCase(AuthenticationTestCase):
         self.register()
         res = self.register()
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn(b'User already exists. Please login.', res.data)
+        self.assertIn(b'user with this email already exists.', res.content)
 
 
 class LoginViewTestCase(AuthenticationTestCase):
@@ -94,14 +97,14 @@ class LoginViewTestCase(AuthenticationTestCase):
         Test user cannot login before registering
         """
         res = self.login()
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertIn(b'User not found. Please register before you login.', res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(b'A user with this email and password was not found.', res.content)
 
     def test_user_can_login(self):
         """
         Test user can login successfully
         """
+        self.register()
         res = self.login()
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIsNotNone(res.data['user'])
-        self.assertIsNotNone(res.data['user']['token'])
+        self.assertIsNotNone(json.loads(res.content)['user']['token'])
