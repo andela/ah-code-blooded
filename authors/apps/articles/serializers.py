@@ -57,6 +57,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     published = serializers.BooleanField(required=False)
     image = serializers.URLField(required=False, allow_blank=False)
+    avg_rating = serializers.SerializerMethodField(method_name='get_average_rating')
 
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
@@ -77,6 +78,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             'description',
             'body',
             'published',
+            'avg_rating',
             'author',
             'image',
             'created_at',
@@ -125,6 +127,9 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+        
+    def get_average_rating(self, instance):
+        return ArticleRating.objects.filter(article=instance).aggregate(average_rating=models.Avg('rating'))['average_rating'] or 0
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -137,3 +142,40 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['tag']
+
+class RatingSerializer(serializers.ModelSerializer):
+    """
+    Creates ratings for the existing articles and edits ratings for existing articles
+    """
+    rating = serializers.IntegerField(required=True)
+    
+    class Meta:
+        fields = ['rating', 'rated_by'] 
+        read_only_fields = ['rated_by']
+        model = ArticleRating
+
+    def create(self, validated_data):
+        rating = ArticleRating.objects.create(**validated_data)
+
+        return rating
+
+    def validate(self, data):
+        """
+        Ensures that ratings are not less than or greater than 5
+        Ensures that users cannot rate an article more than once
+        """
+        _rating = data.get('rating')
+
+        if _rating:
+            if not isinstance(_rating, str):
+                raise serializers.ValidationError(
+                    "Rating has to be a number!"
+                )
+            if _rating < 1  or _rating > 5:
+                raise serializers.ValidationError(
+                    "Rating should be a number between 1 and 5!"
+                )
+
+        return {'rating': _rating}
+
+    
