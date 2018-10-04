@@ -2,13 +2,15 @@
 from django.contrib.auth.models import AnonymousUser
 from rest_framework import status, viewsets
 from rest_framework import mixins
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.db import models
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 
-from authors.apps.articles.models import Article
+from authors.apps.articles.models import Article, ArticleRating
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
-from authors.apps.articles.renderers import ArticleJSONRenderer
-from authors.apps.articles.serializers import ArticleSerializer
+from authors.apps.articles.renderers import ArticleJSONRenderer, RatingJSONRenderer
+from authors.apps.articles.serializers import ArticleSerializer, RatingSerializer
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -129,3 +131,43 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         super().destroy(self, request, *args, **kwargs)
 
         return Response({'message': 'The article has been deleted.'})
+
+class RatingAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = ArticleRating.objects.all()
+    serializer_class = RatingSerializer
+    renderer_classes = (RatingJSONRenderer,)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Users can post article ratings
+        """
+        rating = request.data.get('rating', {})
+
+        article = Article.objects.get(slug=kwargs['slug'])
+        if article:
+            rated = ArticleRating.objects.filter(article=article, rated_by=request.user).first()
+            if rated:
+                data = {"message": "You have already rated this article."}
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+            else:
+                serializer = self.serializer_class(data=rating)
+                serializer.is_valid(raise_exception=True)
+                serializer.save(rated_by=request.user, article=article)
+
+                data = serializer.data
+                data['message'] = "You have successfully rated this article"
+                return Response(data, status=status.HTTP_201_CREATED)
+                
+
+        data = {"message": "This article does not exist."}
+        return Response(data, status=status.HTTP_404_NOT_FOUND)
+
+
+            
+
+
+        
+        
+
+
