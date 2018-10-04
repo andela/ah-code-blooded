@@ -23,6 +23,10 @@ class Profile(models.Model):
         """
         return self.image.url
 
+    @property
+    def username(self):
+        return self.user.username
+
     def __str__(self):
         return self.user.username
 
