@@ -4,7 +4,10 @@ from .views import (
     LoginAPIView,
     RegistrationAPIView,
     AccountVerificationView,
-    UserRetrieveUpdateAPIView
+    UserRetrieveUpdateAPIView,
+    ForgotPasswordView,
+    ResetPasswordView
+
 )
 
 app_name = "authentication"
@@ -15,4 +18,8 @@ urlpatterns = [
     path('users/login/', LoginAPIView.as_view(), name="user-login"),
     path('account/verify/<str:token>/<str:uid>/', AccountVerificationView.as_view(),
          name='activate-account'),
+    path('account/forgot_password/', ForgotPasswordView.as_view(), name="forgot-password"),
+    path('account/reset_password/<str:token>/', ResetPasswordView.as_view(), name="reset-password"),
+
+
 ]

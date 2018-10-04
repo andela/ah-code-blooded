@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from .renderers import UserJSONRenderer
 
 from rest_framework.reverse import reverse
+from django.utils.six.moves.urllib.parse import urlsplit
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
@@ -17,7 +18,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 
 from .serializers import (
-    LoginSerializer, RegistrationSerializer, UserSerializer
+    LoginSerializer, RegistrationSerializer, UserSerializer, ForgotPasswordSerializer, ResetPasswordSerializers
 )
 from .models import User
 
@@ -152,3 +153,78 @@ class AccountVerificationView(APIView):
             user.save()
 
         return Response(data, status=st)
+
+
+class ForgotPasswordView(CreateAPIView):
+    """
+    This view capture the email and generates a reset password token
+    if the email has already been registered.
+    """
+    permission_classes = (AllowAny,)
+    serializer_class = ForgotPasswordSerializer
+
+    def post(self, request):
+        email = request.data.get('email',"")
+        user = User.objects.filter(email=email).first()
+
+        if user is None:
+            response = {"message": "An account with this email does not exist"}
+            return Response(response, status.HTTP_400_BAD_REQUEST)
+
+        # Generate token and get  site domain
+        token = default_token_generator.make_token(user)
+        current_site_domain = get_current_site(request).domain
+        # Required parameters for sending email
+        subject, from_email, to_email = 'Password Reset Link', os.getenv("EMAIL_HOST_SENDER"), email
+        protocol = urlsplit(request.build_absolute_uri(None)).scheme
+
+        reset_link = protocol + "://" + current_site_domain + reverse("authentication:reset-password", kwargs={"token": token})
+
+        # render with dynamic value
+        html_content = render_to_string('email_reset_password.html', {'reset_password_link': reset_link})
+
+        # Strip the html tag. So people can see the pure text at least.
+        text_content = strip_tags(html_content)
+
+        # create the email, and attach the HTML version as well.
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+
+        response = {"message": "Please follow the link sent to your email to reset your password"}
+
+        return Response(response, status.HTTP_200_OK)
+
+
+class ResetPasswordView(APIView):
+    """
+    This view allows any user to update password
+    """
+    permission_classes = (AllowAny,)
+    serializer_class = ResetPasswordSerializers
+
+    def put(self, request, token):
+        """
+        Resets a users password and sends an email on succesful reset
+        """
+        data = request.data
+        email = data['email']
+        # Adds token to data
+        data['token'] = token
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        current_site_domain = get_current_site(request).domain
+        subject, from_email, to_email = 'Successful password reset', os.getenv("EMAIL_HOST_SENDER"), email
+        protocol = urlsplit(request.build_absolute_uri(None)).scheme
+
+        login_link = protocol + "://" + current_site_domain + reverse("authentication:user-login")
+
+        html_content = render_to_string('email_reset_password_done.html', {
+            'login_link': login_link})
+
+        text_content = strip_tags(html_content)
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+        response = {"message": "Your password has been successfully updated"}
+        return Response(response, status.HTTP_200_OK)
