@@ -159,6 +159,7 @@ class RatingSerializer(serializers.ModelSerializer):
 
         return rating
 
+
     def validate(self, data):
         """
         Ensures that ratings are not less than or greater than 5
@@ -167,15 +168,15 @@ class RatingSerializer(serializers.ModelSerializer):
         _rating = data.get('rating')
 
         if _rating:
-            if not isinstance(_rating, str):
+            if isinstance(_rating, str):
                 raise serializers.ValidationError(
                     "Rating has to be a number!"
                 )
-            if _rating < 1  or _rating > 5:
+            if _rating < 0  or _rating > 5:
                 raise serializers.ValidationError(
                     "Rating should be a number between 1 and 5!"
                 )
-
+            
         return {'rating': _rating}
 
     

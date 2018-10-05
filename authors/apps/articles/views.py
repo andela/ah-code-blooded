@@ -5,7 +5,7 @@ from rest_framework import mixins
 from django.db import models
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView
 
 from authors.apps.articles.models import Article, ArticleRating
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
@@ -132,7 +132,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
 
         return Response({'message': 'The article has been deleted.'})
 
-class RatingAPIView(CreateAPIView):
+class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = ArticleRating.objects.all()
     serializer_class = RatingSerializer
@@ -144,9 +144,21 @@ class RatingAPIView(CreateAPIView):
         """
         rating = request.data.get('rating', {})
 
-        article = Article.objects.get(slug=kwargs['slug'])
+        try:
+            article = Article.objects.get(slug=kwargs['slug'])
+        except Exception:
+            data = {"message": "This article does not exist!"}
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
+            
+
         if article:
             rated = ArticleRating.objects.filter(article=article, rated_by=request.user).first()
+            rating_author = article.author
+            rating_user = request.user
+            if rating_author == rating_user:
+                data = {"message": "You cannot rate your own article."}
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+
             if rated:
                 data = {"message": "You have already rated this article."}
                 return Response(data, status=status.HTTP_403_FORBIDDEN)
@@ -158,13 +170,27 @@ class RatingAPIView(CreateAPIView):
                 data = serializer.data
                 data['message'] = "You have successfully rated this article"
                 return Response(data, status=status.HTTP_201_CREATED)
-                
 
-        data = {"message": "This article does not exist."}
-        return Response(data, status=status.HTTP_404_NOT_FOUND)
+    def update(self, request, *args, **kwargs):
+        """users an update the ratings of articles
+        """
+        serializer_data = request.data.get('rating', {})
+
+        article = Article.objects.get(slug=kwargs['slug'])
+        rating = ArticleRating.objects.filter(article=article, rated_by=request.user).first()
+
+        serializer = self.serializer_class(rating, data=serializer_data, partial=True)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save(rated_by=request.user)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)    
 
 
-            
+
+
+
+    
 
 
         
