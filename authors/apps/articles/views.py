@@ -24,6 +24,14 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
     serializer_class = ArticleSerializer
 
     def create(self, request, *args, **kwargs):
+        """
+        Creates an article.
+        Set the author as the current logged in user
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         article = request.data.get('article', {})
 
         serializer = self.serializer_class(data=article)
@@ -33,6 +41,14 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
+        """
+        Check whether the article exists and returns a custom message,
+
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         slug = kwargs['slug']
 
         article = Article.objects.filter(slug=slug).first()
@@ -80,6 +96,13 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
+        """
+        Return a custom message when the article has been deleted
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         super().destroy(self, request, *args, **kwargs)
 
         return Response({'message': 'The article has been deleted.'})
