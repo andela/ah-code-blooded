@@ -125,11 +125,11 @@ class ArticleSerializer(serializers.ModelSerializer):
             setattr(instance, key, value)
 
         instance.save()
-
         return instance
-        
+
     def get_average_rating(self, instance):
-        return ArticleRating.objects.filter(article=instance).aggregate(average_rating=models.Avg('rating'))['average_rating'] or 0
+        return ArticleRating.objects.filter(article=instance).aggregate(
+            average_rating=models.Avg('rating'))['average_rating'] or 0
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -143,14 +143,15 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ['tag']
 
+
 class RatingSerializer(serializers.ModelSerializer):
     """
     Creates ratings for the existing articles and edits ratings for existing articles
     """
     rating = serializers.IntegerField(required=True)
-    
+
     class Meta:
-        fields = ['rating', 'rated_by'] 
+        fields = ['rating', 'rated_by']
         read_only_fields = ['rated_by']
         model = ArticleRating
 
@@ -158,7 +159,6 @@ class RatingSerializer(serializers.ModelSerializer):
         rating = ArticleRating.objects.create(**validated_data)
 
         return rating
-
 
     def validate(self, data):
         """
@@ -172,11 +172,8 @@ class RatingSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Rating has to be a number!"
                 )
-            if _rating < 0  or _rating > 5:
+            if _rating < 0 or _rating > 5:
                 raise serializers.ValidationError(
                     "Rating should be a number between 1 and 5!"
                 )
-            
         return {'rating': _rating}
-
-    

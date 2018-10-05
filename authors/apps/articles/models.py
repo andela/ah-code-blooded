@@ -79,8 +79,3 @@ class ArticleRating(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     rating = models.IntegerField(default=0)
     rated_by = models.ForeignKey(User, on_delete=models.CASCADE)
-
-
-
-
-

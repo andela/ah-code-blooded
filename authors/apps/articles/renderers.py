@@ -54,6 +54,7 @@ class ArticleJSONRenderer(JSONRenderer):
             }
         })
 
+
 class RatingJSONRenderer(JSONRenderer):
     charset = 'utf-8'
 

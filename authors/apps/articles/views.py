@@ -2,7 +2,6 @@
 from django.contrib.auth.models import AnonymousUser
 from rest_framework import status, viewsets
 from rest_framework import mixins
-from django.db import models
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView
@@ -132,6 +131,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
 
         return Response({'message': 'The article has been deleted.'})
 
+
 class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = ArticleRating.objects.all()
@@ -149,8 +149,6 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
         except Exception:
             data = {"message": "This article does not exist!"}
             return Response(data, status=status.HTTP_404_NOT_FOUND)
-            
-
         if article:
             rated = ArticleRating.objects.filter(article=article, rated_by=request.user).first()
             rating_author = article.author
@@ -183,17 +181,4 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
 
         serializer.is_valid(raise_exception=True)
         serializer.save(rated_by=request.user)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)    
-
-
-
-
-
-    
-
-
-        
-        
-
-
+        return Response(serializer.data, status=status.HTTP_200_OK)
