@@ -11,8 +11,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     # Profile specific fields
     bio = serializers.CharField()
-    image = ImageField()
+    image = serializers.ImageField()
 
     class Meta:
         model = Profile
-        fields = ['username', 'bio', 'image_url']
+        fields = ['username', 'bio', 'image']

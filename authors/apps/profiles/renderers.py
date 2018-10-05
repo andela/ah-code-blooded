@@ -19,6 +19,4 @@ class ProfileJSONRenderer(JSONRenderer):
             return super(ProfileJSONRenderer, self).render(data)
 
         # namespace all profile responses with profiles
-        return json.dumps({
-            'profiles': data
-        })
+        return json.dumps(data)

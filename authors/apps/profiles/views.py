@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from authors.apps.profiles.models import Profile
-from authors.apps.profiles.serializer import ProfileSerializer
+from authors.apps.profiles.serializers import ProfileSerializer
 from .renderers import ProfileJSONRenderer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
