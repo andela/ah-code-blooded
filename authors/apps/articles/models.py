@@ -17,6 +17,7 @@ class Article(BaseModel):
     title = models.CharField(max_length=255)
     description = models.TextField()
     body = models.TextField()
+    image = models.URLField(default='')
 
     # The author Foreign Key should be bound to a user profile
     author = models.ForeignKey(
@@ -65,17 +66,3 @@ class Tag(BaseModel):
 
     def __str__(self):
         return self.tag
-
-
-class ArticleImage(BaseModel):
-    """
-    Allow an article to have many images
-    """
-    image = models.URLField(max_length=255, db_index=True)
-    article = models.ForeignKey(
-        Article,
-        on_delete=models.CASCADE,
-    )
-
-    def __str__(self):
-        return self.image
