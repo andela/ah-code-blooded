@@ -31,21 +31,37 @@ class ArticleSerializer(serializers.ModelSerializer):
         required=True,
         max_length=255,
         allow_blank=False,
+        error_messages={
+            'blank': 'The article must have a title',
+            'required': "The article must have a title",
+            'max_length': "The article title cannot be more than 255 characters"
+        }
     )
     description = serializers.CharField(
         required=True,
         allow_blank=False,
+        error_messages={
+            'blank': 'The article must have a description',
+            'required': "The article must have a description",
+        }
     )
     body = serializers.CharField(
         required=True,
-        allow_blank=False
+        allow_blank=False,
+        error_messages={
+            'blank': 'The article must have a body',
+            'required': "The article must have a body",
+        }
     )
+
     published = serializers.BooleanField(required=False)
     image = serializers.URLField(required=False, allow_blank=False)
 
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
-    tags = TagField(many=True, required=False)
+    tags = TagField(many=True, required=False, error_messages={
+        'not_a_list': "The tags must be a list of strings"
+    })
 
     # tagList = TagField(many=True, required=False)
 

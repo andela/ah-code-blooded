@@ -34,6 +34,11 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         """
         article = request.data.get('article', {})
 
+        # prevent an unauthorized user to create an account
+        if not request.user.is_verified:
+            return Response({"errors": "Sorry, verify your account first in order to create articles"},
+                            status.HTTP_401_UNAUTHORIZED)
+
         serializer = self.serializer_class(data=article)
         serializer.is_valid(raise_exception=True)
         serializer.save(author=request.user)
