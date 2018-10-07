@@ -89,7 +89,14 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         :param kwargs:
         :return:
         """
+
         articles = Article.objects.filter(published=True)
+        # if the user is logged in, display both published and unpublished articles
+        if request.user:
+            mine = Article.objects.filter(author=request.user)
+
+            articles = articles.union(mine)
+
         serializer = self.serializer_class(articles, context={'request': request},
                                            many=True)
 
