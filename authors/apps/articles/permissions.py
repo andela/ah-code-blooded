@@ -11,9 +11,5 @@ class IsArticleOwnerOrReadOnly(permissions.BasePermission):
     message = "You are not allowed to modify this article."
 
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request
-        # so we'll always allow GET, HEAD or OPTIONS requests
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
+        # the safe methods are implemented independently in the articles mixins, no need for the implementation here.
         return obj.author == request.user
