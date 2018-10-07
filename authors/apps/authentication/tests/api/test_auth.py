@@ -43,9 +43,12 @@ class AuthenticatedTestCase(AuthenticationTestCase):
         Register the user for further authentication
         :return:
         """
-        self.register()  # register the user
-        self.verify_user() # by default, the user is verified
-        self.login()
+        self.register_and_login()
+
+    def register_and_login(self, user=None):
+        self.register(user)
+        self.verify_user(None if user is None else user['user']['email'])
+        self.login(user)
 
     def logout(self):
         """
