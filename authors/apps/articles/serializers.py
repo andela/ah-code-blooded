@@ -1,28 +1,6 @@
 from rest_framework import serializers
 
-from authors.apps.articles.models import Article, Tag, ArticleImage
-
-
-class ArticleImageSerializer(serializers.ModelSerializer):
-    """
-    Serialize the Article image
-    """
-
-    class Meta:
-        model = ArticleImage
-        fields = ['image']
-
-
-class ArticleImageField(serializers.RelatedField):
-    def get_queryset(self):
-        return ArticleImage.objects.all()
-
-    def to_internal_value(self, data):
-        image = ArticleImage(image=data)
-        return image
-
-    def to_representation(self, value):
-        return value.image
+from authors.apps.articles.models import Article, Tag
 
 
 class TagField(serializers.RelatedField):
@@ -63,7 +41,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         allow_blank=False
     )
     published = serializers.BooleanField(required=False)
-    images = ArticleImageField(source='articleimage_set', many=True, required=False)
+    image = serializers.URLField(required=False, allow_blank=False)
 
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
@@ -81,7 +59,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             'body',
             'published',
             'author',
-            'images',
+            'image',
             'created_at',
             'updated_at',
             'tags'
@@ -96,19 +74,11 @@ class ArticleSerializer(serializers.ModelSerializer):
         :return:
         """
         tags = validated_data.pop('tags', [])
-        images = validated_data.pop('articleimage_set', [])
 
         article = Article.objects.create(**validated_data)
 
         for tag in tags:
             article.tags.add(tag)
-
-        for image in images:
-            image.article = article
-            # avoid having two similar images in the same article
-            if not ArticleImage.objects.filter(article__slug=article.slug,
-                                               article__articleimage__image=image):
-                image.save()
 
         return article
 
@@ -121,17 +91,10 @@ class ArticleSerializer(serializers.ModelSerializer):
         """
 
         tags = validated_data.pop('tags', [])
-        images = validated_data.pop('articleimage_set', [])
 
         instance.tags.clear()
         for tag in tags:
             instance.tags.add(tag)
-
-        for image in images:
-            image.article = instance
-            if not ArticleImage.objects.filter(article__slug=instance.slug,
-                                               article__articleimage__image=image):
-                image.save()
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
