@@ -67,6 +67,9 @@ class AuthenticatedTestCase(AuthenticationTestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + (json.loads(response.content))['user']['token'])
         return response
 
+    def get_current_user(self, email=None):
+        return User.objects.get(email=email or self.user['user']['email'])
+
     def verify_user(self, email=None):
         """
         Verify the user
