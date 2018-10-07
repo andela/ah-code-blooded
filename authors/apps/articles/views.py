@@ -60,6 +60,8 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         article = Article.objects.filter(slug=slug).first()
         if article is None:
             return Response({'errors': 'Article does not exist'}, status.HTTP_404_NOT_FOUND)
+        elif not article.author == request.user:
+            return Response({"errors": "You are not allowed to modify this article"}, status.HTTP_403_FORBIDDEN)
 
         serializer = self.serializer_class(article, data=request.data.get('article', {}), partial=True)
         serializer.is_valid(raise_exception=True)

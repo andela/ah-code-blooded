@@ -1,3 +1,4 @@
+from django.utils.text import slugify
 from rest_framework import serializers
 
 from authors.apps.articles.models import Article, Tag
@@ -13,7 +14,7 @@ class TagField(serializers.RelatedField):
 
     def to_internal_value(self, data):
         tag, created = Tag.objects.get_or_create(
-            tag=data,
+            tag=data, slug=slugify(data)
         )
 
         return tag

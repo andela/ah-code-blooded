@@ -51,14 +51,17 @@ class BaseArticlesTestCase(AuthenticatedTestCase):
 
     def create_article(self, article=None, published=False):
         """
-        Helper method to create an article
+        Overridden method, it will return the data of the created article instead
+        :param published: set the article as published
+        :param article:
         :return:
         """
+
         if article is None:
             article = self.article
-
         article['article']['published'] = published
-        return self.client.post(self.url_list, data=article, format="json")
+        response = self.client.post(self.url_list, data=article, format="json")
+        return json.loads(response.content)['data']['article']
 
     def url_retrieve(self, slug):
         """
@@ -73,6 +76,19 @@ class CreateArticlesTestCase(BaseArticlesTestCase):
     """
     Test for the articles creation
     """
+
+    def create_article(self, article=None, published=False):
+        """
+        Overridden method to return the response
+        :param article:
+        :param published:
+        :return:
+        """
+        if article is None:
+            article = self.article
+        article['article']['published'] = published
+
+        return self.client.post(self.url_list, data=article, format="json")
 
     def test_verified_user_can_create_article(self):
         """
@@ -164,16 +180,6 @@ class CreateArticlesTestCase(BaseArticlesTestCase):
 
 
 class GetArticlesTestCase(BaseArticlesTestCase):
-
-    def create_article(self, article=None, published=False):
-        """
-        Overridden method, it will return the data of the created article instead
-        :param published: set the article as published
-        :param article:
-        :return:
-        """
-        response = super().create_article(article, published=published)
-        return json.loads(response.content)['data']['article']
 
     def get_all_articles(self):
         """
@@ -308,3 +314,132 @@ class GetArticlesTestCase(BaseArticlesTestCase):
 
         response = self.get_single_article(slug)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class UpdateArticleTestCase(BaseArticlesTestCase):
+
+    def update_article(self, article, slug):
+        """
+        Helper method to update the details of an article
+        :param article:
+        :param slug:
+        :return:
+        """
+        return self.client.put(self.url_retrieve(slug), data=article, format="json")
+
+    def test_can_update_article_title(self):
+        """
+        Check that the title of the article can be updated
+        :return:
+        """
+        slug = self.create_article()['slug']
+
+        self.article['article']['title'] = "This is a new title"
+        response = self.update_article(self.article, slug=slug)
+        # ensure the titles are similar
+        self.assertIn(str.encode(self.article['article']['title']), response.content)
+
+    def test_slug_changes_for_unpublished_article(self):
+        """
+        Whenever the title of an unpublished article changes, the slug should change too
+        :return:
+        """
+        slug = self.create_article()['slug']
+
+        self.article['article']['title'] = "This is a new title"
+        response = self.update_article(self.article, slug)
+
+        # ensure the slug changed
+        self.assertNotEqual(json.loads(response.content)['data']['article']['slug'], slug)
+
+    def test_slug_does_not_change_for_published_article(self):
+        """
+        The slug should not change for published articles to avoid broken links when users share the links
+        :return:
+        """
+
+        slug = self.create_article(published=True)['slug']
+
+        self.article['article']['title'] = "This is a new title"
+        response = self.update_article(self.article, slug)
+
+        # ensure the slug changed
+        self.assertEqual(json.loads(response.content)['data']['article']['slug'], slug)
+
+    def test_user_can_update_article_description(self):
+        """
+        Ensure the description of the article can be changed
+        :return:
+        """
+
+        slug = self.create_article()['slug']
+
+        self.article['article']['description'] = "This is a new description"
+        response = self.update_article(self.article, slug=slug)
+
+        self.assertIn(str.encode(self.article['article']['description']), response.content)
+
+    def test_user_can_update_article_body(self):
+        """
+        Ensure the body of the article can be updated
+        :return:
+        """
+
+        slug = self.create_article()['slug']
+
+        self.article['article']['body'] = "This is a new article body"
+        response = self.update_article(self.article, slug=slug)
+
+        self.assertIn(str.encode(self.article['article']['body']), response.content)
+
+    def test_a_user_cannot_edit_an_article_that_does_not_belong_to_them(self):
+        """
+        Ensure that a user cannot edit an article that does not belong to them
+        :return:
+        """
+        slug = self.create_article()['slug']
+
+        # login another user
+        self.register_and_login(self.user2)
+
+        response = self.update_article(self.article, slug=slug)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_user_cannot_edit_an_article(self):
+        """
+        Ensure that a user that is not authenticated cannot modify an article
+        :return:
+        """
+        slug = self.create_article()['slug']
+
+        # logout user
+        self.logout()
+
+        response = self.update_article(self.article, slug=slug)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_can_change_tags(self):
+        """
+        Ensure the user can change the tags for an article
+        :return:
+        """
+        slug = self.create_article()['slug']
+
+        self.article['article']['tags'] = ['this', 'are', 'some', 'new', 'tags']
+        response = self.update_article(self.article, slug=slug)
+
+        # check for similarity
+        for x in json.loads(response.content)['data']['article']['tags']:
+            self.assertIn(x, self.article['article']['tags'])
+
+    def test_user_can_change_article_image(self):
+        """
+        Ensure the user can update the image of the article
+        :return:
+        """
+
+        slug = self.create_article()['slug']
+        self.article['article']['image'] = "Https://google.com/images/this-is-a-new-image.jpg"
+
+        response = self.update_article(self.article, slug=slug)
+        self.assertEqual(json.loads(response.content)['data']['article']['image'], self.article['article']['image'])
