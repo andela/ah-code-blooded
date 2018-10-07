@@ -26,6 +26,14 @@ class ArticleModelTest(AuthenticatedTestCase):
         article = self.create_article()
         self.assertIsNotNone(article.created_at)
 
+    def test_article_representation(self):
+        """
+        Ensure the article representation gives it's title
+        :return:
+        """
+        article = self.create_article()
+        self.assertEqual(article.__str__(), "This is a simple title")
+
 
 class TagModelTest(TestCase):
 
@@ -49,3 +57,11 @@ class TagModelTest(TestCase):
         self.create_tag()
 
         self.assertEqual(len(Tag.objects.filter(tag="Django")), 1)
+
+    def test_tag_representation(self):
+        """
+        Ensure the tag representation gives it's tag name
+        :return:
+        """
+        tag = self.create_tag()
+        self.assertEqual(tag.__str__(), "Django")
