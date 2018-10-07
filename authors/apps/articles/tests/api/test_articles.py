@@ -9,9 +9,10 @@ from rest_framework.reverse import reverse
 from authors.apps.authentication.tests.api.test_auth import AuthenticatedTestCase
 
 
-class CreateArticlesTestCase(AuthenticatedTestCase):
+class BaseArticlesTestCase(AuthenticatedTestCase):
+    DEFAULT_NUM_ARTICLES = 10  # Default number of articles to be randomly created
     """
-    Test for the articles implementation
+    Extend this class in order to use the articles functionality
     """
 
     def setUp(self):
@@ -26,10 +27,11 @@ class CreateArticlesTestCase(AuthenticatedTestCase):
                     "angularjs",
                     "dragons"
                 ],
-                "image": "https://dummyimage.com/600x400/000/fff"
+                "image": "https://dummyimage.com/600x400/000/fff",
+                "published": False
             }
         }
-        self.url = reverse("articles:articles-list")
+        self.url_list = reverse("articles:articles-list")
         self.user2 = {
             "user": {
                 "username": "gitaumoses4",
@@ -38,14 +40,39 @@ class CreateArticlesTestCase(AuthenticatedTestCase):
             }
         }
 
-    def create_article(self, article=None):
+    def create_random_articles(self):
+        """
+        Helper method to create a list of articles
+        :return:
+        """
+        for x in range(0, self.DEFAULT_NUM_ARTICLES):
+            # create a list of published an unpublished articles
+            self.create_article(published=(x % 2 == 0))
+
+    def create_article(self, article=None, published=False):
         """
         Helper method to create an article
         :return:
         """
         if article is None:
             article = self.article
-        return self.client.post(self.url, data=article, format="json")
+
+        article['article']['published'] = published
+        return self.client.post(self.url_list, data=article, format="json")
+
+    def url_retrieve(self, slug):
+        """
+        Helper method to create the url to retrieve an article
+        :param slug:
+        :return:
+        """
+        return reverse("articles:articles-detail", kwargs={"slug": slug})
+
+
+class CreateArticlesTestCase(BaseArticlesTestCase):
+    """
+    Test for the articles creation
+    """
 
     def test_verified_user_can_create_article(self):
         """
@@ -134,3 +161,150 @@ class CreateArticlesTestCase(AuthenticatedTestCase):
         response = self.create_article()
         self.assertIn(slugify(self.article['article']['title']),
                       json.loads(response.content)['data']['article']['slug'])
+
+
+class GetArticlesTestCase(BaseArticlesTestCase):
+
+    def create_article(self, article=None, published=False):
+        """
+        Overridden method, it will return the data of the created article instead
+        :param published: set the article as published
+        :param article:
+        :return:
+        """
+        response = super().create_article(article, published=published)
+        return json.loads(response.content)['data']['article']
+
+    def get_all_articles(self):
+        """
+        Lists all the articles that have been created
+        :return:
+        """
+        response = self.client.get(self.url_list, data=None, format="json")
+        return json.loads(response.content)['data']['articles']
+
+    def get_single_article(self, slug):
+        """
+        Get an article by slug
+        :return:
+        """
+        return self.client.get(self.url_retrieve(slug), data=None, format="json")
+
+    def test_user_can_get_created_article(self):
+        """
+        Ensure the user get an article they created, this tests whether the user can get an unpublished article they
+        created
+        :return:
+        """
+        slug = self.create_article()['slug']
+        response = self.get_single_article(slug)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(str.encode(slug), response.content)
+
+    def test_another_user_cannot_get_unpublished_article(self):
+        """
+        Ensure another user cannot view an article that has not been published by other users
+        :return:
+        """
+        # let the first user create the article, by default it is always not published
+        slug = self.create_article()['slug']
+
+        # register and login another user
+        self.register_and_login(self.user2)
+        # try to get the article
+        response = self.get_single_article(slug)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_another_user_can_get_published_article(self):
+        """
+        Ensure a user can get a published article for another user
+        :return:
+        """
+        slug = self.create_article(published=True)['slug']
+
+        # register and login another user
+        self.register_and_login(self.user2)
+
+        # try to get article
+        response = self.get_single_article(slug)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(str.encode(slug), response.content)
+
+    def test_unauthenticated_user_cannot_get_unpublished_article(self):
+        """
+        Ensure an unauthenticated user cannot get a article that is not published
+        :return:
+        """
+        slug = self.create_article()['slug']
+
+        # lgoout user
+        self.logout()
+
+        # try as unauthenticated user
+        response = self.get_single_article(slug)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_unauthenticated_user_can_get_published_article(self):
+        """
+        Ensure an unauthenticated user can get an article that is published
+        :return:
+        """
+        slug = self.create_article(published=True)['slug']
+
+        # logout user
+        self.logout()
+
+        # try as unauthenticated user
+        response = self.get_single_article(slug)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(str.encode(slug), response.content)
+
+    def test_creator_can_list_all_published_and_unpublished_articles(self):
+        """
+        Ensure the list contains only published articles
+        :return:
+        """
+        self.create_random_articles()
+
+        response = self.get_all_articles()
+        # ensure all five articles are visible
+        self.assertEqual(len(response), self.DEFAULT_NUM_ARTICLES)
+
+    def test_other_user_can_only_see_published_articles(self):
+        """
+        Ensure other users can only see the published articles
+        :return:
+        """
+        self.create_random_articles()
+
+        self.register_and_login(self.user2)  # login another user
+
+        articles = self.get_all_articles()
+        for article in articles:
+            self.assertTrue(article['published'])
+
+    def test_unauthenticated_user_can_only_see_published_articles(self):
+        """
+        Ensure unauthenticated users cannot see unpublished articles
+        :return:
+        """
+        self.create_random_articles()
+
+        self.logout()
+
+        articles = self.get_all_articles()
+        for article in articles:
+            self.assertTrue(article['published'])
+
+    def test_user_cannot_get_404_article(self):
+        """
+        Ensure the correct message is given for an article that does not exist
+        :return:
+        """
+        # create a fake slug
+        slug = self.create_article()['slug'] + ''.join(
+            random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(5))
+
+        response = self.get_single_article(slug)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
