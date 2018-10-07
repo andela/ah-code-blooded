@@ -443,3 +443,68 @@ class UpdateArticleTestCase(BaseArticlesTestCase):
 
         response = self.update_article(self.article, slug=slug)
         self.assertEqual(json.loads(response.content)['data']['article']['image'], self.article['article']['image'])
+
+
+class DeleteArticleTestCase(BaseArticlesTestCase):
+    """
+    Test for deletion method of the articles
+    """
+
+    def delete_article(self, slug):
+        """
+        Helper method to delete articles
+        :param slug:
+        :return:
+        """
+        return self.client.delete(self.url_retrieve(slug), data=None, format="json")
+
+    def test_owner_can_delete_article(self):
+        """
+        Ensure the owner can delete an article
+        :return:
+        """
+        slug = self.create_article()['slug']
+
+        response = self.delete_article(slug)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(b'The article has been deleted', response.content)
+
+    def test_cannot_delete_an_article_that_does_not_exist(self):
+        """
+        Ensure the current status is returned when deleting an article that does not exist
+        :return:
+        """
+        slug = self.create_article()['slug']
+        self.delete_article(slug)
+
+        response = self.delete_article(slug)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_cannot_delete_article_that_does_not_belong_to_them(self):
+        """
+        Ensure the user is prevented from deleting an article they do not own
+        :return:
+        """
+
+        slug = self.create_article()['slug']
+
+        # switch to another user
+        self.register_and_login(self.user2)
+
+        response = self.delete_article(slug)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthenticated_user_cannot_delete_article(self):
+        """
+        Ensure that a user that is not authenticated cannot delete an article
+        :return:
+        """
+        slug = self.create_article()['slug']
+
+        # logout the user
+
+        self.logout()
+
+        response = self.delete_article(slug)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
