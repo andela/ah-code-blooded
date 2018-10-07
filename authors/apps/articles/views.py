@@ -1,4 +1,5 @@
 # Create your views here.
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import status, viewsets
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -77,7 +78,15 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         """
         slug = kwargs['slug']
 
-        article = Article.objects.filter(slug=slug).first()
+        article = Article.objects.filter(slug=slug)
+        if request.user and not isinstance(request.user, AnonymousUser):
+            mine = Article.objects.filter(slug=slug, author=request.user)
+            article = article.filter(published=True)
+
+            article = article.union(mine).first()
+        else:
+            # ensure the article is published
+            article = article.filter(published=True).first()
 
         if article is None:
             return Response({'errors': 'Article does not exist'}, status.HTTP_404_NOT_FOUND)
@@ -97,7 +106,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
 
         articles = Article.objects.filter(published=True)
         # if the user is logged in, display both published and unpublished articles
-        if request.user:
+        if request.user and not isinstance(request.user, AnonymousUser):
             mine = Article.objects.filter(author=request.user)
 
             articles = articles.union(mine)
