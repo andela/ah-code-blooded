@@ -432,6 +432,17 @@ class UpdateArticleTestCase(BaseArticlesTestCase):
         for x in json.loads(response.content)['data']['article']['tags']:
             self.assertIn(x, self.article['article']['tags'])
 
+    def test_cannot_update_details_for_non_existing_article(self):
+        """
+        Ensure a user cannot update the details of a article that does not exist
+        :return:
+        """
+        slug = self.create_article()['slug'] + ''.join(
+            random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(5))
+
+        response = self.update_article(self.article, slug)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_user_can_change_article_image(self):
         """
         Ensure the user can update the image of the article
