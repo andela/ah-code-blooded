@@ -8,9 +8,7 @@ class TagField(serializers.RelatedField):
     """
     Override the RelatedField serializer field in order to serialize the Tags related to a particular article
     """
-
-    def get_queryset(self):
-        return Tag.objects.all()
+    queryset = Tag.objects.all()
 
     def to_internal_value(self, data):
         tag, created = Tag.objects.get_or_create(
