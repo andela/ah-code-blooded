@@ -24,5 +24,6 @@ schema_view = get_swagger_view(title='Authors Haven API')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('authors.apps.authentication.urls', namespace='authentication')),
+    path('api/profiles/', include('authors.apps.profiles.urls', namespace='profiles')),
     path('', schema_view),
 ]

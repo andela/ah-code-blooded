@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'authors.apps.profiles',
     'django_inlinecss',
     'rest_framework_swagger',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -138,7 +139,6 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 # Other locations for collectstatic to get static files.
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
@@ -161,4 +161,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'authors.apps.authentication.backends.JWTAuthentication',
     ),
+}
+
+CLOUDINARY = {
+    'cloud_name': os.getenv('CLOUDINARY_NAME'),
+    'api_key': os.getenv('CLOUDINARY_KEY'),
+    'api_secret': os.getenv('CLOUDINARY_SECRET'),
+    'secure': True
 }

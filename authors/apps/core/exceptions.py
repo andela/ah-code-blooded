@@ -1,4 +1,5 @@
 from rest_framework.views import exception_handler
+from rest_framework.exceptions import APIException
 
 
 def core_exception_handler(exc, context):
@@ -32,3 +33,8 @@ def _handle_generic_error(exc, context, response):
     }
 
     return response
+
+
+class ProfileDoesNotExist(APIException):
+    status_code = 400
+    default_detail = 'The requested profile was not found.'
