@@ -171,10 +171,6 @@ class RatingSerializer(serializers.ModelSerializer):
         _rating = data.get('rating')
 
         if _rating:
-            if isinstance(_rating, str):
-                raise serializers.ValidationError(
-                    "Rating has to be a number!"
-                )
             if _rating < 0 or _rating > 5:
                 raise serializers.ValidationError(
                     "Rating should be a number between 1 and 5!"
