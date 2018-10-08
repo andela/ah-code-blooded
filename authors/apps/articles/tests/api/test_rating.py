@@ -15,6 +15,11 @@ class TestArticleRating(BaseArticlesTestCase):
                 "rating": 3
             }
         }
+        self.string_Rating = {
+            "rating": {
+                "rating": "5"
+            }
+        }
         self.rating_user = {
             "user": {
                 "username": "emily",
@@ -74,7 +79,15 @@ class TestArticleRating(BaseArticlesTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn(b"You have already rated this article.", response.content)
 
+    def test_non_authenticated_user_cannot_rate_article(self):
+        """
+        For a user to rate an article, they have to be authenticated
+        """
+        article = self.create_article()['slug']
+        slug = self.create_article()['slug']
+        rating = self.articleRating
+        self.logout()
+        response = self.client.post(reverse("articles:rate-article", kwargs={'slug': slug}), data=rating, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
 
-
-
-    
