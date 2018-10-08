@@ -2,6 +2,8 @@ from django.utils.text import slugify
 from rest_framework import serializers
 
 from authors.apps.articles.models import Article, Tag
+from authors.apps.profiles.models import Profile
+from authors.apps.profiles.serializers import ProfileSerializer
 
 
 class TagField(serializers.RelatedField):
@@ -62,6 +64,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         'not_a_list': "The tags must be a list of strings"
     })
 
+    author = serializers.SerializerMethodField(read_only=True)
+
     # tagList = TagField(many=True, required=False)
 
     class Meta:
@@ -80,6 +84,10 @@ class ArticleSerializer(serializers.ModelSerializer):
             'tags'
         ]
         read_only_fields = ('slug', 'author',)
+
+    def get_author(self, obj):
+        serializer = ProfileSerializer(instance=Profile.objects.get(user=obj.author))
+        return serializer.data
 
     def create(self, validated_data):
         """
