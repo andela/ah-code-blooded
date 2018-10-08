@@ -16,7 +16,7 @@ class ProfileJSONRenderer(JSONRenderer):
 
         if errors is not None:
             # Let the JSONRenderer handle any arising errors.
-            return super(ProfileJSONRenderer, self).render(data)
+            return super().render(data)
 
         # namespace all profile responses with profiles
         return json.dumps(data)
