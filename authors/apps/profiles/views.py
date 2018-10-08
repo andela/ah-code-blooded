@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -6,12 +7,12 @@ from authors.apps.profiles.serializers import ProfileSerializer
 from .renderers import ProfileJSONRenderer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
+
 from authors.apps.core.exceptions import ProfileDoesNotExist
 
 
 class ProfileListView(ListAPIView):
-    # Remember to only permit authenticated users
+    permission_classes = (IsAuthenticated,)
     serializer_class = ProfileSerializer
     renderer_classes = (ProfileJSONRenderer,)
 
@@ -21,7 +22,7 @@ class ProfileListView(ListAPIView):
         """
         try:
             queryset = Profile.objects.all().exclude(user=request.user)
-        except:
+        except Profile.DoesNotExist:
             raise ProfileDoesNotExist
         serializer = self.serializer_class(queryset, many=True)
         return Response({'profiles': serializer.data}, status=status.HTTP_200_OK)
@@ -36,9 +37,10 @@ class ProfileGetView(APIView):
 
     def get(self, request, username):
         """Fetches a specific profile filtered by the username"""
+
         try:
-            profile = get_object_or_404(Profile, user__username=username)
-        except:
+            profile = Profile.objects.get(user__username=username)
+        except Profile.DoesNotExist:
             raise ProfileDoesNotExist
 
         serializer = self.serializer_class(profile)
@@ -46,9 +48,9 @@ class ProfileGetView(APIView):
 
     def put(self, request, username):
         """Allows authenticated users to update only their profiles."""
-        serializer = self.serializer_class(
-            instance=request.user.profile,
-            data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        data = request.data
+
+        serializer = self.serializer_class(instance=request.user.profile, data=data, partial=True)
+        serializer.is_valid()
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
