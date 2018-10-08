@@ -4,6 +4,9 @@ from rest_framework import serializers
 from authors.apps.articles.models import Article, Tag
 from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
+from django.db import models
+
+from authors.apps.articles.models import Article, Tag , ArticleRating
 
 
 class TagField(serializers.RelatedField):
