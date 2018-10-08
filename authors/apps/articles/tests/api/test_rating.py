@@ -48,7 +48,7 @@ class TestArticleRating(BaseArticlesTestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn(b"This article does not exist!", response.content)
 
-    def test_author_cannot_rate_his_articlw(self):
+    def test_author_cannot_rate_his_articles(self):
         """
         Writers of articles cannot rate their own articles
         Their articles are rated by other users instead
@@ -59,5 +59,22 @@ class TestArticleRating(BaseArticlesTestCase):
         response = self.client.post(reverse("articles:rate-article", kwargs={'slug': slug}), data=rating, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn(b"You cannot rate your own article.", response.content)
+
+    def test_user_cannot_rate_article_twice(self):
+        """
+        Users should not rate articles more than once
+        Instead they can edit ratings
+        """
+        article = self.create_article()['slug']
+        slug = self.create_article()['slug']
+        rating = self.articleRating
+        self.register_and_login(self.rating_user)
+        response = self.client.post(reverse("articles:rate-article", kwargs={'slug': slug}), data=rating, format="json")
+        response = self.client.post(reverse("articles:rate-article", kwargs={'slug': slug}), data=rating, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn(b"You have already rated this article.", response.content)
+
+
+
 
     
