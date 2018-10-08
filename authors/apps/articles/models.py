@@ -2,6 +2,7 @@ import random
 import string
 
 from django.db import models
+from django.db.models.signals import pre_save
 
 from django.template.defaultfilters import slugify
 
@@ -31,15 +32,15 @@ class Article(BaseModel):
     )
     published = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
+    @staticmethod
+    def pre_save(sender, instance, *args, **kwargs):
         # create the slug only when the article is being saved to avoid broken links
-        if not self.id or not self.published:
+        if not instance.id or not instance.published:
             unique = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(12))
-            if self.slug[:-13] != slugify(self.title):
-                self.slug = slugify(self.title)
-                self.slug = self.slug[:250]
-                self.slug = self.slug + '-' + unique
-        super().save(*args, **kwargs)
+            if instance.slug[:-13] != slugify(instance.title):
+                instance.slug = slugify(instance.title)
+                instance.slug = instance.slug[:250]
+                instance.slug = instance.slug + '-' + unique
 
     def __str__(self):
         """
@@ -66,3 +67,7 @@ class Tag(BaseModel):
 
     def __str__(self):
         return self.tag
+
+
+# register the pre_save signal
+pre_save.connect(Article.pre_save, Article, dispatch_uid="authors.apps.articles.models.Article")
