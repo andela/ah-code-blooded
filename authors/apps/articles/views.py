@@ -143,22 +143,25 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
         Users can post article ratings
         """
         rating = request.data.get('rating', {})
+        if rating is None:
+            data = {"errors": "Rating field cannot be empty"}
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             article = Article.objects.get(slug=kwargs['slug'])
         except Exception:
-            data = {"message": "This article does not exist!"}
+            data = {"errors": "This article does not exist!"}
             return Response(data, status=status.HTTP_404_NOT_FOUND)
         if article:
             rated = ArticleRating.objects.filter(article=article, rated_by=request.user).first()
             rating_author = article.author
             rating_user = request.user
             if rating_author == rating_user:
-                data = {"message": "You cannot rate your own article."}
+                data = {"errors": "You cannot rate your own article."}
                 return Response(data, status=status.HTTP_403_FORBIDDEN)
 
             if rated:
-                data = {"message": "You have already rated this article."}
+                data = {"errors": "You have already rated this article."}
                 return Response(data, status=status.HTTP_403_FORBIDDEN)
             else:
                 serializer = self.serializer_class(data=rating)
@@ -166,7 +169,7 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
                 serializer.save(rated_by=request.user, article=article)
 
                 data = serializer.data
-                data['message'] = "You have successfully rated this article"
+                data['errors'] = "You have successfully rated this article"
                 return Response(data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
