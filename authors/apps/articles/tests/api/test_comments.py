@@ -30,7 +30,7 @@ class TestArticleComment(BaseArticlesTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_get_comment_related_article(self):
-        """Test commenting on non-existing-comment"""
+        """Test get comment related to article"""
         self.register_and_login(self.user)
         slug = self.create_article()['slug']
         comment = self.comment
@@ -39,3 +39,14 @@ class TestArticleComment(BaseArticlesTestCase):
             data=comment,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_comment_unavailable_article(self):
+        """Test commenting on non-existing-comment"""
+        self.register_and_login(self.user)
+        slug = None
+        comment = self.comment
+        response = self.client.post(
+            reverse("articles:comments", kwargs={'slug': slug}),
+            data=comment,
+            format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
