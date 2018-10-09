@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
@@ -7,6 +9,12 @@ from authors.apps.profiles.models import Profile
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
+    # Username must be longer than 4 characters but shorter than 128 characters. 
+    # Username is a required field
+    username = serializers.CharField(
+        required=True,
+    )
+
     # Ensure passwords are at least 8 characters long, no longer than 128
     # characters, and can not be read by the client.
     password = serializers.CharField(
@@ -29,6 +37,32 @@ class RegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         Profile.objects.create(user=user)
         return user
+    
+    def validate_username(self, data):
+        """
+        Validate the provided username
+        min_len=4
+        max_len=128
+        required=True
+        unique=True
+        """
+        candidate_name = data
+        
+        try:
+            if int(candidate_name):
+                raise serializers.ValidationError({"username": ["Username cannot be numbers only!"]})
+        except ValueError:
+            pass
+            
+        if candidate_name == "":
+            raise serializers.ValidationError({"username": ["Username is required!"]})
+        elif User.objects.filter(username=candidate_name):
+            raise serializers.ValidationError({"username": ["Username already exists!"]})
+        elif len(candidate_name) < 4:
+            raise serializers.ValidationError({"username": ["Username should be more than 4 charcaters!"]})
+        elif len(candidate_name) > 128:
+            raise serializers.ValidationError({"username": ["Username should not be longer than 128 charcaters!"]})
+        return data
 
 
 class LoginSerializer(serializers.Serializer):
