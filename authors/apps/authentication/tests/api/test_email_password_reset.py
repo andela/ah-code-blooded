@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -110,9 +112,9 @@ class TestResetPassword(APITestCase):
         }
         response = self.client.put(self.reset_url, data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.content, b'{"errors":{"password":["This field may not be \
-            blank."],"confirm_password":["This field may not be blank."]}}'
+        self.assertIn(
+            "This field may not be blank.",
+            json.loads(response.content)['errors']['password'],
         )
 
     def test_unmatching_password(self):
@@ -126,8 +128,7 @@ class TestResetPassword(APITestCase):
         }
         response = self.client.put(self.reset_url, data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.content,
-                         b'{"errors":{"error":["Passwords do not match"]}}')
+        self.assertEqual(response.content, b'{"errors":{"error":["Passwords do not match"]}}')
 
     def test_invalid_password(self):
         """
@@ -140,10 +141,9 @@ class TestResetPassword(APITestCase):
         }
         response = self.client.put(self.reset_url, data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.content,
-            b'{"errors":{"password":["Ensure this field has at least 8 characters."]\
-            ,"confirm_password":["Ensure this field has at least 8 characters."]}}'
+        self.assertIn(
+            "Ensure this field has at least 8 characters.",
+            json.loads(response.content)['errors']['password']
         )
 
     def test_used_token(self):
