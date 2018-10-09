@@ -6,6 +6,13 @@ from rest_framework import serializers
 from .models import User
 from authors.apps.profiles.models import Profile
 
+email_expression = re.compile(
+    r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
+trial_email = re.compile(
+    r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[0-9-.]+$)")
+trial_email_2 = re.compile(
+    r"(^[a-zA-Z0-9_.+-]+@[0-9-]+\.[a-zA-Z0-9-.]+$)")
+
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
@@ -13,6 +20,14 @@ class RegistrationSerializer(serializers.ModelSerializer):
     # Username is a required field
     username = serializers.CharField(
         required=True,
+    )
+
+    # Ensure email is present and has the valid format example@mail.com
+    email = serializers.EmailField(
+        required=True,
+        error_messages={
+            "required" : "Email is required!"
+        }
     )
 
     # Ensure passwords are at least 8 characters long, no longer than 128
@@ -63,6 +78,27 @@ class RegistrationSerializer(serializers.ModelSerializer):
         elif len(candidate_name) > 128:
             raise serializers.ValidationError({"username": ["Username should not be longer than 128 charcaters!"]})
         return data
+
+    def validate_email(self, data):
+        """
+        Validate the provided email
+        required=True
+        unique=True
+        format: example@mail.com
+        """
+        candidate_email = data
+        if candidate_email == "":
+            raise serializers.ValidationError({"email": ["Email is required!"]})
+        elif re.match(trial_email, candidate_email):
+            raise serializers.ValidationError({"email": ["Invalid email! Hint: example@mail.com"]})
+        elif re.match(trial_email_2, candidate_email):
+            raise serializers.ValidationError({"email": ["Invalid email! Hint: example@mail.com"]})
+        elif User.objects.filter(email=candidate_email):
+            raise serializers.ValidationError({"email": ["User with provided email exists! Please login!"]})
+        elif not re.match(email_expression, candidate_email):
+            raise serializers.ValidationError({"email": ["Invalid email! Hint: example@mail.com!"]})
+        return data
+
 
 
 class LoginSerializer(serializers.Serializer):
