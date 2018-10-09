@@ -63,7 +63,7 @@ class RegistrationAPIView(CreateAPIView):
             email = user.email
             username = user.username
             domain = get_current_site(request).domain
-            from_email = os.getenv("EMAIL_HOST_SENDER ")
+            from_email = os.getenv("EMAIL_HOST_SENDER")
 
             email_subject = 'Activate your Author\'s Haven account.'
             activation_link = "http://" + domain + reverse("authentication:activate-account",
@@ -164,7 +164,7 @@ class ForgotPasswordView(CreateAPIView):
     serializer_class = ForgotPasswordSerializer
 
     def post(self, request):
-        email = request.data.get('email',"")
+        email = request.data.get('email', "")
         user = User.objects.filter(email=email).first()
 
         if user is None:
@@ -178,7 +178,8 @@ class ForgotPasswordView(CreateAPIView):
         subject, from_email, to_email = 'Password Reset Link', os.getenv("EMAIL_HOST_SENDER"), email
         protocol = urlsplit(request.build_absolute_uri(None)).scheme
 
-        reset_link = protocol + "://" + current_site_domain + reverse("authentication:reset-password", kwargs={"token": token})
+        reset_link = protocol + "://" + current_site_domain + reverse("authentication:reset-password",
+                                                                      kwargs={"token": token})
 
         # render with dynamic value
         html_content = render_to_string('email_reset_password.html', {'reset_password_link': reset_link})
