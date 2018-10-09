@@ -28,3 +28,14 @@ class TestArticleComment(BaseArticlesTestCase):
             data=comment,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_get_comment_related_article(self):
+        """Test commenting on non-existing-comment"""
+        self.register_and_login(self.user)
+        slug = self.create_article()['slug']
+        comment = self.comment
+        response = self.client.get(
+            reverse("articles:comments", kwargs={'slug': slug}),
+            data=comment,
+            format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
