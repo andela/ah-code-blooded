@@ -7,7 +7,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 class ArticleJSONRenderer(JSONRenderer):
     charset = "utf-8"
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
+    def render(self, data, accepted_media_type=None, renderer_context=None):  # noqa : E731
         """
         If the view throws an error, 'data' will contain errors key, the default JSONRenderer will handle this
         errors, so we need to check for this case
