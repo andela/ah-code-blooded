@@ -33,6 +33,7 @@ class RegistrationAPIView(CreateAPIView):
         user = request.data.get('user', {})
         username = user["username"]
         email = user["email"]
+        password = user["password"]
 
         # The create serializer, validate serializer, save serializer pattern
         # below is common and you will see it a lot throughout this course and
@@ -40,6 +41,7 @@ class RegistrationAPIView(CreateAPIView):
         serializer = self.serializer_class(data=user)
         serializer.validate_username(username)
         serializer.validate_email(email)
+        serializer.validate_password(password)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

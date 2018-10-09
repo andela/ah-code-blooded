@@ -12,6 +12,12 @@ trial_email = re.compile(
     r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[0-9-.]+$)")
 trial_email_2 = re.compile(
     r"(^[a-zA-Z0-9_.+-]+@[0-9-]+\.[a-zA-Z0-9-.]+$)")
+at_least_number = re.compile(
+    r"^(?=.*[0-9]).*")
+at_least_uppercase = re.compile(
+    r"^(?=.*[A-Z])(?=.*[a-z])(?!.*\s).*")
+at_least_special_char = re.compile(
+    r"^[a-zA-Z0-9_]*$")
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -98,6 +104,28 @@ class RegistrationSerializer(serializers.ModelSerializer):
         elif not re.match(email_expression, candidate_email):
             raise serializers.ValidationError({"email": ["Invalid email! Hint: example@mail.com!"]})
         return data
+
+    def validate_password(self, data):
+        """
+        Validate the provided password
+        required=True
+        min_len=8
+        is_alphanumeric=True
+
+        """
+        candidate_password = data
+        if candidate_password == "":
+            raise serializers.ValidationError({"password": ["Password is required!"]})
+        elif len(candidate_password) < 8:
+            raise serializers.ValidationError({"password": ["Password should be at least eight (8) characters long!"]})
+        elif not re.match(at_least_number, candidate_password):
+            raise serializers.ValidationError({"password": ["Password must have at least one number!"]})
+        elif not re.match(at_least_uppercase, candidate_password):
+            raise serializers.ValidationError({"password": ["Password must have at least one uppercase letter!"]})
+        elif not re.match(at_least_special_char, candidate_password):
+            raise serializers.ValidationError({"password": ["Password must include a special character!"]})
+        return data
+
 
 
 
