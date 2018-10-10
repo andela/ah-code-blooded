@@ -140,12 +140,9 @@ class TagsSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """
-    Validate the tag model
-    """
-    tag = serializers.CharField(required=True,
-                                max_length=128)
+    tag = serializers.CharField(required=True, max_length=128)
+    slug = serializers.SlugField(read_only=True)
 
     class Meta:
         model = Tag
-        fields = ['tag']
+        fields = ['tag', 'slug']
