@@ -78,6 +78,10 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
 
         fields = [
+            'slug', 'title', 'description', 'body', 'published', 'author',
+            'image', 'created_at', 'updated_at', 'tags'
+        ]
+        read_only_fields = [
             'slug',
             'title',
             'description',
@@ -245,13 +249,23 @@ class RatingSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     """ serialize and deserialize comment model"""
     body = serializers.CharField(max_length=200)
-    article = ArticleSerializer(read_only=True)
+    article = ArticleImageSerializer(read_only=True)
     author = ProfileSerializer(read_only=True)
+    likes = serializers.SerializerMethodField(method_name='count_likes')
+    dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
 
     class Meta:
         model = Comment
 
         fields = "__all__"
+
+    def count_likes(self, instance):
+        """Returns the total likes of particlular comment"""
+        return instance.likes.count()
+
+    def count_dislikes(self, instance):
+        """Returns  the total dislikes of a particular comment."""
+        return instance.dislikes.count()
 
 
 class UpdateCommentSerializer(serializers.Serializer):
