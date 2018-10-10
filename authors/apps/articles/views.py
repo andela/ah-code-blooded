@@ -26,6 +26,30 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
     renderer_names = ('article', 'articles')
     serializer_class = ArticleSerializer
 
+    @staticmethod
+    def retrieve_owner_or_published(slug, user):
+        """
+        Retrieve the article for a user,
+        If the user is logged in:
+            1. if the user is the owner, return the article whether it is published or not
+            2. If the user is not the owner, return the article only if it is published
+        If the user is not logged in:
+            1. Return the article only if it is published
+        :param slug:
+        :param user:
+        :return:
+        """
+        article = Article.objects.filter(slug=slug)
+        if user and not isinstance(user, AnonymousUser):
+            mine = Article.objects.filter(slug=slug, author=user)
+            article = article.filter(published=True)
+
+            article = article.union(mine).first()
+        else:
+            # ensure the article is published
+            article = article.filter(published=True).first()
+        return article
+
     def create(self, request, *args, **kwargs):
         """
         Creates an article.
@@ -82,15 +106,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         """
         slug = kwargs['slug']
 
-        article = Article.objects.filter(slug=slug)
-        if request.user and not isinstance(request.user, AnonymousUser):
-            mine = Article.objects.filter(slug=slug, author=request.user)
-            article = article.filter(published=True)
-
-            article = article.union(mine).first()
-        else:
-            # ensure the article is published
-            article = article.filter(published=True).first()
+        article = self.retrieve_owner_or_published(slug, request.user)
 
         if article is None:
             return Response({'errors': 'Article does not exist'}, status.HTTP_404_NOT_FOUND)
@@ -197,7 +213,8 @@ class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
 
         slug = kwargs['slug']
 
-        article = Article.objects.filter(slug=slug, author=request.user).first()
+        article = ArticleAPIView.retrieve_owner_or_published(slug, request.user)
+
         if article is None:
             return Response({'errors': 'Article does not exist'}, status.HTTP_404_NOT_FOUND)
         else:
