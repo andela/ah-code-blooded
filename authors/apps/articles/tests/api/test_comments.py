@@ -91,6 +91,25 @@ class TestArticleComment(BaseArticlesTestCase):
             format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_invalid_articleslug_comment(self):
+        """Test incorrect slug in commenting"""
+        self.register_and_login(self.user)
+        slug = "fake-slug"
+        comment = self.comment
+        response = self.client.post(
+            reverse("articles:comments", kwargs={'slug': slug}),
+            data=comment,
+            format="json")
+        pk = json.loads(response.content)
+        response = self.client.post(
+            reverse("articles:a-comment", kwargs={
+                'slug': slug,
+                'pk': pk
+            }),
+            data=self.thread,
+            format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_update_comment(self):
         """Test update comment related to article"""
         self.register_and_login(self.user)
