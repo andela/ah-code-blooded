@@ -1,4 +1,3 @@
-# Create your views here.
 from django.contrib.auth.models import AnonymousUser
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
@@ -174,7 +173,13 @@ class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
         else:
             tags = request.data.get('tags', [])
             serializer = self.serializer_class(many=True, data=[{'tag': x} for x in tags])
-            serializer.is_valid(raise_exception=True)
+            valid = serializer.is_valid(raise_exception=False)
+            if not valid:
+                errors = {}
+                for i in range(0, len(serializer.errors)):
+                    if len(serializer.errors[i]) > 0:
+                        errors[tags[i]] = serializer.errors[i]
+                return Response(errors, status.HTTP_400_BAD_REQUEST)
 
             for tag in tags:
                 t, created = Tag.objects.get_or_create(slug=slugify(tag), tag=tag)
