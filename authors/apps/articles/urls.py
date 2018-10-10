@@ -4,11 +4,11 @@ from rest_framework.routers import DefaultRouter
 from authors.apps.articles.views import (
     ArticleAPIView, ArticleTagsAPIView, LikeAPIView, DislikeAPIView,
     ReactionsAPIView, RatingAPIView, CommentAPIView,
-    CommentCreateUpdateDestroy,
-    ArticleAPIView, ArticleTagsAPIView, LikeAPIView, DislikeAPIView, ReactionsAPIView, SearchFilterListAPIView,
-    FavouriteArticleApiView
-)
+    CommentCreateUpdateDestroy, ArticleAPIView, ArticleTagsAPIView,
+    LikeAPIView, DislikeAPIView, ReactionsAPIView, SearchFilterListAPIView,
+    FavouriteArticleApiView)
 
+from authors.apps.articles.views import ArticleAPIView, CommentAPIView, CommentCreateUpdateDestroy, LikeComments
 
 app_name = "articles"
 router = DefaultRouter()
@@ -36,9 +36,26 @@ urlpatterns = [
         'articles/<slug>/comments/<pk>',
         CommentCreateUpdateDestroy.as_view(),
         name="a-comment"),
-    path('articles/search_filter', SearchFilterListAPIView.as_view(), name='search-filter'),
-    path('articles/<str:slug>/unlike/', DislikeAPIView.as_view(), name='dislike'),
-    path('articles/<str:slug>/reactions/', ReactionsAPIView.as_view(), name='reactions'),
-    path('articles/<slug>/rate/', RatingAPIView.as_view(), name='rate-article'),
-    path('articles/<slug>/favourite/', FavouriteArticleApiView.as_view(), name="favourite_article"),
+    path(
+        'articles/search_filter',
+        SearchFilterListAPIView.as_view(),
+        name='search-filter'),
+    path(
+        'articles/<str:slug>/unlike/',
+        DislikeAPIView.as_view(),
+        name='dislike'),
+    path(
+        'articles/<str:slug>/reactions/',
+        ReactionsAPIView.as_view(),
+        name='reactions'),
+    path(
+        'articles/<slug>/rate/', RatingAPIView.as_view(), name='rate-article'),
+    path(
+        'articles/<slug>/favourite/',
+        FavouriteArticleApiView.as_view(),
+        name="favourite_article"),
+    path(
+        'articles/<slug>/comments/<pk>/likes',
+        LikeComments.as_view(),
+        name="likes")
 ]

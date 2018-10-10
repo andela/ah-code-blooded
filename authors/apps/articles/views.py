@@ -23,7 +23,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 from authors.apps.articles.models import Article, Comment
 from authors.apps.articles.serializers import ArticleSerializer, CommentSerializer, UpdateCommentSerializer
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, UpdateAPIView
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -615,3 +615,40 @@ class FavouriteArticleApiView(APIView):
         return Response({
             'message': 'Article removed from favourites'
         }, status.HTTP_200_OK)
+
+
+class LikeComments(UpdateAPIView):
+    """This class Handles likes of comment"""
+
+    def update(self, request, *args, **kwargs):  # NOQA
+        """This method updates liking of comment"""
+        slug = self.kwargs['slug']
+
+        try:
+            Article.objects.get(slug=slug)
+        except Exception:
+            return Response({'Error,Please check your url?'},
+                            status.HTTP_404_NOT_FOUND)
+        try:
+            pk = self.kwargs.get('pk')
+            comment = Comment.objects.get(pk=pk)
+        except Exception:
+            return Response(
+                {"Failed", "comment with this ID " + pk + " doesn't exist"},
+                status.HTTP_404_NOT_FOUND)
+        # get the user
+        user = request.user
+        comment.dislikes.remove(user.id)
+
+        # confirm if user has already liked comment and remove him if
+        # clicks it again
+        confirm = bool(user in comment.likes.all())
+        if confirm is True:
+            comment.likes.remove(user.id)
+            return Response({'Error, You no longer like this comment'},
+                            status.HTTP_200_OK)
+
+        # This add the user to likes lists
+        comment.likes.add(user.id)
+        return Response({'Sucess, You successfully liked this comment'},
+                        status.HTTP_200_OK)
