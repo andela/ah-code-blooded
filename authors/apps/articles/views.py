@@ -645,7 +645,7 @@ class LikeComments(UpdateAPIView):
         confirm = bool(user in comment.likes.all())
         if confirm is True:
             comment.likes.remove(user.id)
-            return Response({'Error, You no longer like this comment'},
+            return Response({'Success, You no longer like this comment'},
                             status.HTTP_200_OK)
 
         # This add the user to likes lists
@@ -682,7 +682,7 @@ class DislikeComments(UpdateAPIView):
         confirm = bool(user in comment.dislikes.all())
         if confirm is True:
             comment.dislikes.remove(user.id)
-            return Response({'Error, You no longer dislike this comment'},
+            return Response({'Success, You no longer dislike this comment'},
                             status.HTTP_200_OK)
 
         # This add the user to dislikes lists

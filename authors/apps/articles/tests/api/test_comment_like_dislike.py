@@ -30,7 +30,13 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
     def like_url(self, slug, pk):
         return reverse('articles:likes', kwargs={'slug': slug, "pk": pk})
 
+    def dislike_url(self, slug, pk):
+        return reverse('articles:dislikes', kwargs={'slug': slug, "pk": pk})
+
     def like(self, slug, pk):
+        return self.client.put(self.like_url(slug=slug, pk=pk))
+
+    def dislike(self, slug, pk):
         return self.client.put(self.like_url(slug=slug, pk=pk))
 
     def test_user_can_like_comment(self):
@@ -56,4 +62,29 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
         """Test incorrect pk in liking"""
         self.register_and_login(self.user)
         response = self.like(self.slug, "fake")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_can_dislike_comment(self):
+        """Test like a comment"""
+        self.register_and_login(self.user)
+        response = self.dislike(self.slug, self.pk)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_unlike_dislike_comment(self):
+        """Test unlike comment updating twice """
+        self.register_and_login(self.user)
+        response = self.dislike(self.slug, self.pk)
+        response = self.dislike(self.slug, self.pk)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_dislike_nonexisting_artilce_comment(self):
+        """Test incorret slug in liking"""
+        self.register_and_login(self.user)
+        response = self.dislike("fakeslug", self.pk)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_disike_nonexisting_pk_comment(self):
+        """Test incorrect pk in liking"""
+        self.register_and_login(self.user)
+        response = self.dislike(self.slug, "fake")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
