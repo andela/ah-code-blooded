@@ -38,3 +38,10 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
         self.register_and_login(self.user)
         response = self.like(self.slug, self.pk)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_unlike_comment(self):
+        """Test unlike comment updating twice """
+        self.register_and_login(self.user)
+        response = self.like(self.slug, self.pk)
+        response = self.like(self.slug, self.pk)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
