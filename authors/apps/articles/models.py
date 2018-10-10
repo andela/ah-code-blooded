@@ -59,6 +59,10 @@ class Tag(BaseModel):
     tag = models.CharField(max_length=128)
     slug = models.SlugField(db_index=True, unique=True)
 
+    class Meta:
+        unique_together = ['tag', 'slug']
+        ordering = ['tag']
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.tag)
