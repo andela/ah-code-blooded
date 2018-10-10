@@ -4,7 +4,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.utils.serializer_helpers import ReturnList
 
 
-class BaseJSONRenderer(JSONRenderer):
+class BaseJSONRenderer(JSONRenderer):  # NOQA : E731
     """
     Use this class to render your response in the JSend API format.
     In your Views, add the following:
@@ -40,7 +40,7 @@ class BaseJSONRenderer(JSONRenderer):
     single = None
     many = None
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
+    def render(self, data, accepted_media_type=None, renderer_context=None):  # NOQA : E731
 
         view = renderer_context['view']
         if hasattr(view, 'renderer_names'):

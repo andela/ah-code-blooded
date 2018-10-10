@@ -155,7 +155,7 @@ class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = Tag.objects.all()
     permission_classes = [IsArticleOwnerOrReadOnly, IsAuthenticatedOrReadOnly]
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):  # NOQA : E731
         """
         Create a tag, and use it for a particular article,
         This method ensures there is no duplication of articles

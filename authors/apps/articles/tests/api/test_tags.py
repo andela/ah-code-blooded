@@ -210,7 +210,7 @@ class TagRetrievalTestCase(BaseTagsTestCase):
     def test_unauthenticated_user_can_view_tags_on_published_articles(self):
         """
         Ensure an unauthenticated user can view tags on published articles
-        :return: 
+        :return:
         """
         self.logout()
         response = self.list_tags()
