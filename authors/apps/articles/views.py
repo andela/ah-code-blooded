@@ -652,3 +652,40 @@ class LikeComments(UpdateAPIView):
         comment.likes.add(user.id)
         return Response({'Sucess, You successfully liked this comment'},
                         status.HTTP_200_OK)
+
+
+class DislikeComments(UpdateAPIView):
+    """This class Handles dislikes of comment"""
+
+    def update(self, request, *args, **kwargs):  # NOQA
+        """This method updates liking of comment"""
+        slug = self.kwargs['slug']
+
+        try:
+            Article.objects.get(slug=slug)
+        except Exception:
+            return Response({'Error,Please check your url?'},
+                            status.HTTP_404_NOT_FOUND)
+        try:
+            pk = self.kwargs.get('pk')
+            comment = Comment.objects.get(pk=pk)
+        except Exception:
+            return Response(
+                {"Failed", "comment with this ID " + pk + " doesn't exist"},
+                status.HTTP_404_NOT_FOUND)
+        # get the user
+        user = request.user
+        comment.likes.remove(user.id)
+
+        # confirm if user has already disliked comment and remove him if
+        # clicks it again
+        confirm = bool(user in comment.dislikes.all())
+        if confirm is True:
+            comment.dislikes.remove(user.id)
+            return Response({'Error, You no longer dislike this comment'},
+                            status.HTTP_200_OK)
+
+        # This add the user to dislikes lists
+        comment.dislikes.add(user.id)
+        return Response({'Sucess, You successfully disliked this comment'},
+                        status.HTTP_200_OK)
