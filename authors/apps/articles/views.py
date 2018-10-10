@@ -160,12 +160,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         page = self.paginate_queryset(articles)
 
         serializer = self.serializer_class(
-            page,
-            context={
-                'request': request
-            },
-            many=True
-        )
+            page, context={'request': request}, many=True)
         return self.get_paginated_response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
@@ -323,36 +318,36 @@ class LikeDislikeMixin(BaseReactionsMixin, CreateAPIView, DestroyAPIView):
     BaseReactionMixin. These properties are required required by the like
     and dislike views.
     """
+
     def get_response(self, message):
-        return {
-            'message': message,
-            'reactions': self.get_reactions()
-        }
+        return {'message': message, 'reactions': self.get_reactions()}
+
 
 class ArticleFilter(filters.FilterSet):
     tag = filters.CharFilter(field_name='tags__tag', lookup_expr='exact')
-    username = filters.CharFilter(field_name='author__username', lookup_expr='exact')
+    username = filters.CharFilter(
+        field_name='author__username', lookup_expr='exact')
     title = filters.CharFilter(field_name='title', lookup_expr='exact')
 
     class Meta:
         model = Article
         fields = ['tag', 'username', 'title']
 
+
 class SearchFilterListAPIView(ListAPIView):
     serializer_class = ArticleSerializer
-    permission_classes = (AllowAny,)
-    renderer_classes = (BaseJSONRenderer,)
+    permission_classes = (AllowAny, )
+    renderer_classes = (BaseJSONRenderer, )
     queryset = Article.objects.all()
-
 
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     # filter fields are used to filter the articles using the tags, author's username and title
     filterset_class = ArticleFilter
     # search fields search all articles' parameters for the searched character
-    search_fields = ('tags__tag', 'author__username', 'title', 'body', 'description')
+    search_fields = ('tags__tag', 'author__username', 'title', 'body',
+                     'description')
     # ordering fields are used to render search outputs in a particular order e.g asending or descending order
     ordering_fields = ('author__username', 'title')
-
 
 
 class LikeAPIView(LikeDislikeMixin):
@@ -582,12 +577,14 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
         return Response(
             self.serializer_class(updated_comment).data,
             status=status.HTTP_201_CREATED)
+
+
 class FavouriteArticleApiView(APIView):
     """
     define method to favourite article
     """
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = FavouriteSerializer
 
     def post(self, request, slug):
@@ -611,4 +608,6 @@ class FavouriteArticleApiView(APIView):
         serializer.is_valid(raise_exception=True)
         favourite = serializer.view_favourite(data)
         favourite.delete()
-        return Response({'message': 'Article removed from favourites'}, status.HTTP_200_OK)
+        return Response({
+            'message': 'Article removed from favourites'
+        }, status.HTTP_200_OK)
