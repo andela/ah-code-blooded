@@ -21,6 +21,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
 
+from authors.apps.articles.models import Article, Comment
+from authors.apps.articles.serializers import ArticleSerializer, CommentSerializer, UpdateCommentSerializer
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
+
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin, mixins.ListModelMixin,
