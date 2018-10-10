@@ -127,6 +127,18 @@ class ArticleSerializer(serializers.ModelSerializer):
         return instance
 
 
+class TagsSerializer(serializers.ModelSerializer):
+    article = serializers.SerializerMethodField()
+    tags = TagField(many=True)
+
+    class Meta:
+        model = Article
+        fields = ['article', 'tags']
+
+    def get_article(self, instance):
+        return instance.slug
+
+
 class TagSerializer(serializers.ModelSerializer):
     """
     Validate the tag model
