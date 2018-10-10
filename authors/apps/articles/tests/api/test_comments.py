@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.reverse import reverse
 from authors.apps.articles.tests.api.test_articles import BaseArticlesTestCase
+import json
 
 
 class TestArticleComment(BaseArticlesTestCase):
@@ -10,6 +11,7 @@ class TestArticleComment(BaseArticlesTestCase):
         super().setUp()
         self.register()
         self.comment = {"comment": {"body": "comment on this "}}
+        self.thread = {"comment": {"body": "comment on this thread "}}
         self.user = {
             "user": {
                 "username": "tester001",
@@ -50,3 +52,22 @@ class TestArticleComment(BaseArticlesTestCase):
             data=comment,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_thread_comment_related_article(self):
+        """Test thread comment related to article"""
+        self.register_and_login(self.user)
+        slug = self.create_article()["slug"]
+        comment = self.comment
+        response = self.client.post(
+            reverse("articles:comments", kwargs={'slug': slug}),
+            data=comment,
+            format="json")
+        pk = json.loads(response.content)["id"]
+        response = self.client.post(
+            reverse("articles:a-comment", kwargs={
+                'slug': slug,
+                'pk': pk
+            }),
+            data=self.thread,
+            format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
