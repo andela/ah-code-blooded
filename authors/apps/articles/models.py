@@ -56,7 +56,7 @@ class Tag(BaseModel):
 
     A tag has a unique slug
     """
-    tag = models.CharField(max_length=128)
+    tag = models.CharField(max_length=28)
     slug = models.SlugField(db_index=True, unique=True)
 
     class Meta:
