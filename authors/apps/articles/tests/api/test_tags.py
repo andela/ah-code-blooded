@@ -18,7 +18,7 @@ class BaseTagsTestCase(BaseArticlesTestCase):
             ]
         }
         # create an article
-        self.article = self.create_article()
+        self.article_slug = self.create_article(published=True)['slug']
 
     def generate_url(self, slug):
         """
@@ -26,7 +26,7 @@ class BaseTagsTestCase(BaseArticlesTestCase):
         :param slug:
         :return:
         """
-        return reverse("articles:article-tags", kwargs={'slug': slug or self.article['slug']})
+        return reverse("articles:article-tags", kwargs={'slug': slug or self.article_slug})
 
     def tag_article(self, slug=None, tags=None):
         """
@@ -35,7 +35,7 @@ class BaseTagsTestCase(BaseArticlesTestCase):
         :param tags:
         :return:
         """
-        return self.client.post(self.generate_url(slug or self.article['slug']), tags or self.tags, format="json")
+        return self.client.post(self.generate_url(slug or self.article_slug), tags or self.tags, format="json")
 
     def un_tag_article(self, slug=None, tags=None):
         """
@@ -44,7 +44,7 @@ class BaseTagsTestCase(BaseArticlesTestCase):
         :param tags:
         :return:
         """
-        return self.client.delete(self.generate_url(slug or self.article['slug']), tags or self.tags, format="json")
+        return self.client.delete(self.generate_url(slug or self.article_slug), tags or self.tags, format="json")
 
     def list_tags(self, slug=None):
         """
@@ -52,7 +52,7 @@ class BaseTagsTestCase(BaseArticlesTestCase):
         :param slug:
         :return:
         """
-        return self.client.get(self.generate_url(slug or self.article['slug']))
+        return self.client.get(self.generate_url(slug or self.article_slug))
 
 
 class TagCreationTestCase(BaseTagsTestCase):
@@ -69,7 +69,7 @@ class TagCreationTestCase(BaseTagsTestCase):
         tags = json.loads(response.content)['data']['tags']
         for tag in self.tags['tags']:
             self.assertIn(tag, tags)
-        self.assertEqual(slug, self.article['slug'])
+        self.assertEqual(slug, self.article_slug)
 
     def test_unauthenticated_user_cannot_tag_article(self):
         """
@@ -151,3 +151,90 @@ class TagRemovalTestCase(BaseTagsTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+
+class TagRetrievalTestCase(BaseTagsTestCase):
+    TOTAL_NUM_TAGS = 6
+
+    def setUp(self):
+        super().setUp()
+        # tag an article
+        self.tag_article()
+
+    def test_owner_can_view_tags_on_their_published_articles(self):
+        """
+        Ensure the owner can view tags on their published articles
+        :return:
+        """
+        response = self.list_tags()
+        tags = json.loads(response.content)['data']['tags']
+
+        self.assertEqual(len(tags), self.TOTAL_NUM_TAGS)
+
+    def test_owner_can_view_tags_on_their_unpublished_articles(self):
+        """
+        Ensure the owner can also view tags on their unpublished articles
+        :return:
+        """
+        slug = self.create_article(published=False)['slug']
+        self.tag_article(slug=slug)
+        response = self.list_tags(slug=slug)
+
+        tags = json.loads(response.content)['data']['tags']
+        self.assertEqual(len(tags), self.TOTAL_NUM_TAGS)
+
+    def test_unauthenticated_user_can_view_tags_on_published_articles(self):
+        """
+        Ensure an unauthenticated user can view tags on published articles
+        :return: 
+        """
+        self.logout()
+        response = self.list_tags()
+        tags = json.loads(response.content)['data']['tags']
+        self.assertEqual(len(tags), self.TOTAL_NUM_TAGS)
+
+    def test_unauthenticated_user_cannot_view_tags_on_unpublished_articles(self):
+        """
+        Ensure an unauthenticated user cannot view tags on unpublished articles
+        :return:
+        """
+        slug = self.create_article(published=False)['slug']
+        self.tag_article(slug=slug)
+
+        # logout user
+        self.logout()
+        response = self.list_tags(slug=slug)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_another_user_can_view_tags_on_published_articles(self):
+        """
+        Ensure another authenticated user can view tags on published articles
+        :return:
+        """
+        self.register_and_login(self.user2)
+        response = self.list_tags()
+
+        tags = json.loads(response.content)['data']['tags']
+        self.assertEqual(len(tags), self.TOTAL_NUM_TAGS)
+
+    def test_another_user_cannot_view_tags_on_unpublished_articles(self):
+        """
+        Ensure another authenticated user cannot view tags on unpublished articles
+        :return:
+        """
+
+        slug = self.create_article(published=False)['slug']
+        self.tag_article(slug=slug)
+
+        # logout user
+        self.register_and_login(self.user2)
+        response = self.list_tags(slug=slug)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_can_get_all_tags(self):
+        """
+        Ensure all tags can be retrieved
+        :return:
+        """
+        response = self.client.get(reverse("tags"))
+        tags = json.loads(response.content)['data']['tags']
+        self.assertEqual(len(tags), self.TOTAL_NUM_TAGS)
