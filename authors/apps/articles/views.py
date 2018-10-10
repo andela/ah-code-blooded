@@ -202,3 +202,13 @@ class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
         else:
             output = TagsSerializer(article)
             return Response(output.data)
+
+
+class TagsAPIView(generics.ListAPIView):
+    """
+    API View class to display all the tags
+    """
+    queryset = Tag.objects.all()
+    renderer_classes = (BaseJSONRenderer,)
+    renderer_names = ('tag', 'tags')
+    serializer_class = TagSerializer
