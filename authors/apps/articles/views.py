@@ -1,14 +1,15 @@
 # Create your views here.
 from django.contrib.auth.models import AnonymousUser
-from rest_framework import status, viewsets
+from django.utils.text import slugify
+from rest_framework import status, viewsets, generics
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from authors.apps.articles.models import Article
+from authors.apps.articles.models import Article, Tag
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
-from authors.apps.articles.renderers import ArticleJSONRenderer
-from authors.apps.articles.serializers import ArticleSerializer
+from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, TagsSerializer
+from authors.apps.core.renderers import BaseJSONRenderer
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -20,8 +21,9 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
     """
     lookup_field = 'slug'
     permission_classes = (IsAuthenticatedOrReadOnly, IsArticleOwnerOrReadOnly,)
-    renderer_classes = (ArticleJSONRenderer,)
+    renderer_classes = (BaseJSONRenderer,)
     queryset = Article.objects.all()
+    renderer_names = ('article', 'articles')
     serializer_class = ArticleSerializer
 
     def create(self, request, *args, **kwargs):
@@ -129,3 +131,74 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         super().destroy(self, request, *args, **kwargs)
 
         return Response({'message': 'The article has been deleted.'})
+
+
+class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
+    lookup_field = 'slug'
+    serializer_class = TagSerializer
+    renderer_classes = (BaseJSONRenderer,)
+    queryset = Tag.objects.all()
+    permission_classes = [IsArticleOwnerOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a tag, and use it for a particular article,
+        This method ensures there is no duplication of articles
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        slug = kwargs['slug']
+
+        article = Article.objects.filter(slug=slug, author=request.user).first()
+        if article is None:
+            return Response({'errors': 'Article does not exist'}, status.HTTP_404_NOT_FOUND)
+
+        else:
+            tags = request.data.get('tags', [])
+            serializer = self.serializer_class(many=True, data=[{'tag': x} for x in tags])
+            serializer.is_valid(raise_exception=True)
+
+            for tag in tags:
+                t, created = Tag.objects.get_or_create(slug=slugify(tag))
+                article.tags.add(t)
+
+            output = TagsSerializer(article)
+            return Response(output.data)
+
+    def destroy(self, request, *args, **kwargs):
+        slug = kwargs['slug']
+
+        article = Article.objects.filter(slug=slug, author=request.user).first()
+        if article is None:
+            return Response({'errors': 'Article does not exist'}, status.HTTP_404_NOT_FOUND)
+        else:
+            tags = request.data.get('tags', [])
+
+            # delete the tags from the article
+            for tag in tags:
+                t = Tag.objects.get(slug=slugify(tag))
+                if t:
+                    article.tags.remove(t)
+
+            output = TagsSerializer(article)
+            return Response(output.data)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Get all the tags for a particular article
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
+        slug = kwargs['slug']
+
+        article = Article.objects.filter(slug=slug, author=request.user).first()
+        if article is None:
+            return Response({'errors': 'Article does not exist'}, status.HTTP_404_NOT_FOUND)
+        else:
+            output = TagsSerializer(article)
+            return Response(output.data)
