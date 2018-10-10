@@ -9,5 +9,5 @@ router.register('articles', ArticleAPIView, base_name="articles")
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('articles/<slug>/tags/', ArticleTagsAPIView.as_view(), name="tags")
+    path('articles/<slug>/tags/', ArticleTagsAPIView.as_view(), name="article-tags")
 ]
