@@ -1,4 +1,6 @@
 import json
+import random
+import string
 
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -102,6 +104,29 @@ class TagCreationTestCase(BaseTagsTestCase):
         for tag in self.tags['tags']:
             # ensure each tag appears only once
             self.assertEqual(tags.count(tag), 1)
+
+    def test_tag_name_cannot_be_empty(self):
+        """
+        Ensure the name of the tag cannot be empty
+        :return:
+        """
+        self.tags['tags'].append("")
+        response = self.tag_article()
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(b'Please specify a tag', response.content)
+
+    def test_tag_name_cannot_be_more_than_28_characters(self):
+        """
+        Ensure the name of a tag cannot be more than 28 characters
+        :return:
+        """
+        self.tags["tags"].append(
+            ''.join(random.choice(string.ascii_uppercase + string.whitespace + string.ascii_lowercase)
+                    for _ in range(30))
+        )
+        response = self.tag_article()
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(b'Tag cannot be more than 28 characters', response.content)
 
 
 class TagRemovalTestCase(BaseTagsTestCase):
