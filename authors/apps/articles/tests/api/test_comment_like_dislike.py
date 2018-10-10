@@ -45,3 +45,15 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
         response = self.like(self.slug, self.pk)
         response = self.like(self.slug, self.pk)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_like_nonexisting_artilce_comment(self):
+        """Test incorret slug in liking"""
+        self.register_and_login(self.user)
+        response = self.like("fakeslug", self.pk)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_like_nonexisting_pk_comment(self):
+        """Test incorrect pk in liking"""
+        self.register_and_login(self.user)
+        response = self.like(self.slug, "fake")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
