@@ -120,10 +120,7 @@ class TagCreationTestCase(BaseTagsTestCase):
         Ensure the name of a tag cannot be more than 28 characters
         :return:
         """
-        self.tags["tags"].append(
-            ''.join(random.choice(string.ascii_uppercase + string.whitespace + string.ascii_lowercase)
-                    for _ in range(30))
-        )
+        self.tags["tags"].append(string.ascii_lowercase + string.ascii_lowercase)
         response = self.tag_article()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(b'Tag cannot be more than 28 characters', response.content)
