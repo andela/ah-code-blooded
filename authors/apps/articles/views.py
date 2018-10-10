@@ -138,7 +138,7 @@ class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
     serializer_class = TagSerializer
     renderer_classes = (BaseJSONRenderer,)
     queryset = Tag.objects.all()
-    permission_classes = [IsArticleOwnerOrReadOnly]
+    permission_classes = [IsArticleOwnerOrReadOnly, IsAuthenticatedOrReadOnly]
 
     def create(self, request, *args, **kwargs):
         """
@@ -161,10 +161,11 @@ class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
             serializer.is_valid(raise_exception=True)
 
             for tag in tags:
-                t, created = Tag.objects.get_or_create(slug=slugify(tag))
+                t, created = Tag.objects.get_or_create(slug=slugify(tag), tag=tag)
                 article.tags.add(t)
 
             output = TagsSerializer(article)
+
             return Response(output.data)
 
     def destroy(self, request, *args, **kwargs):
