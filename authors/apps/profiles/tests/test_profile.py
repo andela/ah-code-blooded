@@ -21,20 +21,20 @@ class TestProfile(APITestCase):
             'user': {
                 'username': 'chariss',
                 'email': 'chariss@gmail.com',
-                'password': 'chariss12345'
+                'password': 'charissU1'
             }
         }
         self.user2 = {
             'user': {
                 'username': 'chomba',
                 'email': 'chomba@gmail.com',
-                'password': 'chomba12345'
+                'password': 'chombaU1'
             }}
 
         self.login = {
             'user': {
                 'email': 'chomba@gmail.com',
-                'password': 'chomba12345'
+                'password': 'chombaU1'
             }}
         # self.client.post(self.register_url, self.user, format="json")
         self.client.post(self.register_url, self.user2, format="json")

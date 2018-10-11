@@ -36,7 +36,7 @@ class BaseArticlesTestCase(AuthenticatedTestCase):
             "user": {
                 "username": "gitaumoses4",
                 "email": "gitaumoses40@gmail.com",
-                "password": "password"
+                "password": "passwordU1"
             }
         }
 

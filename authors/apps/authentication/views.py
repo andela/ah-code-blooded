@@ -36,6 +36,10 @@ class RegistrationAPIView(CreateAPIView):
         # below is common and you will see it a lot throughout this course and
         # your own work later on. Get familiar with it.
         serializer = self.serializer_class(data=user)
+        serializer.validate_username(user["username"])
+        serializer.validate_email(user["email"])
+        serializer.validate_password(user["password"])
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -121,7 +125,6 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         serializer_data = request.data.get('user', {})
-
         # Here is that serialize, validate, save pattern we talked about
         # before.
         serializer = self.serializer_class(
@@ -164,7 +167,7 @@ class ForgotPasswordView(CreateAPIView):
     serializer_class = ForgotPasswordSerializer
 
     def post(self, request):
-        email = request.data.get('email',"")
+        email = request.data.get('email', "")
         user = User.objects.filter(email=email).first()
 
         if user is None:

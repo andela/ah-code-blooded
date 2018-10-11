@@ -1,28 +1,125 @@
+import re
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
+
 from .models import User
 from authors.apps.profiles.models import Profile
+
+email_expression = re.compile(
+    r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
+trial_email = re.compile(
+    r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[0-9-.]+$)")
+trial_email_2 = re.compile(
+    r"(^[a-zA-Z0-9_.+-]+@[0-9-]+\.[a-zA-Z0-9-.]+$)")
+at_least_number = re.compile(
+    r"^(?=.*[0-9]).*")
+at_least_uppercase = re.compile(
+    r"^(?=.*[A-Z])(?=.*[a-z])(?!.*\s).*")
+at_least_special_char = re.compile(
+    r"^[a-zA-Z0-9_]*$")
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
+    # Username must be longer than 4 characters but shorter than 128 characters.
+    # Username is a required field
+    username = serializers.CharField(
+        required=True,
+    )
+    # Ensure email is present and has the valid format example@mail.com
+    email = serializers.EmailField(
+        required=True,
+        error_messages={
+            "required": "Email is required!"
+        }
+    )
     # Ensure passwords are at least 8 characters long, no longer than 128
     # characters, and can not be read by the client.
-    password = serializers.CharField(
+    password = serializers.RegexField(
+        regex=r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$",
         max_length=128,
         min_length=8,
-        write_only=True
+        write_only=True,
+        required=True,
     )
-
     # The client should not be able to send a token along with a registration
     # request. Making `token` read-only handles that for us.
+    token = serializers.CharField(
+        read_only=True
+    )
 
     class Meta:
         model = User
         # List all of the fields that could possibly be included in a request
         # or response, including fields specified explicitly above.
         fields = ['email', 'username', 'password', 'token']
+
+    def validate_username(self, data):
+        """
+        Validate the provided username
+        min_len=4
+        max_len=128
+        required=True
+        unique=True
+        """
+        candidate_name = data
+        try:
+            if int(candidate_name):
+                raise serializers.ValidationError({"username": ["Username cannot be numbers only!"]})
+        except ValueError:
+            pass
+        if candidate_name == "":
+            raise serializers.ValidationError({"username": ["Username is required!"]})
+        elif User.objects.filter(username=candidate_name):
+            raise serializers.ValidationError({"username": ["Username already exists!"]})
+        elif len(candidate_name) < 4:
+            raise serializers.ValidationError({"username": ["Username should be more than 4 charcaters!"]})
+        elif len(candidate_name) > 128:
+            raise serializers.ValidationError({"username": ["Username should not be longer than 128 charcaters!"]})
+        return data
+
+    def validate_email(self, data):
+        """
+        Validate the provided email
+        required=True
+        unique=True
+        format: example@mail.com
+        """
+        candidate_email = data
+        if candidate_email == "":
+            raise serializers.ValidationError({"email": ["Email is required!"]})
+        elif re.match(trial_email, candidate_email):
+            raise serializers.ValidationError({"email": ["Invalid email! Hint: example@mail.com"]})
+        elif re.match(trial_email_2, candidate_email):
+            raise serializers.ValidationError({"email": ["Invalid email! Hint: example@mail.com"]})
+        elif User.objects.filter(email=candidate_email):
+            raise serializers.ValidationError({"email": ["User with provided email exists! Please login!"]})
+        elif not re.match(email_expression, candidate_email):
+            raise serializers.ValidationError({"email": ["Invalid email! Hint: example@mail.com!"]})
+        return data
+
+    def validate_password(self, data):
+        """
+        Validate the provided password
+        required=True
+        min_len=8
+        is_alphanumeric=True
+
+        """
+        candidate_password = data
+        if candidate_password == "":
+            raise serializers.ValidationError({"password": ["Password is required!"]})
+        elif len(candidate_password) < 8:
+            raise serializers.ValidationError({"password": ["Password should be at least eight (8) characters long!"]})
+        elif not re.match(at_least_number, candidate_password):
+            raise serializers.ValidationError({"password": ["Password must have at least one number!"]})
+        elif not re.match(at_least_uppercase, candidate_password):
+            raise serializers.ValidationError({"password": ["Password must have at least one uppercase letter!"]})
+        elif not re.match(at_least_special_char, candidate_password):
+            raise serializers.ValidationError({"password": ["Password must include a special character!"]})
+        return data
 
     def create(self, validated_data):
         # Use the `create_user` method we wrote earlier to create a new user.
