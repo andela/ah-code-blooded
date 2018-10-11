@@ -2,6 +2,7 @@ from django.utils.text import slugify
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
+from authors.apps.articles.models import Tag, Article, Comment
 from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
@@ -248,8 +249,8 @@ class RatingSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """ serialize and deserialize comment model"""
-    body = serializers.CharField(max_length=200)
-    article = ArticleImageSerializer(read_only=True)
+    body = serializers.CharField(max_length=1200)  # remove
+    article = ArticleSerializer(read_only=True)
     author = ProfileSerializer(read_only=True)
     likes = serializers.SerializerMethodField(method_name='count_likes')
     dislikes = serializers.SerializerMethodField(method_name='count_dislikes')

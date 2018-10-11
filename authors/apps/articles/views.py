@@ -535,7 +535,7 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             data=request.data.get('comment', {}))
         serializer.is_valid(raise_exception=True)
         serializer.save(
-            article=article, parent=parent, author=request.user.profile)
+            article=article, parent=comment, author=request.user.profile)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
@@ -577,7 +577,7 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             return Response(message, status.HTTP_404_NOT_FOUND)
 
         updated_comment = serializer_class.update(
-            data=request.data.get('comment', {}), instance=parent)
+            data=request.data.get('comment', {}), instance=comment)
         return Response(
             self.serializer_class(updated_comment).data,
             status=status.HTTP_201_CREATED)
@@ -626,16 +626,16 @@ class LikeComments(UpdateAPIView):
 
         try:
             Article.objects.get(slug=slug)
-        except Exception:
+        except Article.DoesNotExist:
             return Response({'Error,Please check your url?'},
                             status.HTTP_404_NOT_FOUND)
         try:
             pk = self.kwargs.get('pk')
             comment = Comment.objects.get(pk=pk)
-        except Exception:
-            return Response(
-                {"Failed", "comment with this ID " + pk + " doesn't exist"},
-                status.HTTP_404_NOT_FOUND)
+        except Comment.DoesNotExist:
+            message = {"Error": "comment with this ID doesn't exist"}
+            return Response(message, status.HTTP_404_NOT_FOUND)
+
         # get the user
         user = request.user
         comment.dislikes.remove(user.id)
@@ -650,8 +650,8 @@ class LikeComments(UpdateAPIView):
 
         # This add the user to likes lists
         comment.likes.add(user.id)
-        return Response({'Sucess, You successfully liked this comment'},
-                        status.HTTP_200_OK)
+        message = {"Sucess": "You liked this comment"}
+        return Response(message, status.HTTP_200_OK)
 
 
 class DislikeComments(UpdateAPIView):
@@ -663,16 +663,15 @@ class DislikeComments(UpdateAPIView):
 
         try:
             Article.objects.get(slug=slug)
-        except Exception:
+        except Article.DoesNotExist:
             return Response({'Error,Please check your url?'},
                             status.HTTP_404_NOT_FOUND)
         try:
             pk = self.kwargs.get('pk')
             comment = Comment.objects.get(pk=pk)
-        except Exception:
-            return Response(
-                {"Failed", "comment with this ID " + pk + " doesn't exist"},
-                status.HTTP_404_NOT_FOUND)
+        except Comment.DoesNotExist:
+            message = {"Error": "comment with this ID doesn't exist"}
+            return Response(message, status.HTTP_404_NOT_FOUND)
         # get the user
         user = request.user
         comment.likes.remove(user.id)
@@ -682,10 +681,10 @@ class DislikeComments(UpdateAPIView):
         confirm = bool(user in comment.dislikes.all())
         if confirm is True:
             comment.dislikes.remove(user.id)
-            return Response({'Success, You no longer dislike this comment'},
-                            status.HTTP_200_OK)
+            message = {"Success": "You undislike this comment"}
+            return Response(message, status.HTTP_200_OK)
 
         # This add the user to dislikes lists
         comment.dislikes.add(user.id)
-        return Response({'Sucess, You successfully disliked this comment'},
-                        status.HTTP_200_OK)
+        message = {"success": "You disliked this comment"}
+        return Response(message, status.HTTP_200_OK)
