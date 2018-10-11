@@ -91,3 +91,9 @@ ENV/
 
 # SQLite3
 db.sqlite3
+
+#IDE
+.vscode/
+vscode
+
+.DS_Store
