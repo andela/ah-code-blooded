@@ -63,7 +63,12 @@ class ReactionMixin(models.Model):
         abstract = True
 
 
+<<<<<<< HEAD
 class Article(TimestampsMixin, ReactionMixin):
+=======
+
+class Article(BaseModel):
+>>>>>>> [Feature #160577626] Add report model
     """
     Model for an article, extends a base model since the created and updated times are required
     """
@@ -137,3 +142,47 @@ class ArticleRating(models.Model):
 
 
 pre_save.connect(Article.pre_save, Article, dispatch_uid="authors.apps.articles.models.Article")
+
+
+class Violation(BaseModel):
+    harassment = 'ha'
+    inappropriate_content = 'ic'
+    threats_of_violence_and_incitement = 'tvi'
+    hate_speech = 'hs'
+    spam = 'sp'
+    pending = 'ped'
+    resolved = 'res'
+    approved = 'ap'
+    rejected = 'av'
+
+    VIOLATION_TYPES_CHOICES = (
+        (harassment, 'Harassment'),
+        (inappropriate_content, 'Inappropriate Content'),
+        (threats_of_violence_and_incitement, 'Threats of violence and incitement'),
+        (spam, 'Spam'),
+        (hate_speech, 'Hate speech')
+    )
+    STATUS_TYPES_CHOICES = (
+        (pending, 'Pending'),
+        (approved, 'Approved'),
+        (resolved,'Resolved'),
+        (rejected, 'Rejected'),
+    )
+    status_type = models.CharField(
+        max_length=20,
+        choices=STATUS_TYPES_CHOICES,
+        default=pending,
+    )
+
+    violation_type = models.CharField(
+        max_length=100,
+        choices=VIOLATION_TYPES_CHOICES,
+        default=harassment,
+    )
+    reporter = models.ForeignKey('authentication.User', on_delete=models.CASCADE)
+    description = models.TextField()
+    article = models.ForeignKey(Article, on_delete=models.CASCADE,
+                                related_name='violations')
+
+    def __str__(self):
+        return self.description
