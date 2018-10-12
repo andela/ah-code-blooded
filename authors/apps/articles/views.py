@@ -2,16 +2,17 @@ from django.contrib.auth.models import AnonymousUser
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
 from rest_framework import mixins
-from rest_framework.generics import CreateAPIView, DestroyAPIView, get_object_or_404, RetrieveAPIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView
 
 from authors.apps.articles.models import Article, Tag, ArticleRating
-from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
+from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly, IsNotArticleOwner
 from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, TagsSerializer, RatingSerializer
 from authors.apps.core.renderers import BaseJSONRenderer
-from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
+from authors.apps.articles.renderers import ArticleJSONRenderer
+from authors.apps.articles.serializers import ArticleSerializer, ReporterSerializer
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -151,6 +152,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         return Response({'message': 'The article has been deleted.'})
 
 
+<<<<<<< HEAD
 class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
     lookup_field = 'slug'
     serializer_class = TagSerializer
@@ -387,3 +389,22 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(rated_by=request.user, article=article)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ReportApiView(APIView):
+    serializer_class = ReporterSerializer
+    renderer_classes = (ArticleJSONRenderer,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsNotArticleOwner)
+
+    def post(self, request):
+        data = request.data
+
+        article = Article.objects.get(slug=data['article'])
+        self.check_object_permissions(self.request, article)
+
+        serializer = self.serializer_class(data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(reporter=request.user)
+
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

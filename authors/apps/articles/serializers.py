@@ -1,10 +1,7 @@
 from django.utils.text import slugify
 from rest_framework import serializers
 
-<<<<<<< HEAD
-=======
 from authors.apps.articles.models import Article, Tag, Violation
->>>>>>> [Feature #160577626] Add report serializer
 from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
@@ -199,30 +196,6 @@ class RatingSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(required=True)
 
     class Meta:
-<<<<<<< HEAD
-        fields = ['rating', 'rated_by']
-        read_only_fields = ['rated_by']
-        model = ArticleRating
-
-    def create(self, validated_data):
-        rating = ArticleRating.objects.create(**validated_data)
-
-        return rating
-
-    def validate(self, data):
-        """
-        Ensures that ratings are not less than or greater than 5
-        Ensures that users cannot rate an article more than once
-        """
-        _rating = data.get('rating')
-
-        if _rating:
-            if _rating < 0 or _rating > 5:
-                raise serializers.ValidationError(
-                    "Rating should be a number between 1 and 5!"
-                )
-        return {'rating': _rating}
-=======
         model = Tag
         fields = ['tag']
 
@@ -267,4 +240,3 @@ class ReporterSerializer(serializers.ModelSerializer):
             'display': self.violation_types()[data['violation_type']]
         }
         return data
->>>>>>> [Feature #160577626] Add report serializer

@@ -63,12 +63,7 @@ class ReactionMixin(models.Model):
         abstract = True
 
 
-<<<<<<< HEAD
 class Article(TimestampsMixin, ReactionMixin):
-=======
-
-class Article(BaseModel):
->>>>>>> [Feature #160577626] Add report model
     """
     Model for an article, extends a base model since the created and updated times are required
     """
