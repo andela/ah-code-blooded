@@ -40,19 +40,26 @@
             </div>
         </div>
     </div>
+    
     <div class="row">
         <form action="" class="create-article">
             <input type="text" placeholder="Title" class="title">
             <br>
             <textarea type="text" placeholder="Description" class="description"></textarea>
             <br>
-            <textarea type="text" placeholder="Narrate your story" class="body" onkeyup="auto_grow(this)"></textarea>
+            <textarea id="textarea2" type="text" placeholder="Narrate your story" class="body materialize-textarea" data-length="120" onkeyup="auto_grow(this)"></textarea>
         </form>
     </div>
+    
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="js/materialize.min.js"></script>
 <script type="text/javascript" src="js/main.js"></script>
+<script>
+$(document).ready(function() {
+    $('textarea#textarea2').characterCounter();
+  });
+</script>
 </body>
 </html>
