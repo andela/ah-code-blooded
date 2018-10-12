@@ -8,8 +8,6 @@
 </head>
 <body>
 
-
-
 <nav class="white black-text">
     <div class="container">
         <div class="nav-wrapper">
@@ -19,19 +17,44 @@
                 <li><a href="#"><i class="material-icons black-text">view_module</i></a></li>
                 <li><a href="#"><i class="material-icons black-text">notifications</i></a></li>
                 <li>
-                    <a href="profile.html" style="padding: 10px">
-                        <img src="images/profile.jpg" class="profile responsive-img circle"/>
+                    <a href="#" class="dropdown-trigger" data-target="profile-dropdown">
+                        <i class="material-icons">
+                            <img src="images/profile.jpg" alt="" class="profile circle">
+                        </i>
                     </a>
-                </li>
-                <li>
-                    <a href="index.html" style="color:black">Logout</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
-
-
+<div id="profile-dropdown" class="dropdown-content">
+    <ul style="min-width: 200px">
+        <li>
+            <ul>
+                <li><a href="create-article.html">New Article</a></li>
+                <li><a href="profile.html">My Articles</a></li>
+            </ul>
+        </li>
+        <div class="horizontal divider"></div>
+        <li>
+            <ul>
+                <li><a href="">Favourites</a></li>
+                <li><a href="">Bookmarks</a></li>
+            </ul>
+        </li>
+        <div class="horizontal divider"></div>
+        <li>
+            <ul>
+                <li>
+                    <a href="profile.html">Profile</a>
+                </li>
+                <li>
+                    <a href="login.html">Logout</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
 
 
 <div class="fixed-action-btn">
@@ -362,5 +385,6 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="js/materialize.min.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

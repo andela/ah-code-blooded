@@ -11,8 +11,23 @@ $(document).ready(function () {
     });
     $('.modal').modal();
     $('.dropdown-trigger').dropdown({
-        alignment : 'center',
+        alignment: 'center',
         constrainWidth: false,
         coverTrigger: false
     });
+
+    let buttons = $(".following-button");
+    buttons.on('mouseover', function () {
+        $(this).removeClass("teal");
+        $(this).addClass("red");
+        $(this).html("UNFOLLOW");
+    });
+
+    buttons.on("mouseout", function () {
+        $(this).removeClass("red");
+        $(this).addClass("teal");
+        $(this).html("FOLLOWING");
+    })
 });
+
+
