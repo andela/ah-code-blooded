@@ -1,6 +1,10 @@
 from django.utils.text import slugify
 from rest_framework import serializers
 
+<<<<<<< HEAD
+=======
+from authors.apps.articles.models import Article, Tag, Violation
+>>>>>>> [Feature #160577626] Add report serializer
 from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
@@ -195,6 +199,7 @@ class RatingSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(required=True)
 
     class Meta:
+<<<<<<< HEAD
         fields = ['rating', 'rated_by']
         read_only_fields = ['rated_by']
         model = ArticleRating
@@ -217,3 +222,49 @@ class RatingSerializer(serializers.ModelSerializer):
                     "Rating should be a number between 1 and 5!"
                 )
         return {'rating': _rating}
+=======
+        model = Tag
+        fields = ['tag']
+
+
+class ReporterSerializer(serializers.ModelSerializer):
+    """
+    Validate the tag model
+    """
+    violation_type = serializers.ChoiceField(choices=Violation.VIOLATION_TYPES_CHOICES)
+    description = serializers.CharField()
+    article = serializers.CharField(write_only=True)
+    reportee = serializers.SerializerMethodField()
+    reporter = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Violation
+        fields = ['violation_type', 'article', 'description', 'reporter', 'reportee']
+
+    def get_reporter(self, obj):
+        return obj.reporter.email
+
+    def get_reportee(self, obj):
+        return obj.article.author.email
+
+    def create(self, validated_data):
+        slug = validated_data.pop('article')
+
+        article = Article.objects.get(slug=slug)
+
+        validated_data['article'] = article
+
+        return Violation.objects.create(**validated_data)
+
+    def violation_types(self):
+        return {x[0]: x[1] for x in Violation.VIOLATION_TYPES_CHOICES}
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['article'] = instance.article.slug
+        data['violation_type'] = {
+            'value': data['violation_type'],
+            'display': self.violation_types()[data['violation_type']]
+        }
+        return data
+>>>>>>> [Feature #160577626] Add report serializer
