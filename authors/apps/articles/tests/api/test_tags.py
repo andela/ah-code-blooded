@@ -37,7 +37,7 @@ class BaseTagsTestCase(BaseArticlesTestCase):
         :param tags:
         :return:
         """
-        return self.client.post(self.generate_url(slug or self.article_slug), tags or self.tags, format="json")
+        return self.client.post(self.generate_url(slug), tags or self.tags, format="json")
 
     def un_tag_article(self, slug=None, tags=None):
         """
@@ -46,7 +46,7 @@ class BaseTagsTestCase(BaseArticlesTestCase):
         :param tags:
         :return:
         """
-        return self.client.delete(self.generate_url(slug or self.article_slug), tags or self.tags, format="json")
+        return self.client.delete(self.generate_url(slug), tags or self.tags, format="json")
 
     def list_tags(self, slug=None):
         """
@@ -54,7 +54,7 @@ class BaseTagsTestCase(BaseArticlesTestCase):
         :param slug:
         :return:
         """
-        return self.client.get(self.generate_url(slug or self.article_slug))
+        return self.client.get(self.generate_url(slug))
 
 
 class TagCreationTestCase(BaseTagsTestCase):
