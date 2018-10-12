@@ -18,7 +18,7 @@ at_least_number = re.compile(
 at_least_uppercase = re.compile(
     r"^(?=.*[A-Z])(?=.*[a-z])(?!.*\s).*")
 at_least_special_char = re.compile(
-    r"^[a-zA-Z0-9_]*$")
+    r".*[!@#$%^&*()_\-+={};:\'\"|`~,<.>?/].*")
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -37,8 +37,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     )
     # Ensure passwords are at least 8 characters long, no longer than 128
     # characters, and can not be read by the client.
-    password = serializers.RegexField(
-        regex=r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$",
+    password = serializers.CharField(
         max_length=128,
         min_length=8,
         write_only=True,
@@ -110,15 +109,23 @@ class RegistrationSerializer(serializers.ModelSerializer):
         """
         candidate_password = data
         if candidate_password == "":
-            raise serializers.ValidationError({"password": ["Password is required!"]})
+            raise serializers.ValidationError({
+                "password": ["Password is required!"]})
         elif len(candidate_password) < 8:
-            raise serializers.ValidationError({"password": ["Password should be at least eight (8) characters long!"]})
+            raise serializers.ValidationError({
+                "password": ["Password should be at least eight (8) characters long!"]})
+        elif len(candidate_password) > 128:
+            raise serializers.ValidationError({
+                "password": ["Password should not be longer than (128) characters long!"]})
         elif not re.match(at_least_number, candidate_password):
-            raise serializers.ValidationError({"password": ["Password must have at least one number!"]})
+            raise serializers.ValidationError({
+                "password": ["Password must have at least one number!"]})
         elif not re.match(at_least_uppercase, candidate_password):
-            raise serializers.ValidationError({"password": ["Password must have at least one uppercase letter!"]})
+            raise serializers.ValidationError({
+                "password": ["Password must have at least one uppercase letter!"]})
         elif not re.match(at_least_special_char, candidate_password):
-            raise serializers.ValidationError({"password": ["Password must include a special character!"]})
+            raise serializers.ValidationError({
+                "password": ["Password must include a special character!"]})
         return data
 
     def create(self, validated_data):

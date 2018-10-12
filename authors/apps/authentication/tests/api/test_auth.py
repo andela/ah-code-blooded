@@ -16,7 +16,7 @@ class AuthenticationTestCase(APITestCase):
         self.user = {
             "user": {
                 "username": "beverly",
-                "password": "password1U",
+                "password": "password1U@#}",
                 "email": "beverly@gmail.com"
             }
         }
@@ -206,6 +206,15 @@ class RegistrationViewTestCase(AuthenticationTestCase):
         res = self.register()
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(b'Password must have at least one uppercase letter!', res.content)
+
+    def test_signup_with_password_without_special_character(self):
+        """
+        Test if a user can register with a password without an uppercase characater
+        """
+        self.user["user"]["password"] = "w1thoutSpecial"
+        res = self.register()
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(b'Password must include a special character!', res.content)
 
 
 class LoginViewTestCase(AuthenticationTestCase):

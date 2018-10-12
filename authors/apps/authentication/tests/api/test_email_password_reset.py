@@ -20,7 +20,7 @@ class TestSendEmail(APITestCase):
             'user': {
                 'username': 'kiki',
                 'email': 'kiki@gmail.com',
-                'password': 'Kiki12345'
+                'password': 'Pass3#$%/:='
             }
         }
         self.client.post(self.register_url, self.user, format="json")
@@ -44,8 +44,7 @@ class TestSendEmail(APITestCase):
         """
         response = self.client.post(
             self.forgot_password_url,
-            data={'email': self.user['user']['email']},
-            format="json")
+            data={'email': self.user['user']['email']}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_empty_email(self):
@@ -73,7 +72,7 @@ class TestResetPassword(APITestCase):
             'user': {
                 'username': 'kiki',
                 'email': 'kiki@gmail.com',
-                'password': 'Kiki12345'
+                'password': 'Kiki1234@?/5'
             }
         }
         self.register_url = reverse('authentication:user-register')

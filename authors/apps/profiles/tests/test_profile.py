@@ -21,20 +21,21 @@ class TestProfile(APITestCase):
             'user': {
                 'username': 'chariss',
                 'email': 'chariss@gmail.com',
-                'password': 'charissU1'
+                'password': 'charissU1@_}'
             }
         }
         self.user2 = {
             'user': {
                 'username': 'chomba',
                 'email': 'chomba@gmail.com',
-                'password': 'chombaU1'
+                'password': 'chombaU1;>?+&'
             }}
 
         self.login = {
             'user': {
-                'email': 'chomba@gmail.com',
-                'password': 'chombaU1'
+                'username': 'chomba1',
+                'email': 'chomba2@gmail.com',
+                'password': 'chombaU1^&*'
             }}
         # self.client.post(self.register_url, self.user, format="json")
         self.client.post(self.register_url, self.user2, format="json")
@@ -50,6 +51,7 @@ class TestProfile(APITestCase):
         self.assertEqual(Profile.objects.count(), current_users)
 
     def test_get_all_profiles(self):
+        self.client.post(self.register_url, self.login, format="json")
         response = self.client.post(self.login_url, self.login, format="json")
         token = response.data.get('token')
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
@@ -61,6 +63,7 @@ class TestProfile(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_single_profile(self):
+        self.client.post(self.register_url, self.login, format="json")
         response = self.client.post(self.login_url, self.login, format="json")
         token = response.data.get('token')
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
@@ -72,6 +75,7 @@ class TestProfile(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_can_update_profile_bio(self):
+        self.client.post(self.register_url, self.login, format="json")
         response = self.client.post(self.login_url, self.login, format="json")
         token = response.data.get('token')
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
