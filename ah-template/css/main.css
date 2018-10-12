@@ -9,6 +9,19 @@
 }
 
 .profile {
+    width: 40px;
+    margin-top: 10px;
+    height: 40px !important;
+}
+
+.follow img {
+    height: 200px !important;
+    object-position: center;
+    object-fit: cover;
+}
+
+.dropdown-content li:hover {
+    background: rgba(0, 0, 0, 0) !important;
 }
 
 a {
@@ -34,7 +47,7 @@ a {
     font-size: 3em !important;
     font-weight: bolder !important;
     margin: 20px 0 !important;
-    color: rgba(0,0,0,.5) !important;
+    color: rgba(0, 0, 0, .5) !important;
 }
 
 .create-article .description {
@@ -45,7 +58,7 @@ a {
     min-height: 500px;
 }
 
-.create-article .description:active, .create-article .body:active , .create-article .title:active, .create-article .chips{
+.create-article .description:active, .create-article .body:active, .create-article .title:active, .create-article .chips {
     border: none !important;
     outline: none !important;
 }
@@ -143,6 +156,6 @@ article {
     border-radius: 0.5em;
 }
 
-.tag:hover{
+.tag:hover {
     background: rgba(100, 100, 100, .2);
 }

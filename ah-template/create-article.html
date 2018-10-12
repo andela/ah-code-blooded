@@ -18,7 +18,9 @@
                 <li><a href="#"><i class="material-icons black-text">notifications</i></a></li>
                 <li>
                     <a href="#" class="dropdown-trigger" data-target="profile-dropdown">
-                        <i class="material-icons">account_circle</i>
+                        <i class="material-icons">
+                            <img src="images/profile.jpg" alt="" class="profile circle">
+                        </i>
                     </a>
                 </li>
             </ul>
@@ -32,17 +34,36 @@
         <div class="chips chips-placeholder"></div>
     </div>
     <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect teal white-text btn-flat">Publish</a>
+        <a href="article.html" class="modal-close waves-effect white btn-flat">Save Draft</a>
+        <a href="article.html" class="modal-close waves-effect teal white-text btn-flat">Publish</a>
     </div>
 </div>
 <div id="profile-dropdown" class="dropdown-content">
-    <ul class="collection">
-        <li class="collection-item">New Article</li>
-        <li class="collection-item">Articles</li>
-        <li class="collection-item">Favourites</li>
-        <li class="collection-item">Bookmarks</li>
-        <li class="collection-item" href="profile.html">Profile</li>
-        <li class="collection-item" href="login.html">Logout</li>
+    <ul style="min-width: 200px">
+        <li>
+            <ul>
+                <li><a href="create-article.html">New Article</a></li>
+                <li><a href="profile.html">My Articles</a></li>
+            </ul>
+        </li>
+        <div class="horizontal divider"></div>
+        <li>
+            <ul>
+                <li><a href="">Favourites</a></li>
+                <li><a href="">Bookmarks</a></li>
+            </ul>
+        </li>
+        <div class="horizontal divider"></div>
+        <li>
+            <ul>
+                <li>
+                    <a href="profile.html">Profile</a>
+                </li>
+                <li>
+                    <a href="login.html">Logout</a>
+                </li>
+            </ul>
+        </li>
     </ul>
 </div>
 <div class="container" style="margin-top: 40px">
@@ -60,26 +81,27 @@
             </div>
         </div>
     </div>
-    
+
     <div class="row">
         <form action="" class="create-article">
             <input type="text" placeholder="Title" class="title">
             <br>
             <textarea type="text" placeholder="Description" class="description"></textarea>
             <br>
-            <textarea id="textarea2" type="text" placeholder="Narrate your story" class="body materialize-textarea" data-length="120" onkeyup="auto_grow(this)"></textarea>
+            <textarea id="textarea2" type="text" placeholder="Narrate your story" class="body materialize-textarea"
+                      data-length="120" onkeyup="auto_grow(this)"></textarea>
         </form>
     </div>
-    
+
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="js/materialize.min.js"></script>
 <script type="text/javascript" src="js/main.js"></script>
 <script>
-$(document).ready(function() {
-    $('textarea#textarea2').characterCounter();
-  });
+    $(document).ready(function () {
+        $('textarea#textarea2').characterCounter();
+    });
 </script>
 </body>
 </html>
