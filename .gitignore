@@ -73,11 +73,12 @@ target/
 # pyenv
 .python-version
 
+# dotenv
+.env
+
 # celery beat schedule file
 celerybeat-schedule
 
-# dotenv
-.env
 
 # virtualenv
 venv/
@@ -92,8 +93,7 @@ ENV/
 # SQLite3
 db.sqlite3
 
-#IDE
 .vscode/
-vscode
 
+staticfiles
 .DS_Store
