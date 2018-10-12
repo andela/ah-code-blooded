@@ -12,19 +12,39 @@
         <div class="nav-wrapper">
             <a href="dashboard.html" class="brand-logo center black-text logo">Author's Haven</a>
             <ul class="right hide-on-med-and-down">
-                <li><a href="#" class="btn teal white-text">Publish</a></li>
+                <li><a href="#publish-modal" class="btn btn-flat waves-effect waves-teal modal-trigger">Publish</a></li>
                 <li><a href="#"><i class="material-icons black-text">search</i></a></li>
                 <li><a href="#"><i class="material-icons black-text">view_module</i></a></li>
                 <li><a href="#"><i class="material-icons black-text">notifications</i></a></li>
                 <li>
-                    <a href="profile.html" style="padding: 10px">
-                        <img src="images/profile.jpg" class="profile responsive-img circle"/>
+                    <a href="#" class="dropdown-trigger" data-target="profile-dropdown">
+                        <i class="material-icons">account_circle</i>
                     </a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+<div id="publish-modal" class="modal">
+    <div class="modal-content">
+        <h4>Publish Article</h4>
+        <p>Enter upto 5 tags in order to tell your audience what your article is about.</p>
+        <div class="chips chips-placeholder"></div>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect teal white-text btn-flat">Publish</a>
+    </div>
+</div>
+<div id="profile-dropdown" class="dropdown-content">
+    <ul class="collection">
+        <li class="collection-item">New Article</li>
+        <li class="collection-item">Articles</li>
+        <li class="collection-item">Favourites</li>
+        <li class="collection-item">Bookmarks</li>
+        <li class="collection-item" href="profile.html">Profile</li>
+        <li class="collection-item" href="login.html">Logout</li>
+    </ul>
+</div>
 <div class="container" style="margin-top: 40px">
     <div class="row">
         <div class="col s12 m6 l4 ">
@@ -47,6 +67,7 @@
             <textarea type="text" placeholder="Description" class="description"></textarea>
             <br>
             <textarea type="text" placeholder="Narrate your story" class="body" onkeyup="auto_grow(this)"></textarea>
+            <br>
         </form>
     </div>
 </div>

@@ -9,9 +9,6 @@
 }
 
 .profile {
-    width: 40px !important;
-    height: 40px !important;
-    margin: auto !important;
 }
 
 a {
@@ -34,7 +31,10 @@ a {
 }
 
 .create-article .title {
-    font-size: 2em !important;
+    font-size: 3em !important;
+    font-weight: bolder !important;
+    margin: 20px 0 !important;
+    color: rgba(0,0,0,.5) !important;
 }
 
 .create-article .description {
@@ -45,7 +45,7 @@ a {
     min-height: 500px;
 }
 
-.create-article .description:active, .create-article .body:active {
+.create-article .description:active, .create-article .body:active , .create-article .title:active, .create-article .chips{
     border: none !important;
     outline: none !important;
 }
