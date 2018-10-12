@@ -65,7 +65,7 @@ footer.page-footer {
 
 
 body {
-  background: #dee1e3;
+  background: rgba(100, 100, 100, .05);
 }
 
 .comments-container {
@@ -81,9 +81,9 @@ body {
 
 .comments-list:before {
   content: '';
-  width: 2px;
+  width: 1px;
   height: 100%;
-  background: #c7cacb;
+  background: rgba(100, 100, 100, .3);
   position: absolute;
   left: 32px;
   top: 0;
@@ -107,12 +107,12 @@ body {
 
 .reply-list li:before {
   content: '';
-  width: 160px;
-  height: 2px;
-  background: #c7cacb;
+  width: 80px;
+  height: 1px;
+  background: rgba(100, 100, 100, .3);
   position: absolute;
   top: 20px;
-  left: 0px;
+  left: 32px;
 }
 
 
@@ -130,11 +130,6 @@ body {
   width: 0;
 }
 
-.reply-list {
-  padding-left: 88px;
-  clear: both;
-  margin-top: 15px;
-}
 
 .comments-list .comment-avatar {
   width: 65px;
@@ -161,6 +156,7 @@ body {
 .reply-list .comment-avatar {
   width: 50px;
   height: 50px;
+  margin-left: 90px;
 }
 
 .comment-main-level:after {
@@ -247,7 +243,7 @@ body {
   color: #999;
   font-size: 13px;
   position: relative;
-  top: 1px;
+  top: 10px;
 }
 
 .comment-box .comment-content {
