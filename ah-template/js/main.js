@@ -28,6 +28,13 @@ $(document).ready(function () {
         $(this).addClass("teal");
         $(this).html("FOLLOWING");
     })
+
+    $(".favourite-button").click(function () {
+        $(this).toggleClass("red-text");
+        if ($(this).html() === "favorite_border") {
+            $(this).html("favorite")
+        } else {
+            $(this).html("favorite_border")
+        }
+    });
 });
-
-

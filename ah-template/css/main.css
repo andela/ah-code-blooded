@@ -8,6 +8,10 @@
     font-family: 'Great Vibes', cursive;
 }
 
+.favourite-button {
+    cursor: pointer;
+}
+
 .profile {
     width: 40px;
     margin-top: 10px;
@@ -29,7 +33,9 @@ a {
     color: black !important;
 }
 
-.card, .card-panel, nav {
+.card,
+.card-panel,
+nav {
     box-shadow: 0 1px 1px 0 #D4D4D5, 0 0 0 1px #D4D4D5 !important;
 }
 
@@ -38,7 +44,8 @@ a {
     overflow: hidden;
 }
 
-.create-article input, .create-article textarea {
+.create-article input,
+.create-article textarea {
     outline: none !important;
     border: none !important;
 }
@@ -58,7 +65,10 @@ a {
     min-height: 500px;
 }
 
-.create-article .description:active, .create-article .body:active, .create-article .title:active, .create-article .chips {
+.create-article .description:active,
+.create-article .body:active,
+.create-article .title:active,
+.create-article .chips {
     border: none !important;
     outline: none !important;
 }
@@ -114,7 +124,8 @@ a {
     color: rgba(0, 0, 0, .5);
 }
 
-.article_preview.vertical .author, .article_preview.medium .author {
+.article_preview.vertical .author,
+.article_preview.medium .author {
     margin-top: 20px;
 }
 

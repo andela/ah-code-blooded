@@ -1,311 +1,366 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <link rel="stylesheet" href="css/main.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
+
 <body>
-<nav class="white black-text">
-    <div class="container">
-        <div class="nav-wrapper">
-            <a href="dashboard.html" class="brand-logo center black-text logo">Author's Haven</a>
-            <ul class="right hide-on-med-and-down">
-                <li><a href="#"><i class="material-icons black-text">search</i></a></li>
-                <li><a href="#"><i class="material-icons black-text">view_module</i></a></li>
-                <li><a href="#"><i class="material-icons black-text">notifications</i></a></li>
-                <li>
-                    <a href="#" class="dropdown-trigger" data-target="profile-dropdown">
-                        <i class="material-icons">
-                            <img src="images/profile.jpg" alt="" class="profile circle">
-                        </i>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-<div id="profile-dropdown" class="dropdown-content">
-    <ul style="min-width: 200px">
-        <li>
-            <ul>
-                <li><a href="create-article.html">New Article</a></li>
-                <li><a href="profile.html">My Articles</a></li>
-            </ul>
-        </li>
-        <div class="horizontal divider"></div>
-        <li>
-            <ul>
-                <li><a href="">Favourites</a></li>
-                <li><a href="">Bookmarks</a></li>
-            </ul>
-        </li>
-        <div class="horizontal divider"></div>
-        <li>
-            <ul>
-                <li>
-                    <a href="profile.html">Profile</a>
-                </li>
-                <li>
-                    <a href="login.html">Logout</a>
-                </li>
-            </ul>
-        </li>
-    </ul>
-</div>
-<div id="edit-profile-modal" class="modal">
-    <div class="modal-content">
-        <h4>Edit Profile</h4>
-        <div class="row">
-            <div class="col s8">
-                <form action="">
-                    <input type="text" placeholder="Bio" class="description" style="height: 200px">
-                    <input type="file" id="upload-image" style="visibility: hidden;">
-                </form>
-            </div>
-            <div class="col s4">
-                <div class="col right"><span class="flow-text">
-                    <img src="images/profile.jpg"
-                         class="responsive-img circle" id="upload-image-trigger" style="cursor: pointer"/></span></div>
+    <nav class="white black-text">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="dashboard.html" class="brand-logo center black-text logo">Author's Haven</a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a href="#"><i class="material-icons black-text">search</i></a></li>
+                    <li><a href="#"><i class="material-icons black-text">view_module</i></a></li>
+                    <li><a href="#"><i class="material-icons black-text">notifications</i></a></li>
+                    <li>
+                        <a href="#" class="dropdown-trigger" data-target="profile-dropdown">
+                            <i class="material-icons">
+                                <img src="images/profile.jpg" alt="" class="profile circle">
+                            </i>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
+    </nav>
+    <div id="profile-dropdown" class="dropdown-content">
+        <ul style="min-width: 200px">
+            <li>
+                <ul>
+                    <li><a href="create-article.html">New Article</a></li>
+                    <li><a href="profile.html">My Articles</a></li>
+                </ul>
+            </li>
+            <div class="horizontal divider"></div>
+            <li>
+                <ul>
+                    <li><a href="">Favourites</a></li>
+                    <li><a href="">Bookmarks</a></li>
+                </ul>
+            </li>
+            <div class="horizontal divider"></div>
+            <li>
+                <ul>
+                    <li>
+                        <a href="profile.html">Profile</a>
+                    </li>
+                    <li>
+                        <a href="login.html">Logout</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </div>
-    <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect white btn-flat">Cancel</a>
-        <a href="profile.html" class="modal-close waves-effect teal white-text btn-flat">Save</a>
-    </div>
-</div>
-<div class="container">
-    <div class="card" style="margin-top:40px">
-        <div class="card-content">
+    <div id="edit-profile-modal" class="modal">
+        <div class="modal-content">
+            <h4>Edit Profile</h4>
             <div class="row">
-                <div class="col">
-                    <div><span class="flow-text"><h5 style="font-weight: bolder">chariss chomba</h5></span></div>
-                    <p>Statistician and a programmer. I love coding in python. Also data science is my interest.</p>
-                    <br>
-                    <br>
-                    <a class="btn small white modal-trigger" href="#edit-profile-modal">Edit profile</a>
+                <div class="col s8">
+                    <form action="">
+                        <input type="text" placeholder="Bio" class="description" style="height: 200px">
+                        <input type="file" id="upload-image" style="visibility: hidden;">
+                    </form>
                 </div>
-                <div class="col right"><span class="flow-text"><img src="images/profile.jpg"
-                                                                    class="responsive-img circle"/></span></div>
+                <div class="col s4">
+                    <div class="col right"><span class="flow-text">
+                            <img src="images/profile.jpg" class="responsive-img circle" id="upload-image-trigger" style="cursor: pointer" /></span></div>
+                </div>
             </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect white btn-flat">Cancel</a>
+            <a href="profile.html" class="modal-close waves-effect teal white-text btn-flat">Save</a>
         </div>
     </div>
-</div>
-<div class="container">
-    <div class="row">
-        <div class="col s12">
-            <ul class="tabs">
-                <li class="tab col s3"><a class="active" href="#mystories">My stories</a></li>
-                <li class="tab col s3"><a href="#followers">Followers</a></li>
-                <li class="tab col s3"><a href="#following">Following</a></li>
-            </ul>
-        </div>
-        <div id="mystories" class="col s12">
-            <div class="section">
-                <a href="article.html" class="row article_preview small">
-                    <div class="col s2">
-                        <img src="images/image_10.jpeg" alt="">
-                    </div>
-                    <div class="col s10">
-                        <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
-                        <div class="description">Meaningful change rarely happens overnight...</div>
-                        <div class="author">Moses Gitau</div>
-                        <div class="date">Sep 11</div>
-                    </div>
-                </a>
-            </div>
-            <div class="divider"></div>
-            <div class="section">
-                <a href="article.html" class="row article_preview small">
-                    <div class="col s2">
-                        <img src="images/image_12.jpeg" alt="">
-                    </div>
-                    <div class="col s10">
-                        <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
-                        <div class="description">Meaningful change rarely happens overnight...</div>
-                        <div class="author">Moses Gitau</div>
-                        <div class="date">Sep 11</div>
-                    </div>
-                </a>
-            </div>
-            <div class="divider"></div>
-            <div class="section">
-                <a href="article.html" class="row article_preview small">
-                    <div class="col s2">
-                        <img src="images/image_4.jpeg" alt="">
-                    </div>
-                    <div class="col s10">
-                        <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
-                        <div class="description">Meaningful change rarely happens overnight...</div>
-                        <div class="author">Moses Gitau</div>
-                        <div class="date">Sep 11</div>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div id="followers" class="col s12">
-            <div class="section">
+    <div class="container">
+        <div class="card" style="margin-top:40px">
+            <div class="card-content">
                 <div class="row">
-                    <div class="col s3">
-                        <a href="other_profile.html">
-                            <div class="card follow following">
-                                <div class="card-image">
-                                    <img src="images/image_2.jpeg" alt="">
-                                    <span class="card-title">Moses Gitau</span>
-                                </div>
-                                <div class="card-content">
-                                    <button class="btn white black-text">FOLLOW</button>
-                                    <br>
-                                    <br>
-                                    <p>Statistician and a programmer. I love coding in python. Also data science is my
-                                        interest.</p>
-                                </div>
-                            </div>
-                        </a>
+                    <div class="col">
+                        <div><span class="flow-text">
+                                <h5 style="font-weight: bolder">chariss chomba</h5>
+                            </span></div>
+                        <p>Statistician and a programmer. I love coding in python. Also data science is my interest.</p>
+                        <br>
+                        <br>
+                        <a class="btn small white modal-trigger" href="#edit-profile-modal">Edit profile</a>
                     </div>
-                    <div class="col s3">
-                        <a href="other_profile.html">
-                            <div class="card follow following">
-                                <div class="card-image">
-                                    <img src="images/image_7.jpeg" alt="">
-                                    <span class="card-title">Allan Imire</span>
-                                </div>
-                                <div class="card-content">
-                                    <button class="btn white black-text">FOLLOW</button>
-                                    <br>
-                                    <br>
-                                    <p>Statistician and a programmer. I love coding in python. Also data science is my
-                                        interest.</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col s3">
-                        <a href="other_profile.html">
-                            <div class="card follow following">
-                                <div class="card-image">
-                                    <img src="images/image_4.jpeg" alt="">
-                                    <span class="card-title">Chariss Karunjira</span>
-                                </div>
-                                <div class="card-content">
-                                    <button class="btn teal white-text following-button">FOLLOWING</button>
-                                    <br>
-                                    <br>
-                                    <p>Statistician and a programmer. I love coding in python. Also data science is my
-                                        interest.</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col s3">
-                        <a href="other_profile.html">
-                            <div class="card follow following">
-                                <div class="card-image">
-                                    <img src="images/image_3.jpeg" alt="">
-                                    <span class="card-title">Beverly Kololi</span>
-                                </div>
-                                <div class="card-content">
-                                    <button class="btn white black-text">FOLLOW</button>
-                                    <br>
-                                    <br>
-                                    <p>Statistician and a programmer. I love coding in python. Also data science is my
-                                        interest.</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="following" class="col s12">
-            <div class="section">
-                <div class="row">
-                    <div class="col s3">
-                        <a href="other_profile.html">
-                            <div class="card follow following">
-                                <div class="card-image">
-                                    <img src="images/image_2.jpeg" alt="">
-                                    <span class="card-title">Moses Gitau</span>
-                                </div>
-                                <div class="card-content">
-                                    <button class="btn teal white-text following-button">FOLLOWING</button>
-                                    <br>
-                                    <br>
-                                    <p>Statistician and a programmer. I love coding in python. Also data science is my
-                                        interest.</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col s3">
-                        <a href="other_profile.html">
-                            <div class="card follow following">
-                                <div class="card-image">
-                                    <img src="images/image_7.jpeg" alt="">
-                                    <span class="card-title">Allan Imire</span>
-                                </div>
-                                <div class="card-content">
-                                    <button class="btn teal white-text following-button">FOLLOWING</button>
-                                    <br>
-                                    <br>
-                                    <p>Statistician and a programmer. I love coding in python. Also data science is my
-                                        interest.</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col s3">
-                        <a href="other_profile.html">
-                            <div class="card follow following">
-                                <div class="card-image">
-                                    <img src="images/image_4.jpeg" alt="">
-                                    <span class="card-title">Chariss Karunjira</span>
-                                </div>
-                                <div class="card-content">
-                                    <button class="btn teal white-text following-button">FOLLOWING</button>
-                                    <br>
-                                    <br>
-                                    <p>Statistician and a programmer. I love coding in python. Also data science is my
-                                        interest.</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col s3">
-                        <a href="other_profile.html">
-                            <div class="card follow following">
-                                <div class="card-image">
-                                    <img src="images/image_3.jpeg" alt="">
-                                    <span class="card-title">Beverly Kololi</span>
-                                </div>
-                                <div class="card-content">
-                                    <button class="btn teal white-text following-button">FOLLOWING</button>
-                                    <br>
-                                    <br>
-                                    <p>Statistician and a programmer. I love coding in python. Also data science is my
-                                        interest.</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                    <div class="col right"><span class="flow-text"><img src="images/profile.jpg" class="responsive-img circle" /></span></div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="js/materialize.min.js"></script>
-<script type="text/javascript" src="js/main.js"></script>
-<script>
-    $(document).ready(function () {
-        $('.tabs').tabs();
-    });
-    $("#upload-image-trigger").click(function () {
-        $("#upload-image").click()
-    });
-</script>
+    <div class="container">
+        <div class="row">
+            <div class="col s12">
+                <ul class="tabs">
+                    <li class="tab col s3"><a class="active" href="#mystories">My stories</a></li>
+                    <li class="tab col s3"><a href="#favourited">Favourited Articles</a></li>
+                    <li class="tab col s3"><a href="#followers">Followers</a></li>
+                    <li class="tab col s3"><a href="#following">Following</a></li>
+                </ul>
+            </div>
+            <div id="mystories" class="col s12">
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_10.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_12.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_4.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div id="favourited" class="col s12">
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_10.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_12.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_4.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div id="followers" class="col s12">
+                <div class="section">
+                    <div class="row">
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_2.jpeg" alt="">
+                                        <span class="card-title">Moses Gitau</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn white black-text">FOLLOW</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_7.jpeg" alt="">
+                                        <span class="card-title">Allan Imire</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn white black-text">FOLLOW</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_4.jpeg" alt="">
+                                        <span class="card-title">Chariss Karunjira</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn teal white-text following-button">FOLLOWING</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_3.jpeg" alt="">
+                                        <span class="card-title">Beverly Kololi</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn white black-text">FOLLOW</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="following" class="col s12">
+                <div class="section">
+                    <div class="row">
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_2.jpeg" alt="">
+                                        <span class="card-title">Moses Gitau</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn teal white-text following-button">FOLLOWING</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_7.jpeg" alt="">
+                                        <span class="card-title">Allan Imire</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn teal white-text following-button">FOLLOWING</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_4.jpeg" alt="">
+                                        <span class="card-title">Chariss Karunjira</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn teal white-text following-button">FOLLOWING</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_3.jpeg" alt="">
+                                        <span class="card-title">Beverly Kololi</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn teal white-text following-button">FOLLOWING</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.tabs').tabs();
+        });
+        $("#upload-image-trigger").click(function () {
+            $("#upload-image").click()
+        });
+    </script>
 </body>
+
 </html>
