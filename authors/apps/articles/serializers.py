@@ -127,13 +127,29 @@ class ArticleSerializer(serializers.ModelSerializer):
         return instance
 
 
+class TagsSerializer(serializers.ModelSerializer):
+    article = serializers.SerializerMethodField()
+    tags = TagField(many=True)
+
+    class Meta:
+        model = Article
+        fields = ['article', 'tags']
+
+    def get_article(self, instance):
+        return instance.slug
+
+
 class TagSerializer(serializers.ModelSerializer):
-    """
-    Validate the tag model
-    """
-    tag = serializers.CharField(required=True,
-                                max_length=128)
+    tag = serializers.CharField(required=True, max_length=28,
+                                allow_blank=False,
+                                allow_null=False,
+                                error_messages={
+                                    "blank": "Please specify a tag",
+                                    "required": "Please specify a tag",
+                                    "max_length": "Tag cannot be more than 28 characters"
+                                })
+    slug = serializers.SlugField(read_only=True)
 
     class Meta:
         model = Tag
-        fields = ['tag']
+        fields = ['tag', 'slug']
