@@ -15,5 +15,5 @@ router.register('articles', ArticleAPIView, base_name="articles")
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('report/', ReportApiView.as_view())
+    path('articles/<str:slug>/violations/', ReportApiView.as_view())
 ]
