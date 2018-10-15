@@ -181,7 +181,8 @@ class ForgotPasswordView(CreateAPIView):
         subject, from_email, to_email = 'Password Reset Link', os.getenv("EMAIL_HOST_SENDER"), email
         protocol = urlsplit(request.build_absolute_uri(None)).scheme
 
-        reset_link = protocol + "://" + current_site_domain + reverse("authentication:reset-password", kwargs={"token": token})
+        reset_link = protocol + "://" + current_site_domain + reverse(
+                                "authentication:reset-password", kwargs={"token": token})
 
         # render with dynamic value
         html_content = render_to_string('email_reset_password.html', {'reset_password_link': reset_link})

@@ -5,11 +5,13 @@ from rest_framework import mixins
 from rest_framework.generics import CreateAPIView, DestroyAPIView, get_object_or_404, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView
 
-from authors.apps.articles.models import Article, Tag
+from authors.apps.articles.models import Article, Tag, ArticleRating
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
-from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, TagsSerializer
+from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, TagsSerializer, RatingSerializer
 from authors.apps.core.renderers import BaseJSONRenderer
+from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -330,3 +332,58 @@ class DislikeAPIView(LikeDislikeMixin):
         article.un_dislike(request.user)
 
         return Response(self.get_response('You no longer dislike this article.'), status=status.HTTP_200_OK)
+
+
+class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = ArticleRating.objects.all()
+    serializer_class = RatingSerializer
+    renderer_classes = (BaseJSONRenderer,)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Users can post article ratings
+        """
+        rating = request.data.get('rating', {})
+
+        try:
+            article = Article.objects.get(slug=kwargs['slug'])
+        except Article.DoesNotExist:
+            data = {"errors": "This article does not exist!"}
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
+        if article:
+            rated = ArticleRating.objects.filter(article=article, rated_by=request.user).first()
+            rating_author = article.author
+            rating_user = request.user
+            if rating_author == rating_user:
+                data = {"errors": "You cannot rate your own article."}
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+
+            if rated:
+                data = {"errors": "You have already rated this article."}
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+            else:
+                serializer = self.serializer_class(data=rating)
+                serializer.is_valid(raise_exception=True)
+                serializer.save(rated_by=request.user, article=article)
+
+                data = serializer.data
+                data['message'] = "You have successfully rated this article"
+                return Response(data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        """users an update the ratings of articles
+        """
+        serializer_data = request.data.get('rating', {})
+        try:
+            article = Article.objects.get(slug=kwargs['slug'])
+        except Article.DoesNotExist:
+            data = {"errors": "This article does not exist!"}
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
+
+        rating = ArticleRating.objects.filter(article=article, rated_by=request.user).first()
+
+        serializer = self.serializer_class(rating, data=serializer_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(rated_by=request.user, article=article)
+        return Response(serializer.data, status=status.HTTP_200_OK)
