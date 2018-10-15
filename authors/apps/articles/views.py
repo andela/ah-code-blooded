@@ -1,6 +1,11 @@
 from django.contrib.auth.models import AnonymousUser
+<<<<<<< HEAD
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
+=======
+from django.template.loader import render_to_string
+from rest_framework import status, viewsets
+>>>>>>> [Feature #160577626] Add data required to send mail
 from rest_framework import mixins
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -13,6 +18,7 @@ from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, 
 from authors.apps.core.renderers import BaseJSONRenderer
 from authors.apps.articles.renderers import ArticleJSONRenderer
 from authors.apps.articles.serializers import ArticleSerializer, ReporterSerializer
+from authors.apps.core.mail_sender import send_email
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -395,7 +401,7 @@ class ReportApiView(APIView):
     renderer_classes = (ArticleJSONRenderer,)
     permission_classes = (IsAuthenticatedOrReadOnly, IsNotArticleOwner)
 
-    def post(self, request):
+    def post(self, request, slug):
         data = request.data
 
         article = Article.objects.get(slug=data['article'])
@@ -405,6 +411,21 @@ class ReportApiView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(reporter=request.user)
 
+        data = {
+            'username': request.user.username,
+            'article_slug': article.slug,
+            'author': article.author.email,
+            'report_category': serializer.data['violation_type']['display']
+        }
+
+        send_email(
+            template='acknowledgement_email.html',
+            data=data,
+            to_email=request.user.email,
+            subject='Article Reporting',
+        )
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def get(self, request):
+        pass
