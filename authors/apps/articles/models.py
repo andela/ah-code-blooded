@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from authors.apps.authentication.models import User
-from authors.apps.core.models import TimestampsMixin
+from authors.apps.core.models import TimestampsMixin, SoftDeleteMixin
 from notifications.signals import notify
 from authors.apps.ah_notifications.notifications import Verbs
 from rest_framework.reverse import reverse
@@ -71,7 +71,7 @@ class ReactionMixin(models.Model):
         abstract = True
 
 
-class Article(TimestampsMixin, ReactionMixin):
+class Article(TimestampsMixin, ReactionMixin, SoftDeleteMixin):
     """
     Model for an article, extends a base model since the created and updated times are required
     """
@@ -225,3 +225,59 @@ class ArticleView(models.Model):
     """
     user = models.ForeignKey(User, related_name="article_views", on_delete=models.CASCADE)
     article = models.ForeignKey(Article, related_name="article_views", on_delete=models.CASCADE)
+
+
+class Violation(TimestampsMixin):
+    spam = 'spam'
+    harassment = 'harassment'
+    hate_speech = 'hate_speech'
+    inappropriate_content = 'inappropriate_content'
+    threats_violence_incitement = 'threats_violence_incitement'
+
+    pending = 'pending'
+    approved = 'approved'
+    rejected = 'rejected'
+
+    VIOLATION_TYPES = (
+        (spam, 'Spam'),
+        (harassment, 'Harassment'),
+        (hate_speech, 'Hate speech'),
+        (inappropriate_content, 'Inappropriate Content'),
+        (threats_violence_incitement, 'Threats of violence and incitement'),
+    )
+
+    STATUS_TYPES = (
+        (pending, 'Pending'),
+        (approved, 'Approved'),
+        (rejected, 'Rejected'),
+    )
+
+    DECISION_TYPES = {
+        'approve': 'Approve',
+        'reject': 'Reject',
+    }
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_TYPES,
+        default=pending,
+    )
+
+    type = models.CharField(
+        max_length=100,
+        choices=VIOLATION_TYPES,
+        null=False
+    )
+
+    description = models.TextField()
+
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='violations')
+
+    @staticmethod
+    def represent_violation_types():
+        return {x[0]: x[1] for x in Violation.VIOLATION_TYPES}
+
+    def __str__(self):
+        return self.description

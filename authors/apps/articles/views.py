@@ -3,29 +3,27 @@ from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
 from rest_framework import mixins
 from rest_framework.generics import DestroyAPIView, get_object_or_404, RetrieveAPIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
-from rest_framework.generics import (RetrieveUpdateDestroyAPIView,
-                                     CreateAPIView, ListAPIView,
-                                     ListCreateAPIView, UpdateAPIView)
+from rest_framework.generics import (
+    RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView, ListCreateAPIView, UpdateAPIView,
+)
 from rest_framework.views import APIView
-from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, ArticleView
-from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
-from authors.apps.articles.serializers import (ArticleSerializer,
-                                               TagSerializer, RatingSerializer,
-                                               FavouriteSerializer, update, StatsSerializer)
-from authors.apps.core.renderers import BaseJSONRenderer
-
-from .pagination import StandardResultsSetPagination
-from authors.apps.articles.serializers import (
-    CommentSerializer, UpdateCommentSerializer, TagsSerializer)
-
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
 
+from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, ArticleView, Violation
+from authors.apps.articles.serializers import (
+    ArticleSerializer, TagSerializer, RatingSerializer, FavouriteSerializer, update, CommentSerializer,
+    UpdateCommentSerializer, TagsSerializer, StatsSerializer, ViolationSerializer, ViolationListSerializer,
+)
+from authors.apps.core.renderers import BaseJSONRenderer
+from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly, IsNotArticleOwner
+from .pagination import StandardResultsSetPagination
 from notifications.signals import notify
 from authors.apps.ah_notifications.notifications import Verbs
+from authors.apps.core.mail_sender import send_email
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -346,7 +344,6 @@ class LikeDislikeMixin(BaseReactionsMixin, CreateAPIView, DestroyAPIView):
             'message': message,
             'reactions': self.get_reactions()
         }
-
 
 
 class ArticleFilter(filters.FilterSet):
@@ -718,7 +715,6 @@ class DislikeComments(UpdateAPIView):
         comment.dislikes.add(user.id)
         message = {"success": "You disliked this comment"}
         return Response(message, status.HTTP_200_OK)
-        return Response({'message': 'Article removed from favourites'}, status.HTTP_200_OK)
 
 
 class ArticleStatsView(ListAPIView):
@@ -730,3 +726,107 @@ class ArticleStatsView(ListAPIView):
 
     def get_queryset(self):
         return Article.objects.filter(author=self.request.user)
+
+
+class ViolationTypesAPIView(APIView):
+    renderer_classes = (BaseJSONRenderer,)
+    render_names = ('type', 'types',)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        violations = Violation.represent_violation_types()
+        return Response(violations)
+
+
+class ReportViolationsAPIView(APIView):
+    serializer_class = ViolationSerializer
+    renderer_classes = (BaseJSONRenderer,)
+    renderer_names = ('violation', 'violations')
+    permission_classes = (IsAuthenticatedOrReadOnly, IsNotArticleOwner,)
+
+    def post(self, request, slug):
+        try:
+            article = Article.objects.get(slug=slug, published=True)
+        except Article.DoesNotExist:
+            return Response({"errors": "The article does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        self.check_object_permissions(self.request, article)
+
+        data = request.data
+        data['article'] = article
+        data['reporter'] = request.user
+
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        email_data = {
+            'username': request.user.username,
+            'article_slug': article.slug,
+            'author': article.author.username,
+            'report_category': serializer.data['type']
+        }
+
+        send_email(
+            template='acknowledgement_email.html',
+            data=email_data,
+            to_email=request.user.email,
+            subject='Report received',
+        )
+
+        message = 'Your report has been received. You will receive a confirmation email shortly.'
+
+        return Response({'message': message}, status=status.HTTP_200_OK)
+
+
+class ListViolationsAPIView(generics.ListAPIView):
+    permission_classes = (IsAdminUser,)
+    serializer_class = ViolationListSerializer
+    renderer_classes = (BaseJSONRenderer,)
+    render_names = ('violation', 'violations')
+
+    def get_queryset(self):
+        violations = Violation.objects.filter(status=Violation.pending).order_by('article__id').distinct('article__id')
+        return violations
+
+
+class ProcessViolationsAPIView(APIView):
+    permission_classes = (IsAdminUser,)
+    renderer_classes = (BaseJSONRenderer,)
+
+    def get_error_response(self, message):
+        return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, slug):
+        decision = request.data.get('decision')
+
+        if decision not in Violation.DECISION_TYPES.keys():
+            return self.get_error_response("This violation decision '%s' is not valid." % decision)
+
+        if not Article.objects.filter(slug=slug).exists():
+            return Response({'error': 'The article does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+
+        violations = Violation.objects.filter(article__slug=slug)
+        # if the specified article has no violations we take no action
+        if violations.count() < 1:
+            return self.get_error_response('This article does not have any pending violation reports.')
+
+        if decision == 'approve':
+            # approve all violation reports
+            decision_status = Violation.approved
+            article = Article.objects.get(slug=slug)
+            email_data = {'username': request.user.username, 'article': article.title}
+            to_email = article.author.email
+            template = 'confirmation_email.html'
+            # send email to email owner
+            send_email(data=email_data, template=template, subject='Violation attention', to_email=to_email)
+            # soft-delete the article
+            article.delete()
+
+        elif decision == 'reject':
+            # reject all violation reports
+            decision_status = Violation.rejected
+        for violation in violations:
+            # update violation status accordingly
+            violation.status = decision_status
+            violation.save()
+        return Response({'message': 'You have %s this violation.' % decision_status}, status=status.HTTP_200_OK)

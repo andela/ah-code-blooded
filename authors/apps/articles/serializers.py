@@ -1,13 +1,13 @@
 from django.utils.text import slugify
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from rest_framework.validators import UniqueTogetherValidator
 
 from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
-from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, FavouriteArticle, ArticleView
+from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, FavouriteArticle, ArticleView, Violation
 from authors.apps.authentication.models import User
-# from authors.apps.authentication.views import ArticlesStatView
 
 
 class TagField(serializers.RelatedField):
@@ -37,8 +37,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         error_messages={
             'blank': 'The article must have a title',
             'required': "The article must have a title",
-            'max_length':
-            "The article title cannot be more than 255 characters"
+            'max_length': "The article title cannot be more than 255 characters"
         })
     description = serializers.CharField(
         required=True,
@@ -352,9 +351,9 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
 
 def update(request, key):
-        data = request.data
-        data[key] = request.user.email
-        return data
+    data = request.data
+    data[key] = request.user.email
+    return data
 
 
 class StatsSerializer(serializers.ModelSerializer):
@@ -370,3 +369,88 @@ class StatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ['slug', 'title', 'view_count', 'comment_count']
+
+
+class ReporterField(serializers.RelatedField):
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return value.username
+
+
+class ArticleField(serializers.RelatedField):
+
+    def get_queryset(self):
+        return Article.objects.all()
+
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return value.title
+
+
+class ViolationSerializer(serializers.ModelSerializer):
+    type = serializers.ChoiceField(choices=Violation.VIOLATION_TYPES)
+    description = serializers.CharField()
+    reporter = ReporterField()
+    article = ArticleField()
+
+    class Meta:
+        model = Violation
+        fields = ['type', 'reporter', 'article', 'description']
+        validators = [
+            UniqueTogetherValidator(
+                # include only violations whose article is not soft deleted
+                queryset=Violation.objects.all(),
+                fields=('article', 'reporter'),
+                message='You cannot report an article more than once.'
+            )
+        ]
+
+    def create(self, validated_data):
+        return Violation.objects.create(**validated_data)
+
+
+class ViolationListSerializer(serializers.Serializer):
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+    article = serializers.SerializerMethodField(read_only=True)
+    count = serializers.SerializerMethodField(read_only=True)
+    reports = serializers.SerializerMethodField(read_only=True)
+
+    def get_article(self, data):
+        return {
+            "title": data.article.title,
+            "slug": data.article.slug,
+        }
+
+    def get_reports(self, data):
+        violations = Violation.objects.filter(article=data.article.id)
+
+        reports = []
+        for value in violations:
+            reports.append({
+                "user": value.reporter.username,
+                "description": value.description,
+                "type": {
+                    "key": value.type,
+                    "value": Violation.represent_violation_types()[value.type]
+                }
+            })
+        return reports
+
+    def get_count(self, value):
+        return Violation.objects.filter(article=value.article.id).count()
+
+    class Meta:
+        fields = ('article', 'count', 'reports')
