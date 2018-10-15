@@ -2,7 +2,8 @@ from django.contrib.auth.models import AnonymousUser
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
 from rest_framework import mixins
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.generics import CreateAPIView, DestroyAPIView, get_object_or_404, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 
 from authors.apps.articles.models import Article, Tag
@@ -235,3 +236,97 @@ class TagsAPIView(generics.ListAPIView):
     renderer_classes = (BaseJSONRenderer,)
     renderer_names = ('tag', 'tags')
     serializer_class = TagSerializer
+
+
+class ReactionMixin(CreateAPIView, DestroyAPIView):
+    permission_classes = (IsAuthenticated,)
+
+
+class BaseReactionsMixin:
+    """
+    This mixin contains properties common to all reaction
+    views.
+    """
+    def get_queryset(self):
+        return Article.objects.all()
+
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), slug=self.kwargs["slug"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    def get_reactions(self):
+        article = self.get_object()
+        serializer = ArticleSerializer(article, context={'request': self.request})
+        return serializer.data['reactions']
+
+
+class ReactionsAPIView(BaseReactionsMixin, RetrieveAPIView):
+    """
+    This view retrieves the reactions of an article.
+    """
+    def get(self, request, **kwargs):
+        return Response({'reactions': self.get_reactions()})
+
+
+class LikeDislikeMixin(BaseReactionsMixin, CreateAPIView, DestroyAPIView):
+    """
+    This mixin adds create and destroy API views and permission classes to the
+    BaseReactionMixin. These properties are required required by the like
+    and dislike views.
+    """
+    def get_response(self, message):
+        return {
+            'message': message,
+            'reactions': self.get_reactions()
+        }
+
+
+class LikeAPIView(LikeDislikeMixin):
+    """
+    This view enables liking and un-liking articles.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, **kwargs):
+        """
+        Like an article.
+        """
+        article = self.get_object()
+        article.like(request.user)
+
+        return Response(self.get_response('You like this article.'), status=status.HTTP_201_CREATED)
+
+    def delete(self, request, **kwargs):
+        """
+        Un-like an article.
+        """
+        article = self.get_object()
+        article.un_like(request.user)
+
+        return Response(self.get_response('You no longer like this article.'), status=status.HTTP_200_OK)
+
+
+class DislikeAPIView(LikeDislikeMixin):
+    """
+    This view enables disliking and un-disliking articles.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, **kwargs):
+        """
+        Dislike an article.
+        """
+        article = self.get_object()
+        article.dislike(request.user)
+
+        return Response(self.get_response('You dislike this article.'), status=status.HTTP_201_CREATED)
+
+    def delete(self, request, **kwargs):
+        """
+        Un-dislike an article.
+        """
+        article = self.get_object()
+        article.un_dislike(request.user)
+
+        return Response(self.get_response('You no longer dislike this article.'), status=status.HTTP_200_OK)

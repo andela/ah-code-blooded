@@ -1,9 +1,10 @@
 from django.db import models
 
 
-class BaseModel(models.Model):
+class TimestampsMixin(models.Model):
     """
-    A BaseModel has two fields, used to determine when the model was created and when the model was updated
+    The TimestampsMixin has two fields, created_at and updated_at, used to determine
+    when the model was created and when it was updated respectively.
     """
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

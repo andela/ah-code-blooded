@@ -64,6 +64,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         'not_a_list': "The tags must be a list of strings"
     })
 
+    reactions = serializers.SerializerMethodField(read_only=True)
+
     author = serializers.SerializerMethodField(read_only=True)
 
     # tagList = TagField(many=True, required=False)
@@ -81,9 +83,10 @@ class ArticleSerializer(serializers.ModelSerializer):
             'image',
             'created_at',
             'updated_at',
-            'tags'
+            'tags',
+            'reactions'
         ]
-        read_only_fields = ('slug', 'author',)
+        read_only_fields = ('slug', 'author', 'reactions')
 
     def get_author(self, obj):
         serializer = ProfileSerializer(instance=Profile.objects.get(user=obj.author))
@@ -125,6 +128,28 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+    def get_reactions(self, instance):
+        request = self.context.get('request')
+
+        liked_by_me = False
+        disliked_by_me = False
+
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
+            disliked_by_me = instance.dislikes.all().filter(id=user_id).count() == 1
+
+        return {
+            'likes': {
+                'count': instance.likes.count(),
+                'me': liked_by_me
+            },
+            'dislikes': {
+                'count': instance.dislikes.count(),
+                'me': disliked_by_me
+            }
+        }
 
 
 class TagsSerializer(serializers.ModelSerializer):

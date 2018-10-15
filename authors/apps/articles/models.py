@@ -6,12 +6,66 @@ from django.db.models.signals import pre_save
 
 from django.template.defaultfilters import slugify
 
-from authors.apps.core.models import BaseModel
+from authors.apps.authentication.models import User
+from authors.apps.core.models import TimestampsMixin
 
 
-class Article(BaseModel):
+class ReactionMixin(models.Model):
     """
-    Model for an article, extends a basemodel since the created and updated times are required
+    This mixin adds like and dislike functionality to the article model.
+    """
+    likes = models.ManyToManyField(User, related_name='likes', blank=True)
+
+    dislikes = models.ManyToManyField(User, related_name='dislikes', blank=True)
+
+    def like(self, user):
+        """
+        Adds a like on the article for the user. Before
+        liking, it attempts to un-dislike
+        in case the user disliked it.
+        :param user:
+        :return:
+        """
+        self.un_dislike(user)
+        # add like for the user
+        self.likes.add(user)
+
+    def un_like(self, user):
+        """
+        Un-likes the article if the user likes it.
+        If they don't like it nothing happens.
+        :param user:
+        :return:
+        """
+        self.likes.remove(user)
+
+    def dislike(self, user):
+        """
+        Adds a dislike on the article for the user.
+        Before disliking, it attempts to un-like
+        in case the user liked it.
+        :param user:
+        :return:
+        """
+        self.un_like(user)
+        self.dislikes.add(user)
+
+    def un_dislike(self, user):
+        """
+        Un-dislikes the article if the user dislikes it.
+        If they don't dislike it nothing happens.
+        :param user:
+        :return:
+        """
+        self.dislikes.remove(user)
+
+    class Meta:
+        abstract = True
+
+
+class Article(TimestampsMixin, ReactionMixin):
+    """
+    Model for an article, extends a base model since the created and updated times are required
     """
     slug = models.SlugField(max_length=255, unique=True, db_index=True)
     title = models.CharField(max_length=255)
@@ -50,7 +104,7 @@ class Article(BaseModel):
         return self.title
 
 
-class Tag(BaseModel):
+class Tag(TimestampsMixin):
     """
     Every article contains a tag
 
