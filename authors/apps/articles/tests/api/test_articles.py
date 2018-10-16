@@ -98,6 +98,30 @@ class CreateArticlesTestCase(BaseArticlesTestCase):
         response = self.create_article()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_article_without_image(self):
+        """
+        Ensure that the readtime algorithm factors the presence/absence of an image
+        """
+        article = {
+            "article": {
+                "title": "How to train your dragon today",
+                "description": "Ever wonder how?",
+                "body": "You have to believe in you",
+                "tags": [
+                    "reactjs",
+                    "angularjs",
+                    "dragons"
+                ],
+                "published": False
+            }
+        }
+        response = self.client.post(self.url_list, data=self.article, format="json")
+        current_readtime = response.data["read_time"]
+        res = self.client.post(self.url_list, data=article, format="json")
+        updated_readtime = res.data["read_time"]
+        self.assertEqual(current_readtime-updated_readtime, 10.0)
+
+
     def test_unverified_user_cannot_create_article(self):
         """
         Ensure an unverified user cannot create an article
@@ -206,6 +230,16 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         response = self.get_single_article(slug)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(str.encode(slug), response.content)
+
+    def test_article_has_read_time(self):
+        """
+        Ensure the articles have a readtime property
+        :return:
+        """
+        slug = self.create_article()['slug']
+        response = self.get_single_article(slug)
+        self.assertIn(b'read_time', response.content)
+        self.assertIsInstance(response.data["read_time"], float)
 
     def test_another_user_cannot_get_unpublished_article(self):
         """

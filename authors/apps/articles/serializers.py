@@ -71,6 +71,8 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     author = serializers.SerializerMethodField(read_only=True)
 
+    read_time = serializers.SerializerMethodField(read_only=True)
+
     # tagList = TagField(many=True, required=False)
 
     class Meta:
@@ -88,13 +90,34 @@ class ArticleSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'tags',
-            'reactions'
+            'reactions',
+            'read_time',
+
         ]
         read_only_fields = ('slug', 'author', 'reactions')
 
     def get_author(self, obj):
         serializer = ProfileSerializer(instance=Profile.objects.get(user=obj.author))
         return serializer.data
+
+    def get_read_time(self, obj):
+        """
+        TRT = NoW/275 + [(10/60)*NoI)
+
+        Where;
+        TRT = Total Read Time (in seconds)
+        NoW = Number of Words (in the article)
+        NoI = Number of Images (in the article)
+        """
+        image = obj.image
+        words = obj.body.split()
+        readtime = (len(words)/275.0)*60
+        image_readtime = 10  # Currently we allow a single image (10s)
+
+        if image == "":
+            return round(readtime, 2)  # Round down the readtime in seconds to 2dp
+        return round(readtime + image_readtime, 2)
+
 
     def create(self, validated_data):
         """

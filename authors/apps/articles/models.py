@@ -72,6 +72,7 @@ class Article(TimestampsMixin, ReactionMixin):
     body = models.TextField()
     image = models.URLField(default='')
 
+
     # The author Foreign Key should be bound to a user profile
     author = models.ForeignKey(
         'authentication.User',
