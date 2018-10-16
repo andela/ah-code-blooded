@@ -187,7 +187,6 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ['tag', 'slug']
 
 
-
 class RatingSerializer(serializers.ModelSerializer):
     """
     Creates ratings for the existing articles and edits ratings for existing articles

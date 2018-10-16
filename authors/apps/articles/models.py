@@ -6,7 +6,6 @@ from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from authors.apps.authentication.models import User
 
-from authors.apps.authentication.models import User
 from authors.apps.core.models import TimestampsMixin
 
 

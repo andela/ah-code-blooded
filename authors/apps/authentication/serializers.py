@@ -290,3 +290,11 @@ class ResetPasswordSerializers(serializers.Serializer):
         user.set_password(data.get('password'))
         user.save()
         return data
+
+
+class SocialSignUpSerializer(serializers.Serializer):
+    """Handles serialization and deserialization
+        of the request data of social auth login
+        """
+    provider = serializers.CharField(max_length=20, required=True)
+    access_token = serializers.CharField(max_length=255, required=True)

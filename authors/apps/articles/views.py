@@ -2,16 +2,18 @@ from django.contrib.auth.models import AnonymousUser
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
 from rest_framework import mixins
-from rest_framework.generics import CreateAPIView, DestroyAPIView, get_object_or_404, RetrieveAPIView
+from rest_framework.generics import (
+    CreateAPIView, DestroyAPIView,
+    get_object_or_404, RetrieveAPIView,
+    RetrieveUpdateDestroyAPIView
+)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView
 
 from authors.apps.articles.models import Article, Tag, ArticleRating
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
 from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, TagsSerializer, RatingSerializer
 from authors.apps.core.renderers import BaseJSONRenderer
-from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,

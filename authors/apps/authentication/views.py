@@ -7,6 +7,7 @@ from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from requests.exceptions import HTTPError
 from .renderers import UserJSONRenderer
 
 from rest_framework.reverse import reverse
@@ -17,8 +18,13 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 
+from social_django.utils import load_backend, load_strategy
+
+from social_core.backends.oauth import BaseOAuth1, BaseOAuth2
+from social_core.exceptions import MissingBackend, AuthAlreadyAssociated
 from .serializers import (
-    LoginSerializer, RegistrationSerializer, UserSerializer, ForgotPasswordSerializer, ResetPasswordSerializers
+    LoginSerializer, RegistrationSerializer, UserSerializer, ForgotPasswordSerializer, ResetPasswordSerializers,
+    SocialSignUpSerializer
 )
 from .models import User
 
@@ -232,3 +238,92 @@ class ResetPasswordView(APIView):
         msg.send()
         response = {"message": "Your password has been successfully updated"}
         return Response(response, status.HTTP_200_OK)
+
+
+class SocialSignUp(CreateAPIView):
+    # Allow any user to hit this point
+    permission_classes = (AllowAny,)
+    renderer_classes = (UserJSONRenderer,)
+    serializer_class = SocialSignUpSerializer
+
+    def create(self, request, *args, **kwargs):
+        """Overides `create` to access request
+        request is neccessary for `load_strategy`
+        """
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        provider = serializer.data.get('provider', None)
+
+        # associates the social account if the request comes
+        # from an authenticated user
+        authed_user = request.user if not request.user.is_anonymous else None
+
+        # By loading `request` to `load_strategy` `social-app-auth-django`
+        # will know to use Django
+        strategy = load_strategy(request)
+
+        # Getting the backend that associates the user's social auth provider
+        # eg Facebook, Twitter and Google
+
+        try:
+            backend = load_backend(strategy=strategy, name=provider, redirect_uri=None)
+        except MissingBackend as e:
+            return Response({
+                "errors": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            if isinstance(backend, BaseOAuth1):
+                # Twitter uses OAuth1 and requires an access_token_secret
+                # to be passed in the authentication
+
+                token = {
+                    "access_token": serializer.data['access_token'],
+                    "access_token_secret": request.data['access_token_secret']
+                }
+            elif isinstance(backend, BaseOAuth2):
+                # oauths implicit grant type which is used for web
+                # and mobile application, all we have to pass here is
+                # an access_token
+
+                token = serializer.data['access_token']
+        except HTTPError as e:
+            return Response({
+                "error": {
+                    "token": "invalid token",
+                    "details": str(e)
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # if `authed_user` is None `social-auth-app` will make a new user
+            # else the social account will be associated with the user that is
+            # passed in
+            user = backend.do_auth(token, user=authed_user)
+        except AuthAlreadyAssociated:
+            # you can't associate a social account with more than one user
+            return Response({
+                "errors": "That social account is already in use"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if user and user.is_active:
+            serializer = UserSerializer(user)
+            # if the access_token was set to an empty string,
+            # then save the access_token from the request
+            auth_created = user.social_auth.get(provider=provider)
+            if not auth_created.extra_data["access_token"]:
+                # Facebook will return the access token in its request
+                # the token is then saved for future use
+                auth_created.extra_data["access_token"] = token
+                auth_created.save()
+
+            # set instance since we are not calling `serializer.save()`
+            serializer.instance = user
+            headers = self.get_success_headers(serializer.data)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED,
+                            headers=headers)
+        else:
+            return Response({"errors": "Error with social authentication"},
+                            status=status.HTTP_400_BAD_REQUEST)

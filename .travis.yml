@@ -6,6 +6,9 @@ python:
 service:
   - postgresql
 
+addons:
+  postgresql: '9.6'
+
 install:
   - pip3 install -r requirements.txt
   - pip3 install coverage
@@ -15,6 +18,7 @@ before_script:
   - python manage.py collectstatic
   - export DB_NAME="ah_code_blooded"
   - psql -c 'create database ah_code_blooded;' -U postgres
+  - python manage.py makemigrations
   - python manage.py migrate
   - export TIME_DELTA=100
 

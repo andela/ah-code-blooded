@@ -16,3 +16,5 @@ flake8==3.5.0
 cloudinary==1.13.0
 Pillow==5.3.0
 Faker==0.9.1
+social-auth-app-django==2.1.0
+python-social-auth==0.3.6

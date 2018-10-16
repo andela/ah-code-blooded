@@ -2,9 +2,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from authors.apps.articles.views import (
-    ArticleAPIView, ArticleTagsAPIView, LikeAPIView, DislikeAPIView, ReactionsAPIView
+    ArticleAPIView, ArticleTagsAPIView, LikeAPIView, DislikeAPIView, ReactionsAPIView,
+    RatingAPIView
 )
-from authors.apps.articles.views import ArticleAPIView, ArticleTagsAPIView, RatingAPIView
 
 app_name = "articles"
 router = DefaultRouter()

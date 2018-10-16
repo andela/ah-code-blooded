@@ -6,8 +6,8 @@ from .views import (
     AccountVerificationView,
     UserRetrieveUpdateAPIView,
     ForgotPasswordView,
-    ResetPasswordView
-
+    ResetPasswordView,
+    SocialSignUp,
 )
 
 app_name = "authentication"
@@ -20,6 +20,5 @@ urlpatterns = [
          name='activate-account'),
     path('account/forgot_password/', ForgotPasswordView.as_view(), name="forgot-password"),
     path('account/reset_password/<str:token>/', ResetPasswordView.as_view(), name="reset-password"),
-
-
+    path('users/social-auth/', SocialSignUp.as_view(), name='social'),
 ]
