@@ -203,7 +203,7 @@
             </div>
 
             <div class="row" style="margin: 30px 0">
-                <div class=" col l9 s12 row valign-wrapper">
+                <div class=" col l8 s12 row valign-wrapper">
                     <a href="" style="margin-right: 1em;" class="valign-wrapper teal-text">100 &nbsp;<i class="material-icons">thumb_up</i></a>
                     <a href="" class="valign-wrapper grey-text">20 &nbsp;<i class="material-icons">thumb_down</i></a>
                     <a style="margin-right: 1em; margin-left: 2em;" class="valign-wrapper ">
@@ -217,11 +217,44 @@
                     <a href="" style="margin-right: 0.5em;" class="valign-wrapper black-text"><i class="material-icons">star</i></a>
                     <a href="" style="margin-right: 0.5em;" class="valign-wrapper black-text"><i class="material-icons">star</i></a>
                 </div>
+                <div class="col l1 right">
+                    <a class="dropdown-trigger" data-target="article-dropdown"><i class="material-icons">more_vert</i></a>
+                    <div id="article-dropdown" class="dropdown-content">
+                        <ul style="">
+                            <li><a href="#report-modal" class="modal-trigger">Report</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <div id="report-modal" class="modal">
+            <div class="modal-content">
+              <h4>Report this article</h4>
+              <div class="">
+                <form class="">
+                  <p>Violation type</p>
+                    <div class="input-field">
+                      <select class="" name="">
+                        <option value="">Harassment</option>
+                        <option value="">Inappropriate Content</option>
+                        <option value="">Hate Speech</option>
+                        <option value="">Spam</option>
+                        <option value="">Threats of violence and incitment</option>
+                      </select>
+                    </div>
+                      <textarea oninput="auto_grow(this)" placeholder="A brief description why you wish to report this article"  id="description" rows="15" cols="90"></textarea>
+                  </form>
+              </div>
 
+
+
+            <div class="modal-footer">
+              <a href="#!" class="modal-close waves-effect waves-green btn-flat">submit</a>
+            </div>
+          </div>
+          </div>
     <!-- COMMENT -->
     <hr>
     <div class="comments-container">

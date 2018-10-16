@@ -60,15 +60,15 @@
         <div class="modal-content">
             <h4>Edit Profile</h4>
             <div class="row">
-                <div class="col s8">
-                    <form action="">
-                        <input type="text" placeholder="Bio" class="description" style="height: 200px">
-                        <input type="file" id="upload-image" style="visibility: hidden;">
-                    </form>
-                </div>
                 <div class="col s4">
                     <div class="col right"><span class="flow-text">
                             <img src="images/profile.jpg" class="responsive-img circle" id="upload-image-trigger" style="cursor: pointer" /></span></div>
+                </div>
+                <div class="col s8">
+                    <form action="">
+                        <textarea name="bio" placeholder="Bio" id="bio" cols="30" rows="50" oninput="auto_grow(this)"></textarea>
+                        <input type="file" id="upload-image" style="visibility: hidden;">
+                    </form>
                 </div>
             </div>
         </div>
@@ -80,7 +80,9 @@
     <div class="container">
         <div class="card" style="margin-top:40px">
             <div class="card-content">
+                <a class="btn btn-flat small white modal-trigger right" href="#edit-profile-modal"><i class="material-icons">create</i></a>
                 <div class="row">
+                    <div class="col left"><span class="flow-text"><img src="images/profile.jpg" class="responsive-img circle" /></span></div>
                     <div class="col">
                         <div><span class="flow-text">
                                 <h5 style="font-weight: bolder">chariss chomba</h5>
@@ -88,9 +90,7 @@
                         <p>Statistician and a programmer. I love coding in python. Also data science is my interest.</p>
                         <br>
                         <br>
-                        <a class="btn small white modal-trigger" href="#edit-profile-modal">Edit profile</a>
                     </div>
-                    <div class="col right"><span class="flow-text"><img src="images/profile.jpg" class="responsive-img circle" /></span></div>
                 </div>
             </div>
         </div>

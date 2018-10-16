@@ -68,7 +68,8 @@ nav {
 .create-article .description:active,
 .create-article .body:active,
 .create-article .title:active,
-.create-article .chips {
+.create-article .chips,
+textarea {
     border: none !important;
     outline: none !important;
 }

@@ -16,6 +16,8 @@ $(document).ready(function () {
         coverTrigger: false
     });
 
+    $("select").formSelect();
+
     let buttons = $(".following-button");
     buttons.on('mouseover', function () {
         $(this).removeClass("teal");
