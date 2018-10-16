@@ -12,6 +12,7 @@ from authors.apps.articles.models import Article, Tag, ArticleRating, Comment
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
 from authors.apps.core.renderers import BaseJSONRenderer
 
+from .pagination import StandardResultsSetPagination
 from authors.apps.articles.serializers import (
     ArticleSerializer, CommentSerializer, UpdateCommentSerializer,
     TagSerializer, TagsSerializer, RatingSerializer)
@@ -32,6 +33,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
     queryset = Article.objects.all()
     renderer_names = ('article', 'articles')
     serializer_class = ArticleSerializer
+    pagination_class = StandardResultsSetPagination
 
     @staticmethod
     def retrieve_owner_or_published(slug, user):
@@ -143,16 +145,24 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         """
 
         articles = Article.objects.filter(published=True)
+
         # if the user is logged in, display both published and unpublished articles
         if request.user and not isinstance(request.user, AnonymousUser):
             mine = Article.objects.filter(author=request.user)
 
             articles = articles.union(mine)
 
-        serializer = self.serializer_class(
-            articles, context={'request': request}, many=True)
+        # paginates a queryset(articles) if required
+        page = self.paginate_queryset(articles)
 
-        return Response(serializer.data)
+        serializer = self.serializer_class(
+            page,
+            context={
+                'request': request
+            },
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         """

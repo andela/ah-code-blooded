@@ -14,4 +14,4 @@ class TimestampsMixin(models.Model):
         abstract = True
 
         # Will be ordered in order of models created first by default
-        ordering = ['-created_at']
+        ordering = ['-created_at', '-updated_at', '-id']

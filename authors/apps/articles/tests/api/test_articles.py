@@ -49,6 +49,15 @@ class BaseArticlesTestCase(AuthenticatedTestCase):
             # create a list of published an unpublished articles
             self.create_article(published=(x % 2 == 0))
 
+    def create_30_articles(self):
+        """
+        Helper method to create a list of articles
+        :return:
+        """
+        for x in range(0, 30):
+            # create a list of published an unpublished articles
+            self.create_article(published=(x % 2 == 0))
+
     def create_article(self, article=None, published=False):
         """
         Overridden method, it will return the data of the created article instead
@@ -211,7 +220,7 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         :return:
         """
         response = self.client.get(self.url_list, data=None, format="json")
-        return json.loads(response.content)['data']['articles']
+        return json.loads(response.content)['data']['article']
 
     def get_single_article(self, slug):
         """
@@ -306,10 +315,9 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         :return:
         """
         self.create_random_articles()
-
         response = self.get_all_articles()
         # ensure all five articles are visible
-        self.assertEqual(len(response), self.DEFAULT_NUM_ARTICLES)
+        self.assertEqual(self.DEFAULT_NUM_ARTICLES, response['count'])
 
     def test_other_user_can_only_see_published_articles(self):
         """
@@ -321,7 +329,7 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         self.register_and_login(self.user2)  # login another user
 
         articles = self.get_all_articles()
-        for article in articles:
+        for article in articles['results']:
             self.assertTrue(article['published'])
 
     def test_unauthenticated_user_can_only_see_published_articles(self):
@@ -334,7 +342,7 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         self.logout()
 
         articles = self.get_all_articles()
-        for article in articles:
+        for article in articles['results']:
             self.assertTrue(article['published'])
 
     def test_user_cannot_get_404_article(self):
@@ -348,6 +356,47 @@ class GetArticlesTestCase(BaseArticlesTestCase):
 
         response = self.get_single_article(slug)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_api_returns_paginated_articles(self):
+        """
+        Ensure API returns paginated articles
+        """
+        self.create_random_articles()
+        res = self.get_all_articles()
+        self.assertIn('count', res.keys())
+        self.assertIn('previous', res.keys())
+        self.assertIn('next', res.keys())
+
+    def test_user_can_query_articles_using_page_numbers(self):
+        """
+        Ensures a user can query articles using page numbers
+        """
+        self.create_30_articles()
+        res = self.client.get(self.url_list + '?page=2', data=None, format="json")
+        self.assertEqual(10, len(res.data['results']))
+        self.assertIsNone(res.data['next'])
+        self.assertIsNotNone(res.data['previous'])
+
+    def test_user_can_query_articles_using_page_size(self):
+        """
+        Ensures a user can query articles using page size
+        """
+        self.create_30_articles()
+        res = self.client.get(self.url_list + '?page_size=2', data=None, format="json")
+        self.assertEqual(2, len(res.data['results']))
+        self.assertIsNone(res.data['previous'])
+        self.assertIsNotNone(res.data['next'])
+
+    def test_user_can_query_articles_using_page_size_and_page_number(self):
+        """
+        Ensures a user can query articles using page numbers
+        and page size
+        """
+        self.create_30_articles()
+        res = self.client.get(self.url_list + '?page_size=2', data=None, format="json")
+        self.assertEqual(2, len(res.data['results']))
+        self.assertIsNone(res.data['previous'])
+        self.assertIsNotNone(res.data['next'])
 
 
 class UpdateArticleTestCase(BaseArticlesTestCase):
