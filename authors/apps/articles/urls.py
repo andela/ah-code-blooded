@@ -4,7 +4,10 @@ from rest_framework.routers import DefaultRouter
 from authors.apps.articles.views import (
     ArticleAPIView, ArticleTagsAPIView, LikeAPIView, DislikeAPIView,
     ReactionsAPIView, RatingAPIView, CommentAPIView,
-    CommentCreateUpdateDestroy)
+    CommentCreateUpdateDestroy,
+    ArticleAPIView, ArticleTagsAPIView, LikeAPIView, DislikeAPIView, ReactionsAPIView, SearchFilterListAPIView
+)
+
 
 app_name = "articles"
 router = DefaultRouter()
@@ -31,5 +34,6 @@ urlpatterns = [
     path(
         'articles/<slug>/comments/<pk>',
         CommentCreateUpdateDestroy.as_view(),
-        name="a-comment")
+        name="a-comment"),
+    path('articles/search_filter', SearchFilterListAPIView.as_view(), name='search-filter')
 ]

@@ -2,11 +2,10 @@ from django.contrib.auth.models import AnonymousUser
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
 from rest_framework import mixins
-from rest_framework.generics import (
-    CreateAPIView, DestroyAPIView, get_object_or_404, RetrieveAPIView,
-    RetrieveUpdateDestroyAPIView, ListCreateAPIView)
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.generics import CreateAPIView, DestroyAPIView, get_object_or_404, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView, ListCreateAPIView
 
 from authors.apps.articles.models import Article, Tag, ArticleRating, Comment
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
@@ -16,6 +15,10 @@ from .pagination import StandardResultsSetPagination
 from authors.apps.articles.serializers import (
     ArticleSerializer, CommentSerializer, UpdateCommentSerializer,
     TagSerializer, TagsSerializer, RatingSerializer)
+
+from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -319,9 +322,36 @@ class LikeDislikeMixin(BaseReactionsMixin, CreateAPIView, DestroyAPIView):
     BaseReactionMixin. These properties are required required by the like
     and dislike views.
     """
-
     def get_response(self, message):
-        return {'message': message, 'reactions': self.get_reactions()}
+        return {
+            'message': message,
+            'reactions': self.get_reactions()
+        }
+
+class ArticleFilter(filters.FilterSet):
+    tag = filters.CharFilter(field_name='tags__tag', lookup_expr='exact')
+    username = filters.CharFilter(field_name='author__username', lookup_expr='exact')
+    title = filters.CharFilter(field_name='title', lookup_expr='exact')
+
+    class Meta:
+        model = Article
+        fields = ['tag', 'username', 'title']
+
+class SearchFilterListAPIView(ListAPIView):
+    serializer_class = ArticleSerializer
+    permission_classes = (AllowAny,)
+    renderer_classes = (BaseJSONRenderer,)
+    queryset = Article.objects.all()
+
+
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
+    # filter fields are used to filter the articles using the tags, author's username and title
+    filterset_class = ArticleFilter
+    # search fields search all articles' parameters for the searched character
+    search_fields = ('tags__tag', 'author__username', 'title', 'body', 'description')
+    # ordering fields are used to render search outputs in a particular order e.g asending or descending order
+    ordering_fields = ('author__username', 'title')
+
 
 
 class LikeAPIView(LikeDislikeMixin):
