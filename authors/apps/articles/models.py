@@ -5,7 +5,6 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from authors.apps.authentication.models import User
-
 from authors.apps.core.models import TimestampsMixin
 
 
@@ -15,7 +14,8 @@ class ReactionMixin(models.Model):
     """
     likes = models.ManyToManyField(User, related_name='likes', blank=True)
 
-    dislikes = models.ManyToManyField(User, related_name='dislikes', blank=True)
+    dislikes = models.ManyToManyField(
+        User, related_name='dislikes', blank=True)
 
     def like(self, user):
         """
@@ -72,13 +72,11 @@ class Article(TimestampsMixin, ReactionMixin):
     body = models.TextField()
     image = models.URLField(default='')
 
-
     # The author Foreign Key should be bound to a user profile
     author = models.ForeignKey(
         'authentication.User',
         related_name='articles',
-        on_delete=models.CASCADE
-    )
+        on_delete=models.CASCADE)
     # a article contains many tags
     tags = models.ManyToManyField(
         'articles.Tag',
@@ -90,7 +88,9 @@ class Article(TimestampsMixin, ReactionMixin):
     def pre_save(sender, instance, *args, **kwargs):
         # create the slug only when the article is being saved to avoid broken links
         if not instance.id or not instance.published:
-            unique = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(12))
+            unique = ''.join(
+                random.choice(string.ascii_lowercase + string.digits)
+                for _ in range(12))
             if instance.slug[:-13] != slugify(instance.title):
                 instance.slug = slugify(instance.title)
                 instance.slug = instance.slug[:250]
@@ -131,9 +131,37 @@ class ArticleRating(models.Model):
     """
     Ratings that users give Articles
     """
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='articleratings')
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, related_name='articleratings')
     rating = models.IntegerField(default=0)
     rated_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
-pre_save.connect(Article.pre_save, Article, dispatch_uid="authors.apps.articles.models.Article")
+# register the pre_save signal
+pre_save.connect(
+    Article.pre_save,
+    Article,
+    dispatch_uid="authors.apps.articles.models.Article")
+
+
+class Comment(TimestampsMixin):
+    """
+    Represent model for an comment
+    """
+    # Bound comment to article class
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, related_name='comments')
+    # User form to insert comment for the article
+    body = models.TextField()
+    # Create a recursive relationship so that comment has many-to-one relationship
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='thread')
+    author = models.ForeignKey(
+        'profiles.Profile',
+        related_name='comments',
+        blank=True,
+        on_delete=models.CASCADE)

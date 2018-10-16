@@ -5,7 +5,7 @@ from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
 
-from authors.apps.articles.models import Article, Tag, ArticleRating
+from authors.apps.articles.models import Article, Tag, ArticleRating, Comment
 
 
 class TagField(serializers.RelatedField):
@@ -15,9 +15,7 @@ class TagField(serializers.RelatedField):
     queryset = Tag.objects.all()
 
     def to_internal_value(self, data):
-        tag, created = Tag.objects.get_or_create(
-            tag=data, slug=slugify(data)
-        )
+        tag, created = Tag.objects.get_or_create(tag=data, slug=slugify(data))
 
         return tag
 
@@ -37,35 +35,35 @@ class ArticleSerializer(serializers.ModelSerializer):
         error_messages={
             'blank': 'The article must have a title',
             'required': "The article must have a title",
-            'max_length': "The article title cannot be more than 255 characters"
-        }
-    )
+            'max_length':
+            "The article title cannot be more than 255 characters"
+        })
     description = serializers.CharField(
         required=True,
         allow_blank=False,
         error_messages={
             'blank': 'The article must have a description',
             'required': "The article must have a description",
-        }
-    )
+        })
     body = serializers.CharField(
         required=True,
         allow_blank=False,
         error_messages={
             'blank': 'The article must have a body',
             'required': "The article must have a body",
-        }
-    )
+        })
 
     published = serializers.BooleanField(required=False)
     image = serializers.URLField(required=False, allow_blank=False)
-    avg_rating = serializers.SerializerMethodField(method_name='get_average_rating')
+    avg_rating = serializers.SerializerMethodField(
+        method_name='get_average_rating')
 
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
-    tags = TagField(many=True, required=False, error_messages={
-        'not_a_list': "The tags must be a list of strings"
-    })
+    tags = TagField(
+        many=True,
+        required=False,
+        error_messages={'not_a_list': "The tags must be a list of strings"})
 
     reactions = serializers.SerializerMethodField(read_only=True)
 
@@ -92,12 +90,12 @@ class ArticleSerializer(serializers.ModelSerializer):
             'tags',
             'reactions',
             'read_time',
-
         ]
         read_only_fields = ('slug', 'author', 'reactions')
 
     def get_author(self, obj):
-        serializer = ProfileSerializer(instance=Profile.objects.get(user=obj.author))
+        serializer = ProfileSerializer(
+            instance=Profile.objects.get(user=obj.author))
         return serializer.data
 
     def get_read_time(self, obj):
@@ -111,13 +109,13 @@ class ArticleSerializer(serializers.ModelSerializer):
         """
         image = obj.image
         words = obj.body.split()
-        readtime = (len(words)/275.0)*60
+        readtime = (len(words) / 275.0) * 60
         image_readtime = 10  # Currently we allow a single image (10s)
 
         if image == "":
-            return round(readtime, 2)  # Round down the readtime in seconds to 2dp
+            return round(readtime,
+                         2)  # Round down the readtime in seconds to 2dp
         return round(readtime + image_readtime, 2)
-
 
     def create(self, validated_data):
         """
@@ -168,7 +166,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         if request is not None and request.user.is_authenticated:
             user_id = request.user.id
             liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
-            disliked_by_me = instance.dislikes.all().filter(id=user_id).count() == 1
+            disliked_by_me = instance.dislikes.all().filter(
+                id=user_id).count() == 1
 
         return {
             'likes': {
@@ -195,14 +194,16 @@ class TagsSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    tag = serializers.CharField(required=True, max_length=28,
-                                allow_blank=False,
-                                allow_null=False,
-                                error_messages={
-                                    "blank": "Please specify a tag",
-                                    "required": "Please specify a tag",
-                                    "max_length": "Tag cannot be more than 28 characters"
-                                })
+    tag = serializers.CharField(
+        required=True,
+        max_length=28,
+        allow_blank=False,
+        allow_null=False,
+        error_messages={
+            "blank": "Please specify a tag",
+            "required": "Please specify a tag",
+            "max_length": "Tag cannot be more than 28 characters"
+        })
     slug = serializers.SlugField(read_only=True)
 
     class Meta:
@@ -236,6 +237,35 @@ class RatingSerializer(serializers.ModelSerializer):
         if _rating:
             if _rating < 0 or _rating > 5:
                 raise serializers.ValidationError(
-                    "Rating should be a number between 1 and 5!"
-                )
+                    "Rating should be a number between 1 and 5!")
         return {'rating': _rating}
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """ serialize and deserialize comment model"""
+    body = serializers.CharField(max_length=200)
+    article = ArticleSerializer(read_only=True)
+    author = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = Comment
+
+        fields = "__all__"
+
+
+class UpdateCommentSerializer(serializers.Serializer):
+    """
+    Defines the update comment serializer
+    """
+    body = serializers.CharField(max_length=200)
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ('body', 'created_at')
+
+    def update(instance, data):
+        instance.body = data.get('body', instance.body)
+        instance.save()
+        return instance
