@@ -165,12 +165,10 @@ class Comment(TimestampsMixin):
         related_name='comments',
         blank=True,
         on_delete=models.CASCADE)
-
-
-pre_save.connect(
-    Article.pre_save,
-    Article,
-    dispatch_uid="authors.apps.articles.models.Article")
+    likes = models.ManyToManyField(
+        User, related_name='comment_likes', blank=True)
+    dislikes = models.ManyToManyField(
+        User, related_name='comment_dislikes', blank=True)
 
 
 class FavouriteArticle(TimestampsMixin):
@@ -183,7 +181,3 @@ class FavouriteArticle(TimestampsMixin):
         on_delete=models.CASCADE,
     )
     favourite = models.Manager()
-    likes = models.ManyToManyField(
-        User, related_name='comment_likes', blank=True)
-    dislikes = models.ManyToManyField(
-        User, related_name='comment_dislikes', blank=True)

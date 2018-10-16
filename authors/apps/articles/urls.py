@@ -2,16 +2,10 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from authors.apps.articles.views import (
-    ArticleAPIView, ArticleTagsAPIView, LikeAPIView, DislikeAPIView,
-    ReactionsAPIView, RatingAPIView, CommentAPIView,
-    CommentCreateUpdateDestroy, ArticleAPIView, ArticleTagsAPIView,
-    LikeAPIView, DislikeAPIView, ReactionsAPIView, SearchFilterListAPIView,
-    FavouriteArticleApiView)
-
-from authors.apps.articles.views import ArticleAPIView, CommentAPIView, CommentCreateUpdateDestroy, LikeComments
-from authors.apps.articles.views import (ArticleAPIView, CommentAPIView,
-                                         CommentCreateUpdateDestroy,
-                                         LikeComments, DislikeComments)
+    ArticleAPIView, ArticleTagsAPIView, LikeAPIView, RatingAPIView,
+    CommentAPIView, CommentCreateUpdateDestroy, DislikeAPIView,
+    ReactionsAPIView, SearchFilterListAPIView, FavouriteArticleApiView,
+    LikeComments, DislikeComments)
 
 app_name = "articles"
 router = DefaultRouter()
@@ -34,7 +28,8 @@ urlpatterns = [
         name='reactions'),
     path(
         'articles/<slug>/rate/', RatingAPIView.as_view(), name='rate-article'),
-    path('articles/<slug>/comments', CommentAPIView.as_view(), name='comment'),
+    path(
+        'articles/<slug>/comments', CommentAPIView.as_view(), name='comments'),
     path(
         'articles/<slug>/comments/<pk>',
         CommentCreateUpdateDestroy.as_view(),

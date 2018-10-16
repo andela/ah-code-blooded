@@ -2,7 +2,6 @@ from django.utils.text import slugify
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from authors.apps.articles.models import Tag, Article, Comment
 from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
@@ -80,7 +79,8 @@ class ArticleSerializer(serializers.ModelSerializer):
 
         fields = [
             'slug', 'title', 'description', 'body', 'published', 'author',
-            'image', 'created_at', 'updated_at', 'tags'
+            'image', 'created_at', 'updated_at', 'tags', 'avg_rating',
+            'read_time', 'reactions'
         ]
         read_only_fields = [
             'slug',
@@ -285,6 +285,8 @@ class UpdateCommentSerializer(serializers.Serializer):
         instance.body = data.get('body', instance.body)
         instance.save()
         return instance
+
+
 class FavouriteSerializer(serializers.ModelSerializer):
     """validate favourite model"""
 
@@ -305,7 +307,8 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
     def add_or_remove(self, data):
         data = self.get_user_email_and_article(data)
-        query_set = FavouriteArticle.favourite.filter(article=self.article, email=self.email)
+        query_set = FavouriteArticle.favourite.filter(
+            article=self.article, email=self.email)
         if query_set.exists():
             output = query_set.get()
             return output
@@ -332,6 +335,6 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
 
 def update(request, key):
-        data = request.data
-        data[key] = request.user.email
-        return data
+    data = request.data
+    data[key] = request.user.email
+    return data

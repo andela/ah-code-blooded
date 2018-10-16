@@ -2,28 +2,27 @@ from django.contrib.auth.models import AnonymousUser
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
 from rest_framework import mixins
-from rest_framework.generics import CreateAPIView, DestroyAPIView, get_object_or_404, RetrieveAPIView
+from rest_framework.generics import DestroyAPIView, get_object_or_404, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView, ListCreateAPIView
+from rest_framework.generics import (RetrieveUpdateDestroyAPIView,
+                                     CreateAPIView, ListAPIView,
+                                     ListCreateAPIView, UpdateAPIView)
 from rest_framework.views import APIView
 from authors.apps.articles.models import Article, Tag, ArticleRating, Comment
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
-from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, TagsSerializer, RatingSerializer, FavouriteSerializer, update
+from authors.apps.articles.serializers import (ArticleSerializer,
+                                               TagSerializer, RatingSerializer,
+                                               FavouriteSerializer, update)
 from authors.apps.core.renderers import BaseJSONRenderer
 
 from .pagination import StandardResultsSetPagination
 from authors.apps.articles.serializers import (
-    ArticleSerializer, CommentSerializer, UpdateCommentSerializer,
-    TagSerializer, TagsSerializer, RatingSerializer)
+    CommentSerializer, UpdateCommentSerializer, TagsSerializer)
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
-
-from authors.apps.articles.models import Article, Comment
-from authors.apps.articles.serializers import ArticleSerializer, CommentSerializer, UpdateCommentSerializer
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, UpdateAPIView
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -535,7 +534,7 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             data=request.data.get('comment', {}))
         serializer.is_valid(raise_exception=True)
         serializer.save(
-            article=article, parent=comment, author=request.user.profile)
+            article=article, parent=parent, author=request.user.profile)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
@@ -571,7 +570,7 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             }, status.HTTP_404_NOT_FOUND)
         try:
             pk = self.kwargs.get('pk')
-            parent = Comment.objects.get(pk=pk)
+            comment = Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
             message = {"Error": "comment with this ID doesn't exist"}
             return Response(message, status.HTTP_404_NOT_FOUND)

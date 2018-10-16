@@ -17,12 +17,12 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': self.slug}),
             data=self.comment,
             format="json")
-        self.pk = json.loads(response.content)["id"]
+        self.pk = json.loads(response.content)["data"]['id']
         self.user = {
             "user": {
                 "username": "tester001",
                 "email": "test@example.com",
-                "password": "@secret123"
+                "password": "@Asecret123"
             }
         }
 

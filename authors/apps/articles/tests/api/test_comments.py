@@ -16,7 +16,7 @@ class TestArticleComment(BaseArticlesTestCase):
             "user": {
                 "username": "tester001",
                 "email": "test@example.com",
-                "password": "@secret123"
+                "password": "@AFFsecret123"
             }
         }
 
@@ -62,7 +62,7 @@ class TestArticleComment(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': slug}),
             data=comment,
             format="json")
-        pk = json.loads(response.content)["id"]
+        pk = json.loads(response.content)['data']['id']
         response = self.client.post(
             reverse("articles:a-comment", kwargs={
                 'slug': slug,
@@ -119,7 +119,7 @@ class TestArticleComment(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': slug}),
             data=comment,
             format="json")
-        pk = json.loads(response.content)["id"]
+        pk = json.loads(response.content)["data"]['id']
         response = self.client.put(
             reverse("articles:a-comment", kwargs={
                 'slug': slug,
@@ -138,7 +138,7 @@ class TestArticleComment(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': slug}),
             data=comment,
             format="json")
-        pk = json.loads(response.content)["id"]
+        pk = json.loads(response.content)['data']['id']
         response = self.client.delete(
             reverse("articles:a-comment", kwargs={
                 'slug': slug,
