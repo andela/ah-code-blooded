@@ -1,5 +1,6 @@
 import json
 
+from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.utils.serializer_helpers import ReturnList
 
@@ -39,10 +40,18 @@ class BaseJSONRenderer(JSONRenderer):  # NOQA : E731
     charset = 'utf-8'
     single = None
     many = None
+    SUCCESS_STATUSES = [
+        status.HTTP_200_OK,
+        status.HTTP_201_CREATED,
+        status.HTTP_202_ACCEPTED,
+        status.HTTP_100_CONTINUE,
+        status.HTTP_302_FOUND,
+    ]
 
     def render(self, data, accepted_media_type=None, renderer_context=None):  # NOQA : E731
-
         view = renderer_context['view']
+
+        stat = 'success' if renderer_context['response'].status_code in self.SUCCESS_STATUSES else 'error'
         if hasattr(view, 'renderer_names'):
             names = view.renderer_names
             if len(names) != 2:
@@ -51,11 +60,8 @@ class BaseJSONRenderer(JSONRenderer):  # NOQA : E731
                 self.single, self.many = names[0], names[1]
 
         if hasattr(data, 'get'):
-            status = 'success'
             errors = data.get('errors', data.get('detail', None))
-            if errors is not None:
-                status = 'error'
-            else:
+            if errors is None:
                 errors = data.get('message', None)
 
             # if there exist errors, set the status as error
@@ -64,24 +70,24 @@ class BaseJSONRenderer(JSONRenderer):  # NOQA : E731
                 # if there is only one error, use 'message' field to display the response
                 if isinstance(message, str):
                     return json.dumps({
-                        'status': status,
+                        'status': stat,
                         'message': message
                     })
                 else:
                     # for dictionary or list, use data to display the response
                     return json.dumps({
-                        'status': status,
+                        'status': stat,
                         'data': message
                     })
 
         if isinstance(data, ReturnList):
             return json.dumps({
-                'status': 'success',
+                'status': stat,
                 'data': {self.many: data} if self.many else data
             })
 
         return json.dumps({
-            'status': 'success',
+            'status': stat,
             'data': {self.single: data} if self.single else data
         })
 
