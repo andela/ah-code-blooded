@@ -1,11 +1,12 @@
 from django.utils.text import slugify
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
-
-from authors.apps.articles.models import Article, Tag, ArticleRating, Comment
+from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, FavouriteArticle
+from authors.apps.authentication.models import User
 
 
 class TagField(serializers.RelatedField):
@@ -269,3 +270,53 @@ class UpdateCommentSerializer(serializers.Serializer):
         instance.body = data.get('body', instance.body)
         instance.save()
         return instance
+class FavouriteSerializer(serializers.ModelSerializer):
+    """validate favourite model"""
+
+    article = serializers.SlugField()
+    email = serializers.EmailField()
+
+    def get_user_email_and_article(self, data):
+        try:
+            self.article = Article.objects.get(slug=data['article'])
+            self.email = User.objects.get(email=data['email'])
+        except Article.DoesNotExist:
+            raise NotFound("this slug doesnt match any article")
+        except User.DoesNotExist:
+            raise NotFound("this email does not exist")
+        data['article'] = self.article
+        data['email'] = self.email
+        return data
+
+    def add_or_remove(self, data):
+        data = self.get_user_email_and_article(data)
+        query_set = FavouriteArticle.favourite.filter(article=self.article, email=self.email)
+        if query_set.exists():
+            output = query_set.get()
+            return output
+        return data
+
+    def create(self, data):
+        fav = self.add_or_remove(data)
+        if isinstance(fav, FavouriteArticle):
+            raise serializers.ValidationError("Article already favourited")
+        else:
+            return FavouriteArticle.favourite.create(**fav)
+
+    def view_favourite(self, data):
+        fav = self.add_or_remove(data)
+
+        if isinstance(fav, FavouriteArticle):
+            return fav
+        else:
+            raise serializers.ValidationError("Article not favourited")
+
+    class Meta:
+        model = FavouriteArticle
+        fields = ['email', 'article']
+
+
+def update(request, key):
+        data = request.data
+        data[key] = request.user.email
+        return data

@@ -165,3 +165,12 @@ class Comment(TimestampsMixin):
         related_name='comments',
         blank=True,
         on_delete=models.CASCADE)
+pre_save.connect(Article.pre_save, Article, dispatch_uid="authors.apps.articles.models.Article")
+
+
+class FavouriteArticle(TimestampsMixin):
+    """Allow an article to be favourited"""
+
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="favourites")
+    email = models.ForeignKey(User, on_delete=models.CASCADE,)
+    favourite = models.Manager()

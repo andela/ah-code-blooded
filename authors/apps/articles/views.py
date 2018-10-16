@@ -6,9 +6,10 @@ from rest_framework.generics import CreateAPIView, DestroyAPIView, get_object_or
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView, ListCreateAPIView
-
+from rest_framework.views import APIView
 from authors.apps.articles.models import Article, Tag, ArticleRating, Comment
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
+from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, TagsSerializer, RatingSerializer, FavouriteSerializer, update
 from authors.apps.core.renderers import BaseJSONRenderer
 
 from .pagination import StandardResultsSetPagination
@@ -581,3 +582,33 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
         return Response(
             self.serializer_class(updated_comment).data,
             status=status.HTTP_201_CREATED)
+class FavouriteArticleApiView(APIView):
+    """
+    define method to favourite article
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FavouriteSerializer
+
+    def post(self, request, slug):
+        """
+        a registered user can favourite an article
+        """
+        request.data['email'] = request.user.email
+        request.data['article'] = slug
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message': 'Article favourited'})
+
+    def delete(self, request, slug):
+        """
+        a registered user can unfavourite an article
+        """
+        data = update(request, 'email')
+        data['article'] = slug
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        favourite = serializer.view_favourite(data)
+        favourite.delete()
+        return Response({'message': 'Article removed from favourites'}, status.HTTP_200_OK)
