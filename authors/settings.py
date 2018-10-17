@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'authors.apps.ah_notifications',
     'authors.apps.core',
     'authors.apps.profiles',
+    'authors.apps.ah_notifications',
     'django_inlinecss',
     'authors.apps.articles',
     'rest_framework_swagger',
@@ -149,7 +150,6 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('GOOGLE_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('GOOGLE_SECRET')
 SOCIAL_AUTH_GOOGLE_SCOPE = ['email', 'username']
 
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -242,4 +242,4 @@ CLOUDINARY = {
     'secure': True
 }
 
-DJANGO_NOTIFICATIONS_CONFIG = { 'SOFT_DELETE': True}
+DJANGO_NOTIFICATIONS_CONFIG = {'SOFT_DELETE': True}
