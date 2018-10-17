@@ -91,6 +91,8 @@ class SubscribeAPIView(APIView):
     Allow users to subscribe to notifications
     """
     permission_classes = (IsAuthenticated,)
+    renderer_classes = (BaseJSONRenderer,)
+    
     def post(self, request):
         subscribe = request.data.get("subscribe")    
         try:
