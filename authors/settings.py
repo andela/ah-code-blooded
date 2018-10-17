@@ -240,3 +240,5 @@ CLOUDINARY = {
     'api_secret': os.getenv('CLOUDINARY_SECRET'),
     'secure': True
 }
+
+DJANGO_NOTIFICATIONS_CONFIG = { 'SOFT_DELETE': True}
