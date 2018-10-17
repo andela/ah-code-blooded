@@ -4,6 +4,7 @@ from rest_framework import serializers
 from authors.apps.articles.models import Article, Comment
 from authors.apps.articles.serializers import CommentSerializer
 from authors.apps.authentication.models import User
+from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 
 
@@ -22,10 +23,10 @@ class ActorField(serializers.RelatedField):
             data = {"slug": value.slug}
         elif isinstance(value, Comment):
             actor_type = "comment"
-            data = CommentSerializer(value)
+            data = CommentSerializer(value).data
         elif isinstance(value, User):
             actor_type = "user"
-            data = ProfileSerializer(value)
+            data = ProfileSerializer(Profile.objects.get(user=value)).data
 
         return {
             "type": actor_type,
