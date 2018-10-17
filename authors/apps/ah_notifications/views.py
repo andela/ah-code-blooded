@@ -5,7 +5,8 @@ from rest_framework.response import Response
 
 from authors.apps.ah_notifications.serializers import NotificationSerializer
 from authors.apps.core.renderers import BaseJSONRenderer
-
+from rest_framework.views import APIView
+from authors.apps.authentication.models import User
 
 class NotificationAPIView(generics.ListAPIView, generics.DestroyAPIView):
     permission_classes = (IsAuthenticated,)
@@ -84,3 +85,23 @@ class SentNotificationsAPIView(NotificationAPIView):
 
     def notifications(self, request):
         return request.user.notifications.active().sent()
+
+class SubscribeAPIView(APIView):
+    """
+    Allow users to subscribe to notifications
+    """
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        subscribe = request.data.get("subscribe")    
+        try:
+            user = User.objects.filter(email=request.user.email).first()
+            if subscribe == "True":
+                user.is_subscribed = True
+                data = {"message": "You have successfully subscribed to our notifications."}
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                user.is_subscribed = False
+                data = {"message": "You have successfully unsubscribed from our notifications."}
+                return Response(data, status=status.HTTP_200_OK)    
+        except User.DoesNotExist:
+            return Response("User does not exist")
