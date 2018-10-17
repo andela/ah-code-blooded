@@ -36,7 +36,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         IsAuthenticatedOrReadOnly,
         IsArticleOwnerOrReadOnly,
     )
-    renderer_classes = (BaseJSONRenderer, )
+    renderer_classes = (BaseJSONRenderer,)
     queryset = Article.objects.all()
     renderer_names = ('article', 'articles')
     serializer_class = ArticleSerializer
@@ -81,7 +81,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         if not request.user.is_verified:
             return Response({
                 "errors":
-                "Sorry, verify your account first in order to create articles"
+                    "Sorry, verify your account first in order to create articles"
             }, status.HTTP_401_UNAUTHORIZED)
 
         serializer = self.serializer_class(data=article)
@@ -163,7 +163,12 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         page = self.paginate_queryset(articles)
 
         serializer = self.serializer_class(
-            page, context={'request': request}, many=True)
+            page,
+            context={
+                'request': request
+            },
+            many=True
+        )
         return self.get_paginated_response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
@@ -179,10 +184,20 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         return Response({'message': 'The article has been deleted.'})
 
 
+class ArticleFilter(filters.FilterSet):
+    tag = filters.CharFilter(field_name='tags__tag', lookup_expr='exact')
+    username = filters.CharFilter(field_name='author__username', lookup_expr='exact')
+    title = filters.CharFilter(field_name='title', lookup_expr='exact')
+
+    class Meta:
+        model = Article
+        fields = ['tag', 'username', 'title']
+
+
 class ArticleTagsAPIView(generics.ListCreateAPIView, generics.DestroyAPIView):
     lookup_field = 'slug'
     serializer_class = TagSerializer
-    renderer_classes = (BaseJSONRenderer, )
+    renderer_classes = (BaseJSONRenderer,)
     queryset = Tag.objects.all()
     permission_classes = [IsArticleOwnerOrReadOnly, IsAuthenticatedOrReadOnly]
 
@@ -276,13 +291,13 @@ class TagsAPIView(generics.ListAPIView):
     API View class to display all the tags
     """
     queryset = Tag.objects.all()
-    renderer_classes = (BaseJSONRenderer, )
+    renderer_classes = (BaseJSONRenderer,)
     renderer_names = ('tag', 'tags')
     serializer_class = TagSerializer
 
 
 class ReactionMixin(CreateAPIView, DestroyAPIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
 
 class BaseReactionsMixin:
@@ -323,14 +338,16 @@ class LikeDislikeMixin(BaseReactionsMixin, CreateAPIView, DestroyAPIView):
     """
 
     def get_response(self, message):
-        return {'message': message, 'reactions': self.get_reactions()}
+        return {
+            'message': message,
+            'reactions': self.get_reactions()
+        }
 
 
 
 class ArticleFilter(filters.FilterSet):
     tag = filters.CharFilter(field_name='tags__tag', lookup_expr='exact')
-    username = filters.CharFilter(
-        field_name='author__username', lookup_expr='exact')
+    username = filters.CharFilter(field_name='author__username', lookup_expr='exact')
     title = filters.CharFilter(field_name='title', lookup_expr='exact')
 
     class Meta:
@@ -340,16 +357,15 @@ class ArticleFilter(filters.FilterSet):
 
 class SearchFilterListAPIView(ListAPIView):
     serializer_class = ArticleSerializer
-    permission_classes = (AllowAny, )
-    renderer_classes = (BaseJSONRenderer, )
+    permission_classes = (AllowAny,)
+    renderer_classes = (BaseJSONRenderer,)
     queryset = Article.objects.all()
 
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     # filter fields are used to filter the articles using the tags, author's username and title
     filterset_class = ArticleFilter
     # search fields search all articles' parameters for the searched character
-    search_fields = ('tags__tag', 'author__username', 'title', 'body',
-                     'description')
+    search_fields = ('tags__tag', 'author__username', 'title', 'body', 'description')
     # ordering fields are used to render search outputs in a particular order e.g asending or descending order
     ordering_fields = ('author__username', 'title')
 
@@ -358,7 +374,7 @@ class LikeAPIView(LikeDislikeMixin):
     """
     This view enables liking and un-liking articles.
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, **kwargs):
         """
@@ -387,7 +403,7 @@ class DislikeAPIView(LikeDislikeMixin):
     """
     This view enables disliking and un-disliking articles.
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, **kwargs):
         """
@@ -413,10 +429,10 @@ class DislikeAPIView(LikeDislikeMixin):
 
 
 class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     queryset = ArticleRating.objects.all()
     serializer_class = RatingSerializer
-    renderer_classes = (BaseJSONRenderer, )
+    renderer_classes = (BaseJSONRenderer,)
 
     def post(self, request, *args, **kwargs):  # NOQA
         """
@@ -473,8 +489,8 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
 class CommentAPIView(ListCreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, )
-    renderer_classes = (BaseJSONRenderer, )
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    renderer_classes = (BaseJSONRenderer,)
     """This class get commit for specific article and create comment"""
 
     # filter by slug from url
@@ -507,8 +523,8 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
     """This class view creates update and delete comment"""
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, )
-    renderer_classes = (BaseJSONRenderer, )
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    renderer_classes = (BaseJSONRenderer,)
     lookup_url_kwarg = "pk"
 
     def create(self, request, slug=None, pk=None):
@@ -581,6 +597,8 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
         return Response(
             self.serializer_class(updated_comment).data,
             status=status.HTTP_201_CREATED)
+
+
 
 
 class FavouriteArticleApiView(APIView):

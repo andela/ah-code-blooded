@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'cloudinary',
     'social_django',
-    'notifications'
+    'notifications',
     'django_filters',
 ]
 

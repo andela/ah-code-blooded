@@ -19,4 +19,4 @@ Faker==0.9.1
 social-auth-app-django==2.1.0
 python-social-auth==0.3.6
 django-filter==2.0.0
-django-notifications-hq=1.5.0
+django-notifications-hq==1.5.0
