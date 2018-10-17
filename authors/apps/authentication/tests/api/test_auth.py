@@ -5,6 +5,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
 from authors.apps.authentication.models import User
+from authors.apps.core.test_helpers import make_user
 
 
 class AuthenticationTestCase(APITestCase):
@@ -82,6 +83,13 @@ class AuthenticatedTestCase(AuthenticationTestCase):
         user.is_verified = True
         user.save()
 
+    def authenticate_another_user(self):
+        """
+        Helper method to authenticate another user
+        :return:
+        """
+        self.register_and_login(user={"user": make_user()})
+
     def unverify_user(self, email=None):
         """
         Unverify a user's account in order to perform some tests
@@ -93,6 +101,12 @@ class AuthenticatedTestCase(AuthenticationTestCase):
         user = User.objects.get(email=email)
         user.is_verified = False
         user.save()
+
+    def get_authenticated_user(self):
+        response = self.client.get(reverse("authentication:user-retrieve-update"))
+        if response.status_code == 200:
+            return User.objects.get(email=json.loads(response.content)['user']['email'])
+        return None
 
 
 class RegistrationViewTestCase(AuthenticationTestCase):
