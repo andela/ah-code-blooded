@@ -9,25 +9,32 @@ from authors.apps.authentication.tests.api.test_auth import AuthenticatedTestCas
 
 class BaseNotificationsTestCase(AuthenticatedTestCase):
     DEFAULT_NOTIFICATION_COUNT = 10
+    URLS = {
+        'all': reverse("notifications:notifications"),
+        'sent': reverse("notifications:sent-notifications"),
+        'unsent': reverse("notifications:unsent-notifications"),
+        'read': reverse("notifications:read-notifications"),
+        'unread': reverse("notifications:unread-notifications")
+    }
 
     def setUp(self):
         super().setUp()
-        self.url = reverse("notifications:notifications")
+        self.notification_type = "all"
 
-    def get(self):
+    def get(self, notification_type=None):
         """
         Return a list of notifications and response_code
         :return:
         """
-        response = self.client.get(self.url)
+        response = self.client.get(self.URLS[notification_type or self.notification_type])
         return response.status_code, json.loads(response.content)
 
-    def delete(self):
+    def delete(self, notification_type=None):
         """
         Delete a list of notifications and return the response
         :return:
         """
-        response = self.client.delete(self.url)
+        response = self.client.delete(self.URLS[notification_type or self.notification_type])
         return response.status_code, json.loads(response.content)
 
     def sendNotification(self, user=None, verb="sample", description="You have a notification"):
@@ -106,3 +113,42 @@ class AllNotificationsTestCase(BaseNotificationsTestCase):
         self.authenticate_another_user()
         status_code, data = self.get()
         self.assertEqual(data['data']['count'], 0)
+
+
+class UnsentNotificationsTestCase(BaseNotificationsTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.notification_type = "unsent"
+
+    def test_notifications_first_unsent(self):
+        """
+        Ensure the notification status begins as unsent
+        :return:
+        """
+        self.sendManyNotifications()
+        status_code, data = self.get()
+        self.assertEqual(data['data']['count'], self.DEFAULT_NOTIFICATION_COUNT)
+
+
+class SentNotificationTestCase(BaseNotificationsTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.notification_type = "sent"
+
+    def test_notifications_sent_once_queried(self):
+        """
+        Notifications should be marked as sent once they are retrieved
+        :return:
+        """
+        self.sendManyNotifications()
+        status_code, data = self.get()
+        self.assertEqual(data['data']['count'], 0)
+
+        # get all notifications
+        self.get(notification_type="all")
+
+        # now check whether they exist in the sentbox
+        status_code, data = self.get()
+        self.assertEqual(data['data']['count'], self.DEFAULT_NOTIFICATION_COUNT)
