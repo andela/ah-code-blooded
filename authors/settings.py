@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'authors.apps.ah_notifications',
     'authors.apps.core',
     'authors.apps.profiles',
-    'authors.apps.ah_notifications',
     'django_inlinecss',
     'authors.apps.articles',
     'rest_framework_swagger',
