@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'authors.apps.authentication',
+    'authors.apps.ah_notifications',
     'authors.apps.core',
     'authors.apps.profiles',
     'django_inlinecss',
