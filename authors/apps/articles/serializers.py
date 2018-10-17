@@ -262,11 +262,22 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def count_likes(self, instance):
         """Returns the total likes of particlular comment"""
-        return instance.likes.count()
+        request = self.context.get('request')
+        liked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
+        return {'count': instance.likes.count(), 'me': liked_by_me}
 
     def count_dislikes(self, instance):
         """Returns  the total dislikes of a particular comment."""
-        return instance.dislikes.count()
+        request = self.context.get('request')
+        disliked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            disliked_by_me = instance.dislikes.all().filter(
+                id=user_id).count() == 1
+        return {'count': instance.dislikes.count(), 'me': disliked_by_me}
 
 
 class UpdateCommentSerializer(serializers.Serializer):

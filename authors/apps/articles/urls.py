@@ -57,7 +57,7 @@ urlpatterns = [
         LikeComments.as_view(),
         name="likes"),
     path(
-        'articles/<slug>/comments/<pk>/dislike',
+        'articles/<slug>/comments/<pk>/dislikes',
         DislikeComments.as_view(),
         name="dislikes")
 ]

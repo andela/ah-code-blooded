@@ -626,8 +626,9 @@ class LikeComments(UpdateAPIView):
         try:
             Article.objects.get(slug=slug)
         except Article.DoesNotExist:
-            return Response({'Error,Please check your url?'},
-                            status.HTTP_404_NOT_FOUND)
+            return Response({
+                'Error': 'Article doesnot exist'
+            }, status.HTTP_404_NOT_FOUND)
         try:
             pk = self.kwargs.get('pk')
             comment = Comment.objects.get(pk=pk)
@@ -663,8 +664,9 @@ class DislikeComments(UpdateAPIView):
         try:
             Article.objects.get(slug=slug)
         except Article.DoesNotExist:
-            return Response({'Error,Please check your url?'},
-                            status.HTTP_404_NOT_FOUND)
+            return Response({
+                'Error': 'Article doesnot exist'
+            }, status.HTTP_404_NOT_FOUND)
         try:
             pk = self.kwargs.get('pk')
             comment = Comment.objects.get(pk=pk)
