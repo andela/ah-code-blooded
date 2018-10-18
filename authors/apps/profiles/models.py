@@ -49,7 +49,7 @@ class Profile(TimestampsMixin, FollowMixin):
     This model creates a user profile with bio and
     image field once a user creates an account.
     """
-    user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
     bio = models.TextField(default="Update your bio description")
     image = CloudinaryField('image')
 

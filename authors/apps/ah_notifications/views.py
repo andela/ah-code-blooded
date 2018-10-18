@@ -108,7 +108,7 @@ class SubscribeAPIView(APIView):
                     template='email_subscribe.html',
                     data=data,
                     to_email=request.user.email,
-                    subject='You have subscribed to notifications',
+                    subject='Email subscription activated',
                 )
                 return Response(res_data, status=status.HTTP_200_OK)
             else:
@@ -121,7 +121,7 @@ class SubscribeAPIView(APIView):
                     template='unsubscribe_email.html',
                     data=data,
                     to_email=request.user.email,
-                    subject='You have subscribed to notifications',
+                    subject='Email subscription deactivated',
                 )
                 return Response(res_data, status=status.HTTP_200_OK)    
         except User.DoesNotExist:
