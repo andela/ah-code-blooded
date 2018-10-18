@@ -126,36 +126,3 @@ class SubscribeAPIView(APIView):
                 return Response(res_data, status=status.HTTP_200_OK)    
         except User.DoesNotExist:
             return Response("User does not exist")
-
-    # def post(self, request):
-    #     subscribe = request.data.get("subscribe")    
-    #     try:
-    #         user = User.objects.filter(email=request.user.email).first()
-    #         if subscribe == "True":
-    #             user.is_subscribed = True
-    #             res_data = {"message": "You have successfully subscribed to our notifications."}
-    #             data = {
-    #                     'username': request.user.username,
-    #                 }
-    #             send_email(
-    #                 template='email_subscribe.html',
-    #                 data=data,
-    #                 to_email=request.user.email,
-    #                 subject='Email subscription activated',
-    #             )
-    #             return Response(res_data, status=status.HTTP_200_OK)
-    #         else:
-    #             user.is_subscribed = False
-    #             res_data = {"message": "You have successfully unsubscribed from our notifications."}
-    #             data = {
-    #                     'username': request.user.username,
-    #                 }
-    #             send_email(
-    #                 template='unsubscribe_email.html',
-    #                 data=data,
-    #                 to_email=request.user.email,
-    #                 subject='Email subscription deactivated',
-    #             )
-    #             return Response(res_data, status=status.HTTP_200_OK)    
-    #     except User.DoesNotExist:
-    #         return Response("User does not exist")
