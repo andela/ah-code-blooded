@@ -24,6 +24,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
 
+from notifications.signals import notify
+from authors.apps.ah_notifications.notifications import Verbs
+
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin, mixins.ListModelMixin,
@@ -460,6 +463,10 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
             else:
                 serializer = self.serializer_class(data=rating)
                 serializer.is_valid(raise_exception=True)
+
+                notify.send(rating_user, verb=Verbs.ARTICLE_RATING, recipient=rating_author, 
+                    description="{} has rated your article {}/5".format(rating_user, rating))
+
                 serializer.save(rated_by=request.user, article=article)
 
                 data = serializer.data
