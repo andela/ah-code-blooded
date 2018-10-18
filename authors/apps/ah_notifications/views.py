@@ -94,13 +94,13 @@ class SubscribeAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (BaseJSONRenderer,)
 
-    def post(self, request):
-        subscribe = request.data.get("subscribe")    
+    def post(self, request):    
         try:
             user = User.objects.filter(email=request.user.email).first()
-            if subscribe == True:
-                user.is_subscribed = True
-                res_data = {"message": "You have successfully subscribed to our notifications."}
+            if user.is_subscribed:
+                user.is_subscribed = False
+                user.save()
+                res_data = {"message": "You have successfully unsubscribed to our notifications."}
                 data = {
                         'username': request.user.username,
                     }
@@ -111,9 +111,10 @@ class SubscribeAPIView(APIView):
                     subject='Email subscription activated',
                 )
                 return Response(res_data, status=status.HTTP_200_OK)
-            else:
-                user.is_subscribed = False
-                res_data = {"message": "You have successfully unsubscribed from our notifications."}
+            if not user.is_subscribed:
+                user.is_subscribed = True
+                user.save()
+                res_data = {"message": "You have successfully subscribed from our notifications."}
                 data = {
                         'username': request.user.username,
                     }
