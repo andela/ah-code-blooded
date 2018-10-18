@@ -41,7 +41,7 @@ def send_user_commented_on_article_to_author(sender, instance, created, **kwargs
     author = instance.article.author
     
     notify.send(instance, verb=Verbs.ARTICLE_COMMENT, recipient=instance.article.author, 
-                description="{} just commented your article".format(instance.author.username))
+                description="You have a new comment from {}".format(instance.author.username))
 
 
 
