@@ -9,3 +9,5 @@ class Verbs:
     ARTICLE_DISLIKE = "article_dislike"
 
     ARTICLE_FAVORITING = "article_favoriting"
+
+    ARTICLE_COMMENT = "article_comment"
