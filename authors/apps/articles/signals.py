@@ -5,7 +5,7 @@ from authors.apps.ah_notifications.notifications import Verbs
 from authors.apps.core.mail_sender import send_email
 from notifications.signals import notify
 
-from authors.apps.articles.models import Article
+from authors.apps.articles.models import Article, FavouriteArticle
 
 @receiver(post_save, sender=Article)
 def send_create_article_notification_to_followers(sender, instance, created, **kwargs):
@@ -26,5 +26,14 @@ def send_create_article_notification_to_followers(sender, instance, created, **k
             )
         notify.send(instance, verb=Verbs.ARTICLE_CREATION, recipient=follower.user, 
                     description="An article by an author you follow has been created")
+
+
+@receiver(post_save, sender=FavouriteArticle)
+def send_user_favorited_article_to_author(sender, instance, created, **kwargs):
+    author = instance.article.author
+    
+    notify.send(instance, verb=Verbs.ARTICLE_FAVORITING, recipient=instance.article.author, 
+                description="Someone just favorited your article")
+
 
 
