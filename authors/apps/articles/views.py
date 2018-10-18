@@ -2,20 +2,23 @@ from django.contrib.auth.models import AnonymousUser
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
 from rest_framework import mixins
-from rest_framework.generics import CreateAPIView, DestroyAPIView, get_object_or_404, RetrieveAPIView
+from rest_framework.generics import DestroyAPIView, get_object_or_404, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView, ListCreateAPIView
+from rest_framework.generics import (RetrieveUpdateDestroyAPIView,
+                                     CreateAPIView, ListAPIView,
+                                     ListCreateAPIView, UpdateAPIView)
 from rest_framework.views import APIView
 from authors.apps.articles.models import Article, Tag, ArticleRating, Comment
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
-from authors.apps.articles.serializers import ArticleSerializer, TagSerializer, TagsSerializer, RatingSerializer, FavouriteSerializer, update
+from authors.apps.articles.serializers import (ArticleSerializer,
+                                               TagSerializer, RatingSerializer,
+                                               FavouriteSerializer, update)
 from authors.apps.core.renderers import BaseJSONRenderer
 
 from .pagination import StandardResultsSetPagination
 from authors.apps.articles.serializers import (
-    ArticleSerializer, CommentSerializer, UpdateCommentSerializer,
-    TagSerializer, TagsSerializer, RatingSerializer)
+    CommentSerializer, UpdateCommentSerializer, TagsSerializer)
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
@@ -160,12 +163,7 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         page = self.paginate_queryset(articles)
 
         serializer = self.serializer_class(
-            page,
-            context={
-                'request': request
-            },
-            many=True
-        )
+            page, context={'request': request}, many=True)
         return self.get_paginated_response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
@@ -323,36 +321,36 @@ class LikeDislikeMixin(BaseReactionsMixin, CreateAPIView, DestroyAPIView):
     BaseReactionMixin. These properties are required required by the like
     and dislike views.
     """
+
     def get_response(self, message):
-        return {
-            'message': message,
-            'reactions': self.get_reactions()
-        }
+        return {'message': message, 'reactions': self.get_reactions()}
+
 
 class ArticleFilter(filters.FilterSet):
     tag = filters.CharFilter(field_name='tags__tag', lookup_expr='exact')
-    username = filters.CharFilter(field_name='author__username', lookup_expr='exact')
+    username = filters.CharFilter(
+        field_name='author__username', lookup_expr='exact')
     title = filters.CharFilter(field_name='title', lookup_expr='exact')
 
     class Meta:
         model = Article
         fields = ['tag', 'username', 'title']
 
+
 class SearchFilterListAPIView(ListAPIView):
     serializer_class = ArticleSerializer
-    permission_classes = (AllowAny,)
-    renderer_classes = (BaseJSONRenderer,)
+    permission_classes = (AllowAny, )
+    renderer_classes = (BaseJSONRenderer, )
     queryset = Article.objects.all()
-
 
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     # filter fields are used to filter the articles using the tags, author's username and title
     filterset_class = ArticleFilter
     # search fields search all articles' parameters for the searched character
-    search_fields = ('tags__tag', 'author__username', 'title', 'body', 'description')
+    search_fields = ('tags__tag', 'author__username', 'title', 'body',
+                     'description')
     # ordering fields are used to render search outputs in a particular order e.g asending or descending order
     ordering_fields = ('author__username', 'title')
-
 
 
 class LikeAPIView(LikeDislikeMixin):
@@ -572,22 +570,24 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             }, status.HTTP_404_NOT_FOUND)
         try:
             pk = self.kwargs.get('pk')
-            parent = Comment.objects.get(pk=pk)
+            comment = Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
             message = {"Error": "comment with this ID doesn't exist"}
             return Response(message, status.HTTP_404_NOT_FOUND)
 
         updated_comment = serializer_class.update(
-            data=request.data.get('comment', {}), instance=parent)
+            data=request.data.get('comment', {}), instance=comment)
         return Response(
             self.serializer_class(updated_comment).data,
             status=status.HTTP_201_CREATED)
+
+
 class FavouriteArticleApiView(APIView):
     """
     define method to favourite article
     """
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = FavouriteSerializer
 
     def post(self, request, slug):
@@ -611,4 +611,81 @@ class FavouriteArticleApiView(APIView):
         serializer.is_valid(raise_exception=True)
         favourite = serializer.view_favourite(data)
         favourite.delete()
-        return Response({'message': 'Article removed from favourites'}, status.HTTP_200_OK)
+        return Response({
+            'message': 'Article removed from favourites'
+        }, status.HTTP_200_OK)
+
+
+class LikeComments(UpdateAPIView):
+    """This class Handles likes of comment"""
+
+    def update(self, request, *args, **kwargs):  # NOQA
+        """This method updates liking of comment"""
+        slug = self.kwargs['slug']
+
+        try:
+            Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            return Response({
+                'Error': 'Article doesnot exist'
+            }, status.HTTP_404_NOT_FOUND)
+        try:
+            pk = self.kwargs.get('pk')
+            comment = Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            message = {"Error": "comment with this ID doesn't exist"}
+            return Response(message, status.HTTP_404_NOT_FOUND)
+
+        # get the user
+        user = request.user
+        comment.dislikes.remove(user.id)
+
+        # confirm if user has already liked comment and remove him if
+        # clicks it again
+        confirm = bool(user in comment.likes.all())
+        if confirm is True:
+            comment.likes.remove(user.id)
+            return Response({'Success, You no longer like this comment'},
+                            status.HTTP_200_OK)
+
+        # This add the user to likes lists
+        comment.likes.add(user.id)
+        message = {"Sucess": "You liked this comment"}
+        return Response(message, status.HTTP_200_OK)
+
+
+class DislikeComments(UpdateAPIView):
+    """This class Handles dislikes of comment"""
+
+    def update(self, request, *args, **kwargs):  # NOQA
+        """This method updates liking of comment"""
+        slug = self.kwargs['slug']
+
+        try:
+            Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            return Response({
+                'Error': 'Article doesnot exist'
+            }, status.HTTP_404_NOT_FOUND)
+        try:
+            pk = self.kwargs.get('pk')
+            comment = Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            message = {"Error": "comment with this ID doesn't exist"}
+            return Response(message, status.HTTP_404_NOT_FOUND)
+        # get the user
+        user = request.user
+        comment.likes.remove(user.id)
+
+        # confirm if user has already disliked comment and remove him if
+        # clicks it again
+        confirm = bool(user in comment.dislikes.all())
+        if confirm is True:
+            comment.dislikes.remove(user.id)
+            message = {"Success": "You undislike this comment"}
+            return Response(message, status.HTTP_200_OK)
+
+        # This add the user to dislikes lists
+        comment.dislikes.add(user.id)
+        message = {"success": "You disliked this comment"}
+        return Response(message, status.HTTP_200_OK)

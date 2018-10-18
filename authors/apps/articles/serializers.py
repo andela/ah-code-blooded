@@ -78,6 +78,11 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
 
         fields = [
+            'slug', 'title', 'description', 'body', 'published', 'author',
+            'image', 'created_at', 'updated_at', 'tags', 'avg_rating',
+            'read_time', 'reactions'
+        ]
+        read_only_fields = [
             'slug',
             'title',
             'description',
@@ -244,14 +249,35 @@ class RatingSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """ serialize and deserialize comment model"""
-    body = serializers.CharField(max_length=200)
+    body = serializers.CharField(max_length=1200)  # remove
     article = ArticleSerializer(read_only=True)
     author = ProfileSerializer(read_only=True)
+    likes = serializers.SerializerMethodField(method_name='count_likes')
+    dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
 
     class Meta:
         model = Comment
 
         fields = "__all__"
+
+    def count_likes(self, instance):
+        """Returns the total likes of particlular comment"""
+        request = self.context.get('request')
+        liked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
+        return {'count': instance.likes.count(), 'me': liked_by_me}
+
+    def count_dislikes(self, instance):
+        """Returns  the total dislikes of a particular comment."""
+        request = self.context.get('request')
+        disliked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            disliked_by_me = instance.dislikes.all().filter(
+                id=user_id).count() == 1
+        return {'count': instance.dislikes.count(), 'me': disliked_by_me}
 
 
 class UpdateCommentSerializer(serializers.Serializer):
@@ -270,6 +296,8 @@ class UpdateCommentSerializer(serializers.Serializer):
         instance.body = data.get('body', instance.body)
         instance.save()
         return instance
+
+
 class FavouriteSerializer(serializers.ModelSerializer):
     """validate favourite model"""
 
@@ -290,7 +318,8 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
     def add_or_remove(self, data):
         data = self.get_user_email_and_article(data)
-        query_set = FavouriteArticle.favourite.filter(article=self.article, email=self.email)
+        query_set = FavouriteArticle.favourite.filter(
+            article=self.article, email=self.email)
         if query_set.exists():
             output = query_set.get()
             return output
@@ -317,6 +346,6 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
 
 def update(request, key):
-        data = request.data
-        data[key] = request.user.email
-        return data
+    data = request.data
+    data[key] = request.user.email
+    return data
