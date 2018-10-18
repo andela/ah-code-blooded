@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+    <nav class="white black-text">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="dashboard.html" class="brand-logo center black-text logo">Author's Haven</a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a href="#"><i class="material-icons black-text">search</i></a></li>
+                    <li><a href="#"><i class="material-icons black-text">view_module</i></a></li>
+                    <li><a href="#"><i class="material-icons black-text">notifications</i></a></li>
+                    <li>
+                        <a href="#" class="dropdown-trigger" data-target="profile-dropdown">
+                            <i class="material-icons">
+                                <img src="images/profile.jpg" alt="" class="profile circle">
+                            </i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="profile-dropdown" class="dropdown-content">
+        <ul style="min-width: 200px">
+            <li>
+                <ul>
+                    <li><a href="create-article.html">New Article</a></li>
+                    <li><a href="profile.html">My Articles</a></li>
+                    <li><a href="stats.html">My Stats</a></li>
+                </ul>
+            </li>
+            <div class="horizontal divider"></div>
+            <li>
+                <ul>
+                    <li><a href="">Favourites</a></li>
+                    <li><a href="">Bookmarks</a></li>
+                </ul>
+            </li>
+            <div class="horizontal divider"></div>
+            <li>
+                <ul>
+                    <li>
+                        <a href="profile.html">Profile</a>
+                    </li>
+                    <li>
+                        <a href="login.html">Logout</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="container" style="margin-top: 40px">
+        <div class="row">
+            <div class="col s12 m6 l4 ">
+                <div class="">
+                    <div class="row valign-wrapper">
+                        <div class="col s10">
+                            <h4>Stats</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m6 l4 ">
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Article</th>
+                    <th>Article Views</th>
+                    <th>Article Reads</th>
+                    <th>Read Ratio</th>
+                    <th>Article Comments</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th>
+                        <p>You Don't Need a Breakthrough, You Need a Microshift<p>
+                    </th>
+                    <th>100</th>
+                    <th>65</th>
+                    <th>65%</th>
+                    <th>45</th>
+                </tr>
+                <tr>
+                    <th>
+                        <p>You Don't Need a Breakthrough, You Need a Microshift<p>
+                    </th>
+                    <th>100</th>
+                    <th>65</th>
+                    <th>65%</th>
+                    <th>45</th>
+                </tr>
+                <tr>
+                    <th>
+                        <p>You Don't Need a Breakthrough, You Need a Microshift<p>
+                    </th>
+                    <th>100</th>
+                    <th>65</th>
+                    <th>65%</th>
+                    <th>45</th>
+                </tr>
+                <tr>
+                    <th>
+                        <p>You Don't Need a Breakthrough, You Need a Microshift<p>
+                    </th>
+                    <th>100</th>
+                    <th>65</th>
+                    <th>65%</th>
+                    <th>45</th>
+                </tr>
+                <tr>
+                    <th>
+                        <p>You Don't Need a Breakthrough, You Need a Microshift<p>
+                    </th>
+                    <th>100</th>
+                    <th>65</th>
+                    <th>65%</th>
+                    <th>45</th>
+                </tr>
+                <tr>
+                    <th>
+                        <p>You Don't Need a Breakthrough, You Need a Microshift<p>
+                    </th>
+                    <th>100</th>
+                    <th>65</th>
+                    <th>65%</th>
+                    <th>45</th>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            <ul class="pagination">
+                <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+                <li class="active"><a href="#!">1</a></li>
+                <li class="waves-effect"><a href="">2</a></li>
+                <li class="waves-effect"><a href="#!">3</a></li>
+                <li class="waves-effect"><a href="#!">4</a></li>
+                <li class="waves-effect"><a href="#!">5</a></li>
+                <li class="waves-effect"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+            </ul>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous">
+        </script>
+        <script type="text/javascript" src="js/materialize.min.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('textarea#textarea2').characterCounter();
+            });
+        </script>
+</body>
+
+</html>
