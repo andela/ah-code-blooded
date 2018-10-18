@@ -33,7 +33,7 @@ def send_user_favorited_article_to_author(sender, instance, created, **kwargs):
     author = instance.article.author
     
     notify.send(instance, verb=Verbs.ARTICLE_FAVORITING, recipient=instance.article.author, 
-                description="{} just favorited your article".format(instance.user.username))
+                description="{} just favorited your article".format(instance.email))
 
 
 @receiver(post_save, sender=Comment)
