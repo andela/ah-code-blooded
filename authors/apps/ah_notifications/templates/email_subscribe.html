@@ -1,24 +1,23 @@
 <!--
-This HTML Templates is to be used in sending emails to users.
-Extend this template in order to complete the content part with the information to pass to the user
-REQUIRED PARAMETERS : title - the subject of the email
+This template creates a UI for acknowledgement reporting articles .
+REQUIRED PARAMETERS:
+    username - the username of the user
+    article-slug -
+    author
+    report-category
+    user-message
 !-->
-{% load inlinecss %}
-{% inlinecss 'css/emails.css' %}
-    <html lang="en">
-    <body>
-    <header>
-        <h2>Author's Haven</h2>
-    </header>
-    <div id="content">
-        <div class="card">
-            <div class="content">
-                <h3 class="title center">{{ title }}</h3>
-                <br/>
-                ddeikdaklksaks
-            </div>
-        </div>
+{% extends 'email_template.html' %}
+{% block content %}
+
+    <div>
+        <p>
+            Dear <b>{{ username }}</b>,
+            You have subscribed to Authors' Haven's notifications. 
+            You will be able to receive notifications on articles you create and activities on people you follow.
+        </p>
+        <br/>
+        <p>Happy Writing!</p>
     </div>
-    </body>
-    </html>
-{% endinlinecss %}
+
+{% endblock %}
