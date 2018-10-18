@@ -4,6 +4,9 @@ from authors.apps.core.models import TimestampsMixin
 from authors.settings import AUTH_USER_MODEL
 from cloudinary.models import CloudinaryField
 
+from notifications.signals import notify
+from authors.apps.ah_notifications.notifications import Verbs
+
 
 class FollowMixin(models.Model):
     """
@@ -19,6 +22,8 @@ class FollowMixin(models.Model):
         Follow a profile.
         :param profile: Profile
         """
+        notify.send(self, verb=Verbs.USER_FOLLOWING, recipient=profile.user, 
+                    description="{} has just followed you!".format(self.username))
         return self.follows.add(profile)
 
     def un_follow(self, profile):

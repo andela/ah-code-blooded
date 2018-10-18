@@ -4,6 +4,8 @@ class Verbs:
     """
     ARTICLE_CREATION = "article_creation"
 
+    USER_FOLLOWING = "user_following"
+
     ARTICLE_LIKE = "article_like"
 
     ARTICLE_DISLIKE = "article_dislike"
