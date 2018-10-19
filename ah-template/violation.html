@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+<nav class="white black-text">
+    <div class="container">
+        <div class="nav-wrapper">
+            <a href="dashboard.html" class="brand-logo center black-text logo">Author's Haven</a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="#"><i class="material-icons black-text">search</i></a></li>
+                <li><a href="#"><i class="material-icons black-text">view_module</i></a></li>
+                <li><a href="#"><i class="material-icons black-text">notifications</i></a></li>
+                <li>
+                    <a href="#" class="dropdown-trigger" data-target="profile-dropdown">
+                        <i class="material-icons">
+                            <img src="images/profile.jpg" alt="" class="profile circle">
+                        </i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div id="profile-dropdown" class="dropdown-content">
+    <ul style="min-width: 200px">
+        <li>
+            <ul>
+                <li><a href="create-article.html">New Article</a></li>
+                <li><a href="profile.html">My Articles</a></li>
+            </ul>
+        </li>
+        <div class="horizontal divider"></div>
+        <li>
+            <ul>
+                <li><a href="">Favourites</a></li>
+                <li><a href="">Bookmarks</a></li>
+            </ul>
+        </li>
+        <div class="horizontal divider"></div>
+        <li>
+            <ul>
+                <li>
+                    <a href="profile.html">Profile</a>
+                </li>
+                <li>
+                    <a href="login.html">Logout</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="responsive-table container">
+    <table>
+        <thead>
+          <tr>
+              <th>Reported articles</Article></th>
+              <th>Author</Article></th>
+              <th>Reported times</th>
+              <th>Reports</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>You Don't Need a Breakthrough, You Need a Microshift</td>
+            <td>Moses Gitau</td>
+            <td> <a class="modal-trigger" data-target ="reporters" href="#!">5</a> </td>
+            <td><button data-target="report" class="btn modal-trigger">view</button></td>
+          </tr>
+          <tr>
+            <td>You Don't Need a Breakthrough, You Need a Microshift</td>
+            <td>Allan Imire</td>
+            <td> <a class="modal-trigger" data-target ="reporters" href="#!">3</a> </td>
+            <td><button data-target="report1" class="btn modal-trigger">view</button></td>
+          </tr>
+          <tr>
+            <td>You Don't Need a Breakthrough, You Need a Microshift</td>
+            <td>Bev Bev</td>
+            <td> <a class="modal-trigger" data-target ="reporters" href="#!">8</a> </td>
+            <td><button data-target="report" class="btn modal-trigger">view</button></td>
+          </tr>
+          <tr>
+            <td>You Don't Need a Breakthrough, You Need a Microshift</td>
+            <td>Yahya</td>
+            <td> <a class="modal-trigger" data-target ="reporters" href="#!">1</a> </td>
+            <td><button data-target="report" class="btn modal-trigger">view</button></td>
+          </tr>
+          <tr>
+            <td>You Don't Need a Breakthrough, You Need a Microshift</td>
+            <td>Brian Ok</td>
+            <td> <a class="modal-trigger" data-target ="reporters" href="#!">10</a> </td>
+            <td><button data-target="report" class="btn modal-trigger">view</button></td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+ <!-- report modal-->
+ <div id="report" class="modal">
+    <div class="modal-content">
+      <h4>Harassment</h4>
+      <div>
+        <h5>This is a reported article</h5>
+      </div>
+      <div>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam quia, eius magnam temporibus neque in porro at officiis! Saepe debitis neque at odio aut expedita voluptates aperiam qui! Voluptatem, pariatur!</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect white btn-flat">Reject</a>
+            <a href="#!" class="modal-close waves-effect teal white-text btn-flat">Approve</a>
+    </div>
+  </div>
+
+   <!-- report modal-->
+ <div id="report1" class="modal">
+    <div class="modal-content">
+      <h4>Hate Speech</h4>
+      <div>
+        <h5>This is a reported article</h5>
+      </div>
+      <div>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam quia, eius magnam temporibus neque in porro at officiis! Saepe debitis neque at odio aut expedita voluptates aperiam qui! Voluptatem, pariatur!</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect white btn-flat">Reject</a>
+            <a href="#!" class="modal-close waves-effect teal white-text btn-flat">Approve</a>
+    </div>
+  </div>
+  <div id="reporters" class="modal">
+    <div class="modal-content">
+        <div>
+            <h5>Reporters</h5>
+            <ol>
+                <li>Hanningtone</li>
+                <li>Alvin</li>
+                <li>Gibb</li>
+                <li>Moffat</li>
+                <li>Elton</li>
+            </ol>
+        </div>
+     
+    </div>
+    <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect teal white-text btn-flat">close</a>
+    </div>
+  </div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="js/materialize.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
