@@ -103,7 +103,7 @@ class SubscribeAPIView(APIView):
             user.save()
             res_data = {"message": "You have successfully unsubscribed to our notifications."}
             data = {
-                'username': request.user.username,
+                'username': request.user.username
             }
             send_email(
                 template='email_subscribe.html',

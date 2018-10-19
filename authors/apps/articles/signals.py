@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from authors.apps.ah_notifications.notifications import Verbs
 from authors.apps.core.mail_sender import send_email
 from notifications.signals import notify
+from rest_framework.reverse import reverse
 
 from authors.apps.articles.models import Article, FavouriteArticle, Comment
 
@@ -17,7 +18,8 @@ def send_create_article_notification_to_followers(sender, instance, created, **k
             data = {
                 'username': follower.user.username,
                 'article_title': instance.title,
-                'author': instance.author.username
+                'author': instance.author.username,
+                'unsubscribe_url': 'http://localhost:8000'+reverse('notifications:subscribe')
             }
             send_email(
                 template='article_created.html',
