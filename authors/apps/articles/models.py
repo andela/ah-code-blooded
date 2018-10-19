@@ -6,6 +6,7 @@ from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from authors.apps.authentication.models import User
 from authors.apps.core.models import TimestampsMixin
+from rest_framework.reverse import reverse
 
 
 class ReactionMixin(models.Model):
@@ -103,6 +104,29 @@ class Article(TimestampsMixin, ReactionMixin):
         """
         return self.title
 
+    def get_share_article(self, request=None):
+        """
+        This method shares article through twitter, facebook, email
+        linkedin and email.
+        """
+        article = reverse(
+            "articles:articles-detail",
+            kwargs={'slug': self.slug},
+            request=request)
+
+        article_uri = {
+            'Email':
+            'mailto:?subject=New Article Alert&body={}'.format(article),
+            'Twitter':
+            'https://twitter.com/intent/tweet?url={}'.format(article),
+            'Facebook':
+            'https://www.facebook.com/sharer/sharer.php?u={}'.format(article),
+            'LinkedIn':
+            'http://www.linkedin.com/shareArticle?mini=true&amp;url={}'.format(
+                article),
+        }
+        return article_uri
+
 
 class Tag(TimestampsMixin):
     """
@@ -169,6 +193,9 @@ class Comment(TimestampsMixin):
         User, related_name='comment_likes', blank=True)
     dislikes = models.ManyToManyField(
         User, related_name='comment_dislikes', blank=True)
+
+
+pre_save.connect(Article.pre_save, Article, dispatch_uid="authors.apps.articles.models.Article")
 
 
 class FavouriteArticle(TimestampsMixin):

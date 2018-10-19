@@ -130,7 +130,6 @@ class CreateArticlesTestCase(BaseArticlesTestCase):
         updated_readtime = res.data["read_time"]
         self.assertEqual(current_readtime-updated_readtime, 10.0)
 
-
     def test_unverified_user_cannot_create_article(self):
         """
         Ensure an unverified user cannot create an article
@@ -239,6 +238,19 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         response = self.get_single_article(slug)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(str.encode(slug), response.content)
+
+    def test_article_has_share_links(self):
+        """
+        Ensures the user can be able to share an article through social media
+        platforms like Twitter, Facebook, LinkedIn or mail
+        """
+        slug = self.create_article()['slug']
+        res = self.get_single_article(slug)
+        self.assertIn('share_article', res.data)
+        self.assertIn('Facebook', res.data['share_article'])
+        self.assertIn('Twitter', res.data['share_article'])
+        self.assertIn('LinkedIn', res.data['share_article'])
+        self.assertIn('Email', res.data['share_article'])
 
     def test_article_has_read_time(self):
         """

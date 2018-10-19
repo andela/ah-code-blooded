@@ -71,6 +71,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField(read_only=True)
 
     read_time = serializers.SerializerMethodField(read_only=True)
+    share_article = serializers.SerializerMethodField(read_only=True)
 
     # tagList = TagField(many=True, required=False)
 
@@ -78,11 +79,6 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
 
         fields = [
-            'slug', 'title', 'description', 'body', 'published', 'author',
-            'image', 'created_at', 'updated_at', 'tags', 'avg_rating',
-            'read_time', 'reactions'
-        ]
-        read_only_fields = [
             'slug',
             'title',
             'description',
@@ -95,9 +91,18 @@ class ArticleSerializer(serializers.ModelSerializer):
             'updated_at',
             'tags',
             'reactions',
+            'share_article',
             'read_time',
         ]
         read_only_fields = ('slug', 'author', 'reactions')
+
+    def get_share_article(self, instance):
+        """
+        Share articles for facebook, twitter, Linkenin
+        and email.
+        """
+        request = self.context.get('request')
+        return instance.get_share_article(request=request)
 
     def get_author(self, obj):
         serializer = ProfileSerializer(
