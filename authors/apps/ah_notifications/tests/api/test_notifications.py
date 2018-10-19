@@ -179,11 +179,11 @@ class ReadNotificationsTestCase(BaseNotificationsTestCase):
         if len(notifications) != 1:
             for notification in data['data']['notifications']:
                 self.client.put(
-                    reverse("notifications:read-notifications", kwargs={'pk': notification['id']})
+                    reverse("notifications:read-notification", kwargs={'pk': notification['id']})
                 )
         else:
             return self.client.put(
-                reverse("notifications:read-notifications", kwargs={'pk': notifications[0]['id']})
+                reverse("notifications:read-notification", kwargs={'pk': notifications[0]['id']})
             )
 
     def test_can_read_notification(self):
@@ -208,7 +208,8 @@ class ReadNotificationsTestCase(BaseNotificationsTestCase):
         """
         self.sendManyNotifications()
 
-        self.read_notifications(data=self.get(notification_type='read'))
+        status_code, data = self.get(notification_type='unread')
+        self.read_notifications(data=data)
 
         status_code, data = self.get()
         self.assertEqual(data['data']['count'], self.DEFAULT_NOTIFICATION_COUNT)
@@ -221,7 +222,7 @@ class NotificationSubscriptionTestCase(AuthenticatedTestCase):
         Helper method to subscribe to emails
         :return:
         """
-        return self.client.post(reverse("notifications:subscribe"), data={}, format=json)
+        return self.client.post(reverse("notifications:subscribe"), data={})
 
     def test_user_can_unsubscribe_from_notifications(self):
         """

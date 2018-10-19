@@ -464,8 +464,8 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
                 serializer = self.serializer_class(data=rating)
                 serializer.is_valid(raise_exception=True)
 
-                notify.send(rating_user, verb=Verbs.ARTICLE_RATING, recipient=rating_author, 
-                    description="{} has rated your article {}/5".format(rating_user, rating))
+                notify.send(rating_user, verb=Verbs.ARTICLE_RATING, recipient=rating_author,
+                            description="{} has rated your article {}/5".format(rating_user, rating))
 
                 serializer.save(rated_by=request.user, article=article)
 
@@ -606,14 +606,12 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             status=status.HTTP_201_CREATED)
 
 
-
-
 class FavouriteArticleApiView(APIView):
     """
     define method to favourite article
     """
 
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = FavouriteSerializer
 
     def post(self, request, slug):
@@ -674,9 +672,13 @@ class LikeComments(UpdateAPIView):
             return Response({'Success, You no longer like this comment'},
                             status.HTTP_200_OK)
 
+        # notify the author
+        notify.send(request.user, recipient=comment.author.user, verb=Verbs.COMMENT_LIKE,
+                    description="{} liked your comment".format(request.user.username))
+
         # This add the user to likes lists
         comment.likes.add(user.id)
-        message = {"Sucess": "You liked this comment"}
+        message = {"Success": "You liked this comment"}
         return Response(message, status.HTTP_200_OK)
 
 

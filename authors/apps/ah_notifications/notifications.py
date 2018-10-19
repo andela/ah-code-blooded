@@ -15,3 +15,5 @@ class Verbs:
     ARTICLE_COMMENT = "article_comment"
 
     ARTICLE_RATING = "article_rating"
+
+    COMMENT_LIKE = "comment_like"

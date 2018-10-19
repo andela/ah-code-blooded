@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/', include('authors.apps.authentication.urls', namespace='authentication')),
     path('api/', include('authors.apps.articles.urls', namespace="articles")),
     path('api/profiles/', include('authors.apps.profiles.urls', namespace='profiles')),
-    path('api/', include('authors.apps.articles.urls', namespace="articles")),
+    path('api/', include('authors.apps.articles.urls', namespace="ah-articles")),
     path('api/tags/', TagsAPIView.as_view(), name="tags"),
     path('api/notifications/', include('authors.apps.ah_notifications.urls', namespace='notifications')),
     path('', schema_view),
