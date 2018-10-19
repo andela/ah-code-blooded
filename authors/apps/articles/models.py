@@ -6,6 +6,8 @@ from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from authors.apps.authentication.models import User
 from authors.apps.core.models import TimestampsMixin
+from notifications.signals import notify
+from authors.apps.ah_notifications.notifications import Verbs
 from rest_framework.reverse import reverse
 
 
@@ -26,6 +28,9 @@ class ReactionMixin(models.Model):
         :param user:
         :return:
         """
+        if user != self.author:
+            notify.send(user, verb=Verbs.ARTICLE_LIKE, recipient=self.author,
+                    description="{} just liked your article".format(user.username))
         self.un_dislike(user)
         # add like for the user
         self.likes.add(user)
@@ -47,6 +52,9 @@ class ReactionMixin(models.Model):
         :param user:
         :return:
         """
+        if user != self.author:
+            notify.send(user, verb=Verbs.ARTICLE_DISLIKE, recipient=self.author,
+                    description="{} just disliked your article".format(user.username))
         self.un_like(user)
         self.dislikes.add(user)
 

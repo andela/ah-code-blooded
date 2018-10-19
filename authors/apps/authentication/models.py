@@ -79,6 +79,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     # falsed.
     is_staff = models.BooleanField(default=False)
 
+    # To receive notification emails, users have to be subscribed
+    # If a user is not subscribed, they will not receive notification emails
+    is_subscribed = models.BooleanField(default=True)
+
     # A timestamp representing when this object was created.
     created_at = models.DateTimeField(auto_now_add=True)
 

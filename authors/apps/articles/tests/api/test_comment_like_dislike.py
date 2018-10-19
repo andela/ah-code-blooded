@@ -86,5 +86,5 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
     def test_disike_nonexisting_pk_comment(self):
         """Test incorrect pk in liking"""
         self.register_and_login(self.user)
-        response = self.dislike(self.slug, 2)
+        response = self.dislike(self.slug, 3)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
