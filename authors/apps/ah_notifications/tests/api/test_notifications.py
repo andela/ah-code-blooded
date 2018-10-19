@@ -4,6 +4,7 @@ from notifications.signals import notify
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from authors.apps.articles.tests.api.test_articles import BaseArticlesTestCase
 from authors.apps.authentication.tests.api.test_auth import AuthenticatedTestCase
 
 
@@ -242,3 +243,26 @@ class NotificationSubscriptionTestCase(AuthenticatedTestCase):
         response = self.toggle_subscription()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(b'You have successfully subscribed from our notifications.', response.content)
+
+
+class ArticleNotificationTestCase(BaseArticlesTestCase, BaseNotificationsTestCase):
+
+    def test_user_gets_notification_upon_article_creation(self):
+        """
+        Ensure a user gets an email when they are subscribed
+        :return:
+        """
+        # login another user to follow
+        self.register_and_login(self.user2)
+
+        # follow the first user
+        self.client.post(reverse("profiles:follow", kwargs={'username': self.user['user']['username']}))
+
+        # login as first user and create an article
+        self.login(self.user)
+        self.create_article(published=True)
+
+        # login as second user and check notifications
+        self.login(self.user2)
+        status_code, data = self.get(notification_type='unsent')
+        self.assertEqual(data['data']['count'], 1)
