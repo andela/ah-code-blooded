@@ -12,6 +12,11 @@
     cursor: pointer;
 }
 
+ul #active a {
+    color: white !important;
+    background-color: black;
+}
+
 .profile {
     width: 40px;
     margin-top: 10px;
