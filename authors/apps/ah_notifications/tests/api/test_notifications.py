@@ -152,3 +152,92 @@ class SentNotificationTestCase(BaseNotificationsTestCase):
         # now check whether they exist in the sentbox
         status_code, data = self.get()
         self.assertEqual(data['data']['count'], self.DEFAULT_NOTIFICATION_COUNT)
+
+
+class UnReadNotificationTestCase(BaseNotificationsTestCase):
+    def setUp(self):
+        super().setUp()
+        self.notification_type = "unread"
+
+    def notifications_unread_once_created(self):
+        """
+        Notifications should be unread by default
+        :return:
+        """
+        self.sendManyNotifications()
+        status_code, data = self.get()
+        self.assertEqual(data['data']['count'], self.DEFAULT_NOTIFICATION_COUNT)
+
+
+class ReadNotificationsTestCase(BaseNotificationsTestCase):
+    def setUp(self):
+        super().setUp()
+        self.notification_type = "read"
+
+    def read_notifications(self, data):
+        notifications = data['data']['notifications']
+        if len(notifications) != 1:
+            for notification in data['data']['notifications']:
+                self.client.put(
+                    reverse("notifications:read-notifications", kwargs={'pk': notification['id']})
+                )
+        else:
+            return self.client.put(
+                reverse("notifications:read-notifications", kwargs={'pk': notifications[0]['id']})
+            )
+
+    def test_can_read_notification(self):
+        """
+        Ensure a notification can be marked as read
+        :return:
+        """
+        self.sendNotification()
+        status_code, data = self.get(notification_type='unread')
+        # mark the notification as read
+        response = self.read_notifications(data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        status_code, data = self.get()
+        self.assertEqual(data['data']['count'], 1)
+
+    def test_can_get_read_notifications(self):
+        """
+        Ensure notifications after read can be queried
+        :return:
+        """
+        self.sendManyNotifications()
+
+        self.read_notifications(data=self.get(notification_type='read'))
+
+        status_code, data = self.get()
+        self.assertEqual(data['data']['count'], self.DEFAULT_NOTIFICATION_COUNT)
+
+
+class NotificationSubscriptionTestCase(AuthenticatedTestCase):
+
+    def toggle_subscription(self):
+        """
+        Helper method to subscribe to emails
+        :return:
+        """
+        return self.client.post(reverse("notifications:subscribe"), data={}, format=json)
+
+    def test_user_can_unsubscribe_from_notifications(self):
+        """
+        Ensure a user can opt to unsubscribe from notifications
+        :return:
+        """
+        response = self.toggle_subscription()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(b'You have successfully unsubscribed to our notifications.', response.content)
+
+    def test_user_can_subscribe_back_to_the_notifications(self):
+        """
+        Ensure after subscription, a user can get back to subscription
+        :return:
+        """
+        self.toggle_subscription()
+        response = self.toggle_subscription()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(b'You have successfully subscribed from our notifications.', response.content)

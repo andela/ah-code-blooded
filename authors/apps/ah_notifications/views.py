@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from authors.apps.authentication.models import User
 from authors.apps.core.mail_sender import send_email
 
+
 class NotificationAPIView(generics.ListAPIView, generics.DestroyAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = NotificationSerializer
@@ -28,7 +29,7 @@ class NotificationAPIView(generics.ListAPIView, generics.DestroyAPIView):
         return Response({"message": "{} notifications deleted".format(count)})
 
     def notifications(self, request):
-        return Notification.objects.all()
+        pass
 
 
 class AllNotificationsAPIView(NotificationAPIView):
@@ -87,6 +88,7 @@ class SentNotificationsAPIView(NotificationAPIView):
     def notifications(self, request):
         return request.user.notifications.active().sent()
 
+
 class SubscribeAPIView(APIView):
     """
     Allow users to subscribe to notifications
@@ -94,36 +96,33 @@ class SubscribeAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (BaseJSONRenderer,)
 
-    def post(self, request):    
-        try:
-            user = User.objects.filter(email=request.user.email).first()
-            if user.is_subscribed:
-                user.is_subscribed = False
-                user.save()
-                res_data = {"message": "You have successfully unsubscribed to our notifications."}
-                data = {
-                        'username': request.user.username,
-                    }
-                send_email(
-                    template='email_subscribe.html',
-                    data=data,
-                    to_email=request.user.email,
-                    subject='Email subscription activated',
-                )
-                return Response(res_data, status=status.HTTP_200_OK)
-            if not user.is_subscribed:
-                user.is_subscribed = True
-                user.save()
-                res_data = {"message": "You have successfully subscribed from our notifications."}
-                data = {
-                        'username': request.user.username,
-                    }
-                send_email(
-                    template='unsubscribe_email.html',
-                    data=data,
-                    to_email=request.user.email,
-                    subject='Email subscription deactivated',
-                )
-                return Response(res_data, status=status.HTTP_200_OK)    
-        except User.DoesNotExist:
-            return Response("User does not exist")
+    def post(self, request):
+        user = User.objects.filter(email=request.user.email).first()
+        if user.is_subscribed:
+            user.is_subscribed = False
+            user.save()
+            res_data = {"message": "You have successfully unsubscribed to our notifications."}
+            data = {
+                'username': request.user.username,
+            }
+            send_email(
+                template='email_subscribe.html',
+                data=data,
+                to_email=request.user.email,
+                subject='Email subscription activated',
+            )
+            return Response(res_data, status=status.HTTP_200_OK)
+        if not user.is_subscribed:
+            user.is_subscribed = True
+            user.save()
+            res_data = {"message": "You have successfully subscribed from our notifications."}
+            data = {
+                'username': request.user.username,
+            }
+            send_email(
+                template='unsubscribe_email.html',
+                data=data,
+                to_email=request.user.email,
+                subject='Email subscription deactivated',
+            )
+            return Response(res_data, status=status.HTTP_200_OK)

@@ -542,7 +542,7 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
             return Response({
-                'Error': 'Article doesnot exist'
+                'Error': 'Article does not exist'
             }, status.HTTP_404_NOT_FOUND)
 
         # Get the parent commet of the thread
