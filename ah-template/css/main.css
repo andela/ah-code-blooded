@@ -176,3 +176,26 @@ article {
 .tag:hover {
     background: rgba(100, 100, 100, .2);
 }
+
+.notification{
+    padding: 1em 0 0 0;
+}
+
+.notification .body{
+    padding-left: 0.6em;
+}
+
+.notification p{
+    margin: 0 !important;
+    padding: !important;
+}
+.notification .description{
+    font-size: 0.8em;
+    display: block !important;
+}
+
+.notification .meta{
+    font-size: 0.6em;
+    color: #666;
+    display: block !important;
+}

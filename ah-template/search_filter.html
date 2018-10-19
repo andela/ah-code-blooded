@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        .tag{
+            margin-left: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="white black-text">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="dashboard.html" class="brand-logo center black-text logo">Author's Haven</a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a href="#"><i class="material-icons black-text">search</i></a></li>
+                    <li><a href="#"><i class="material-icons black-text">view_module</i></a></li>
+                    <li><a href="#"><i class="material-icons black-text">notifications</i></a></li>
+                    <li>
+                        <a href="#" class="dropdown-trigger" data-target="profile-dropdown">
+                            <i class="material-icons">
+                                <img src="images/profile.jpg" alt="" class="profile circle">
+                            </i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="profile-dropdown" class="dropdown-content">
+        <ul style="min-width: 200px">
+            <li>
+                <ul>
+                    <li><a href="create-article.html">New Article</a></li>
+                    <li><a href="profile.html">My Articles</a></li>
+                    <li><a href="stats.html">My Stats</a></li>
+                </ul>
+            </li>
+            <div class="horizontal divider"></div>
+            <li>
+                <ul>
+                    <li><a href="">Favourites</a></li>
+                    <li><a href="">Bookmarks</a></li>
+                </ul>
+            </li>
+            <div class="horizontal divider"></div>
+            <li>
+                <ul>
+                    <li>
+                        <a href="profile.html">Profile</a>
+                    </li>
+                    <li>
+                        <a href="login.html">Logout</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="container">
+        <div class="card" style="margin-top:40px">
+            <div class="card-content">
+                <div class="nav-wrapper">
+                    <form>
+                        <div class="input-field">
+                          <input id="search" type="search" required value="Angular JS">
+                          <label class="label-icon" for="search"><i class="material-icons">search</i></label>
+                          <i class="material-icons">close</i>
+                        </div>
+                      </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col s12">
+                <ul class="tabs">
+                    <li class="tab col s3"><a class="active" href="#mystories">Stories</a></li>
+                    <li class="tab col s3"><a href="#profiles">People</a></li>
+                    <li class="tab col s3"><a href="#tags">Tags</a></li>
+                </ul>
+            </div>
+            <div id="mystories" class="col s12">
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_10.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_12.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <a href="article.html" class="row article_preview small">
+                        <div class="col s2">
+                            <img src="images/image_4.jpeg" alt="">
+                        </div>
+                        <div class="col s10">
+                            <div class="title">You Don't Need a Breakthrough, You Need a Microshift</div>
+                            <div class="description">Meaningful change rarely happens overnight...</div>
+                            <div class="author">Moses Gitau</div>
+                            <div class="date">Sep 11</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div id="tags" class="col s12">
+                <div class="section">
+                    <div class="col">
+                        <a href="" class="tag">Angular JS</a>
+                        <a href="" class="tag">React</a>
+                        <a href="" class="tag">Javascript</a>
+                        <a href="" class="tag">Web Development</a>
+                    </div>
+                </div>
+            </div>
+            <div id="profiles" class="col s12">
+                <div class="section">
+                    <div class="row">
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_2.jpeg" alt="">
+                                        <span class="card-title">Moses Gitau</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn white black-text">FOLLOW</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_7.jpeg" alt="">
+                                        <span class="card-title">Allan Imire</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn white black-text">FOLLOW</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_4.jpeg" alt="">
+                                        <span class="card-title">Chariss Karunjira</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn teal white-text following-button">FOLLOWING</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col s3">
+                            <a href="other_profile.html">
+                                <div class="card follow following">
+                                    <div class="card-image">
+                                        <img src="images/image_3.jpeg" alt="">
+                                        <span class="card-title">Beverly Kololi</span>
+                                    </div>
+                                    <div class="card-content">
+                                        <button class="btn white black-text">FOLLOW</button>
+                                        <br>
+                                        <br>
+                                        <p>Statistician and a programmer. I love coding in python. Also data science is
+                                            my
+                                            interest.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.tabs').tabs();
+        });
+        $("#upload-image-trigger").click(function () {
+            $("#upload-image").click()
+        });
+    </script>
+</body>
+
+</html>
