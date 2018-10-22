@@ -5,7 +5,7 @@ from authors.apps.articles.views import (
     ArticleAPIView, ArticleTagsAPIView, LikeAPIView, RatingAPIView,
     CommentAPIView, CommentCreateUpdateDestroy, DislikeAPIView,
     ReactionsAPIView, SearchFilterListAPIView, FavouriteArticleApiView,
-    LikeComments, DislikeComments)
+    LikeComments, DislikeComments, ArticleStatsView)
 
 app_name = "articles"
 router = DefaultRouter()
@@ -59,5 +59,11 @@ urlpatterns = [
     path(
         'articles/<slug>/comments/<pk>/dislikes',
         DislikeComments.as_view(),
-        name="dislikes")
+        name="dislikes"),
+    path('articles/search_filter', SearchFilterListAPIView.as_view(), name='search-filter'),
+    path('articles/<str:slug>/unlike/', DislikeAPIView.as_view(), name='dislike'),
+    path('articles/<str:slug>/reactions/', ReactionsAPIView.as_view(), name='reactions'),
+    path('articles/<slug>/rate/', RatingAPIView.as_view(), name='rate-article'),
+    path('articles/<slug>/favourite/', FavouriteArticleApiView.as_view(), name="favourite_article"),
+    path('article-stats/', ArticleStatsView.as_view(), name="stats")
 ]

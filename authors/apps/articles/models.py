@@ -216,3 +216,12 @@ class FavouriteArticle(TimestampsMixin):
         on_delete=models.CASCADE,
     )
     favourite = models.Manager()
+
+
+class ArticleView(models.Model):
+    """
+    This model is used to record views to articles. It captures the article and the
+    viewing user. It purely for stats purposes.
+    """
+    user = models.ForeignKey(User, related_name="article_views", on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, related_name="article_views", on_delete=models.CASCADE)

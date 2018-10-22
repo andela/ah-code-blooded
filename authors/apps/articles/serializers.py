@@ -5,8 +5,9 @@ from rest_framework.exceptions import NotFound
 from authors.apps.profiles.models import Profile
 from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
-from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, FavouriteArticle
+from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, FavouriteArticle, ArticleView
 from authors.apps.authentication.models import User
+# from authors.apps.authentication.views import ArticlesStatView
 
 
 class TagField(serializers.RelatedField):
@@ -351,6 +352,21 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
 
 def update(request, key):
-    data = request.data
-    data[key] = request.user.email
-    return data
+        data = request.data
+        data[key] = request.user.email
+        return data
+
+
+class StatsSerializer(serializers.ModelSerializer):
+    view_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+
+    def get_comment_count(self, value):
+        return Comment.objects.filter(article=value).count()
+
+    def get_view_count(self, value):
+        return ArticleView.objects.filter(article=value).count()
+
+    class Meta:
+        model = Article
+        fields = ['slug', 'title', 'view_count', 'comment_count']

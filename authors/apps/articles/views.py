@@ -9,11 +9,11 @@ from rest_framework.generics import (RetrieveUpdateDestroyAPIView,
                                      CreateAPIView, ListAPIView,
                                      ListCreateAPIView, UpdateAPIView)
 from rest_framework.views import APIView
-from authors.apps.articles.models import Article, Tag, ArticleRating, Comment
+from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, ArticleView
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly
 from authors.apps.articles.serializers import (ArticleSerializer,
                                                TagSerializer, RatingSerializer,
-                                               FavouriteSerializer, update)
+                                               FavouriteSerializer, update, StatsSerializer)
 from authors.apps.core.renderers import BaseJSONRenderer
 
 from .pagination import StandardResultsSetPagination
@@ -139,7 +139,8 @@ class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
             return Response({
                 'errors': 'Article does not exist'
             }, status.HTTP_404_NOT_FOUND)
-
+        if request.user and not isinstance(request.user, AnonymousUser) and article.author != request.user:
+            ArticleView.objects.get_or_create(article=article, user=request.user)
         serializer = self.serializer_class(
             article, context={'request': request})
 
@@ -717,3 +718,15 @@ class DislikeComments(UpdateAPIView):
         comment.dislikes.add(user.id)
         message = {"success": "You disliked this comment"}
         return Response(message, status.HTTP_200_OK)
+        return Response({'message': 'Article removed from favourites'}, status.HTTP_200_OK)
+
+
+class ArticleStatsView(ListAPIView):
+    """"""
+    permission_classes = (IsAuthenticated,)
+    serializer_class = StatsSerializer
+    renderer_classes = (BaseJSONRenderer,)
+    renderer_names = ('stat', 'stats')
+
+    def get_queryset(self):
+        return Article.objects.filter(author=self.request.user)
