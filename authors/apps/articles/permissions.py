@@ -13,3 +13,10 @@ class IsArticleOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # the safe methods are implemented independently in the articles mixins, no need for the implementation here.
         return obj.author == request.user
+
+
+class IsNotArticleOwner(permissions.BasePermission):
+    message = "You cannot perform this action on your own article"
+
+    def has_object_permission(self, request, view, obj):
+        return obj.author != request.user

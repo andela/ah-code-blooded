@@ -34,6 +34,18 @@ class ArticleModelTest(AuthenticatedTestCase):
         article = self.create_article()
         self.assertEqual(article.__str__(), "This is a simple title")
 
+    def test_soft_deletes(self):
+        article = self.create_article()
+        self.assertIsNone(article.deleted_at)
+        article.delete()
+        self.assertIsNotNone(article.deleted_at)
+
+    def test_hard_deletes(self):
+        article = self.create_article()
+        article.delete(hard=True)
+        with self.assertRaises(Article.DoesNotExist):
+            Article.objects.get(slug=article.slug)
+
 
 class TagModelTest(TestCase):
 
