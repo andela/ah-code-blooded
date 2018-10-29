@@ -640,6 +640,7 @@ class FavouriteArticleApiView(APIView):
 
 class LikeComments(UpdateAPIView):
     """This class Handles likes of comment"""
+    serializer_class = CommentSerializer
 
     def update(self, request, *args, **kwargs):  # NOQA
         """This method updates liking of comment"""
@@ -682,6 +683,7 @@ class LikeComments(UpdateAPIView):
 
 class DislikeComments(UpdateAPIView):
     """This class Handles dislikes of comment"""
+    serializer_class = CommentSerializer
 
     def update(self, request, *args, **kwargs):  # NOQA
         """This method updates liking of comment"""
