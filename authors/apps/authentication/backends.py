@@ -4,8 +4,7 @@ from django.conf import settings
 
 from rest_framework import authentication, exceptions
 
-from .models import User
-
+from .models import User, BlacklistedToken
 
 class JWTAuthentication(authentication.BaseAuthentication): # NOQA
     """ JWTAuthenticattion implement authentication
@@ -37,6 +36,9 @@ class JWTAuthentication(authentication.BaseAuthentication): # NOQA
         authenticate the given credentials. If authentication is
         successful, return the user and token. If not, throw an error.
         """
+
+        if BlacklistedToken.objects.filter(token=token).first():
+                raise exceptions.AuthenticationFailed('Token is blacklisted')
         try:
             payload = jwt.decode(token, settings.SECRET_KEY)
         except Exception as e:

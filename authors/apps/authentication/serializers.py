@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
 
-from .models import User
+from .models import User, BlacklistedToken
 from authors.apps.profiles.models import Profile
 
 email_expression = re.compile(
@@ -298,3 +298,13 @@ class SocialSignUpSerializer(serializers.Serializer):
         """
     provider = serializers.CharField(max_length=20, required=True)
     access_token = serializers.CharField(max_length=255, required=True)
+
+
+class LogoutSerializer(serializers.ModelSerializer):
+    """Performs logout serializer"""
+    token = serializers.CharField(max_length=500)
+    # user = serializers.CharField(max_length=500)
+
+    class Meta:
+        model = BlacklistedToken
+        fields = "__all__"
