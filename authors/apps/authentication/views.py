@@ -24,9 +24,10 @@ from social_core.backends.oauth import BaseOAuth1, BaseOAuth2
 from social_core.exceptions import MissingBackend, AuthAlreadyAssociated
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer, ForgotPasswordSerializer, ResetPasswordSerializers,
-    SocialSignUpSerializer
+    SocialSignUpSerializer, LogoutSerializer
 )
-from .models import User
+from .models import User, BlacklistedToken
+from rest_framework import authentication
 
 
 class RegistrationAPIView(CreateAPIView):
@@ -327,3 +328,21 @@ class SocialSignUp(CreateAPIView):
         else:
             return Response({"errors": "Error with social authentication"},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutView(APIView):
+    """this class logs out a user"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LogoutSerializer
+
+    def delete(self, request):
+        token = authentication.get_authorization_header(request).split()[1].decode()
+        data = request.data
+        data['token'] = token
+        if BlacklistedToken.objects.filter(token=token).first():
+            return Response({"success": "You have already logged out"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"success": "Succesfully logged out"}, status=status.HTTP_200_OK)

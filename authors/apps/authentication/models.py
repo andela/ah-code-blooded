@@ -142,3 +142,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             },
             settings.SECRET_KEY, algorithm='HS256').decode()
         return token
+
+
+class BlacklistedToken(models.Model):
+    """this class stores blacklisted token"""
+
+    token = models.CharField(max_length=500)
+    timestamp = models.DateTimeField(auto_now=True)
