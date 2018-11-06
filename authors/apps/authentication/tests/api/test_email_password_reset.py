@@ -38,7 +38,7 @@ class TestSendEmail(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.content,
-            b'{"message":"An account with this email does not exist"}')
+            b'{"message":"An account with this email does not exist."}')
 
     def test_valid_email(self):
         """
@@ -58,7 +58,7 @@ class TestSendEmail(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.content,
-            b'{"message":"An account with this email does not exist"}')
+            b'{"message":"An account with this email does not exist."}')
 
 
 class TestResetPassword(APITestCase):
@@ -98,7 +98,7 @@ class TestResetPassword(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.content,
-            b'{"message":"Your password has been successfully updated"}')
+            b'{"message":"Your password has been successfully reset. You can now log in."}')
 
     def test_empty_password(self):
         """
@@ -163,7 +163,7 @@ class TestResetPassword(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.content,
-            b'{"message":"Your password has been successfully updated"}')
+            b'{"message":"Your password has been successfully reset. You can now log in."}')
         response2 = self.client.put(self.reset_url, data=data2, format="json")
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(

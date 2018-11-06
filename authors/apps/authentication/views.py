@@ -8,10 +8,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from requests.exceptions import HTTPError
+
+from authors.apps.core import client
 from .renderers import UserJSONRenderer
 
 from rest_framework.reverse import reverse
-from django.utils.six.moves.urllib.parse import urlsplit
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
@@ -178,18 +179,15 @@ class ForgotPasswordView(CreateAPIView):
         user = User.objects.filter(email=email).first()
 
         if user is None:
-            response = {"message": "An account with this email does not exist"}
+            response = {"message": "An account with this email does not exist."}
             return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Generate token and get  site domain
         token = default_token_generator.make_token(user)
-        current_site_domain = get_current_site(request).domain
         # Required parameters for sending email
         subject, from_email, to_email = 'Password Reset Link', os.getenv("EMAIL_HOST_SENDER"), email
-        protocol = urlsplit(request.build_absolute_uri(None)).scheme
 
-        reset_link = protocol + "://" + current_site_domain + reverse(
-                                "authentication:reset-password", kwargs={"token": token})
+        reset_link = client.get_password_reset_link(token)
 
         # render with dynamic value
         html_content = render_to_string('email_reset_password.html', {'reset_password_link': reset_link})
@@ -202,7 +200,7 @@ class ForgotPasswordView(CreateAPIView):
         msg.attach_alternative(html_content, "text/html")
         msg.send()
 
-        response = {"message": "Please follow the link sent to your email to reset your password"}
+        response = {"message": "Please follow the link sent to your email to reset your password."}
 
         return Response(response, status.HTTP_200_OK)
 
@@ -216,7 +214,7 @@ class ResetPasswordView(APIView):
 
     def put(self, request, token):
         """
-        Resets a users password and sends an email on succesful reset
+        Resets a users password and sends an email on successful reset
         """
         data = request.data
         email = data['email']
@@ -224,20 +222,15 @@ class ResetPasswordView(APIView):
         data['token'] = token
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
-        current_site_domain = get_current_site(request).domain
-        subject, from_email, to_email = 'Successful password reset', os.getenv("EMAIL_HOST_SENDER"), email
-        protocol = urlsplit(request.build_absolute_uri(None)).scheme
+        subject, from_email, to_email = 'Password reset notification', os.getenv("EMAIL_HOST_SENDER"), email
 
-        login_link = protocol + "://" + current_site_domain + reverse("authentication:user-login")
-
-        html_content = render_to_string('email_reset_password_done.html', {
-            'login_link': login_link})
+        html_content = render_to_string('email_reset_password_done.html')
 
         text_content = strip_tags(html_content)
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
         msg.attach_alternative(html_content, "text/html")
         msg.send()
-        response = {"message": "Your password has been successfully updated"}
+        response = {"message": "Your password has been successfully reset. You can now log in."}
         return Response(response, status.HTTP_200_OK)
 
 
