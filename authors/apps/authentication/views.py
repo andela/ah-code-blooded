@@ -1,6 +1,7 @@
 import os
 
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.db import IntegrityError
 from django.utils.encoding import force_bytes, force_text
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
@@ -289,35 +290,48 @@ class SocialSignUp(CreateAPIView):
                     "details": str(e)
                 }
             }, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             # if `authed_user` is None `social-auth-app` will make a new user
             # else the social account will be associated with the user that is
             # passed in
             user = backend.do_auth(token, user=authed_user)
-        except AuthAlreadyAssociated:
+
+        except (AuthAlreadyAssociated, IntegrityError):
             # you can't associate a social account with more than one user
             return Response({
                 "errors": "That social account is already in use"
             }, status=status.HTTP_400_BAD_REQUEST)
-
         if user and user.is_active:
-            serializer = UserSerializer(user)
-            # if the access_token was set to an empty string,
-            # then save the access_token from the request
-            auth_created = user.social_auth.get(provider=provider)
-            if not auth_created.extra_data["access_token"]:
-                # Facebook will return the access token in its request
-                # the token is then saved for future use
-                auth_created.extra_data["access_token"] = token
-                auth_created.save()
+            user.is_verified = True
+
+            # token = jwt.encode({
+            #     "username": user.username,
+            #     "id": user.pk,
+            #     "email": user.email,
+            #     "iat": datetime.utcnow(),
+            #     "exp": datetime.utcnow() + timedelta(minutes=int(os.getenv('TIME_DELTA')))
+            # }, settings.SECRET_KEY)
+
+            # # if the access_token was set to an empty string,
+            # # then save the access_token from the request
+            # auth_created = user.social_auth.get(provider=provider)
+            # if not auth_created.extra_data["access_token"]:
+            #     # Facebook will return the access token in its request
+            #     # the token is then saved for future use
+            #     auth_created.extra_data["access_token"] = token
+            #     auth_created.save()
 
             # set instance since we are not calling `serializer.save()`
-            serializer.instance = user
-            headers = self.get_success_headers(serializer.data)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED,
-                            headers=headers)
+            serializer.instance = user
+            user.save()
+            return Response(
+                {'token': user.token},
+
+                status=status.HTTP_201_CREATED
+            )
+            # return Response(serializer.data, status=status.HTTP_201_CREATED,
+            #                 headers=headers)
         else:
             return Response({"errors": "Error with social authentication"},
                             status=status.HTTP_400_BAD_REQUEST)
