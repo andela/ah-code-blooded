@@ -17,7 +17,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('articles/<slug>/tags/', ArticleTagsAPIView.as_view(), name="article-tags"),
     path('articles/<str:slug>/like/', LikeAPIView.as_view(), name='like'),
-    path('articles/<str:slug>/unlike/', DislikeAPIView.as_view(), name='dislike'),
+    path('articles/<str:slug>/dislike/', DislikeAPIView.as_view(), name='dislike'),
     path('articles/<str:slug>/reactions/', ReactionsAPIView.as_view(), name='reactions'),
     path('articles/search_filter', SearchFilterListAPIView.as_view(), name='search-filter'),
     path('articles/<slug>/rate/', RatingAPIView.as_view(), name='rate-article'),
