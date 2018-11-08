@@ -215,10 +215,18 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-CORS_ORIGIN_WHITELIST = (
-    '0.0.0.0:4000',
-    'localhost:4000',
-)
+# Tell Django the origins from which to allow CORS
+CORS_ORIGIN_WHITELIST = [
+    '0.0.0.0:4000',  # this came with Django
+    'localhost:4000',  # this came with Django
+    os.getenv('CLIENT_DOMAIN'),  # the client app
+]
+
+# Add local ports that may require CORS when working locally
+CORS_ORIGIN_WHITELIST += ['localhost:{}'.format(port) for port in os.getenv('LOCALHOST_CORS_WHITELIST', '').split(',')]
+
+# Convert the CORS whitelist into a tuple so that it is immutable
+CORS_ORIGIN_WHITELIST = tuple(CORS_ORIGIN_WHITELIST)
 
 # Tell Django about the custom `User` model we created. The string
 # `authentication.User` tells Django we are referring to the `User` model in
