@@ -28,6 +28,7 @@ from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer, ForgotPasswordSerializer, ResetPasswordSerializers,
     SocialSignUpSerializer, LogoutSerializer
 )
+from authors.apps.profiles.serializers import ProfileSerializer
 from .models import User, BlacklistedToken
 from rest_framework import authentication
 
@@ -111,10 +112,10 @@ class LoginAPIView(CreateAPIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
+        user = User.objects.get(email=user['email'])
         # return jwt as the response
-        resp = {
-            "token": serializer.data['token']
-        }
+        resp = ProfileSerializer(user.profile).data
+        resp['token'] = serializer.data['token']
 
         return Response(resp, status=status.HTTP_200_OK)
 
@@ -325,8 +326,12 @@ class SocialSignUp(CreateAPIView):
 
             serializer.instance = user
             user.save()
+
+
             return Response(
-                {'token': user.token},
+                {
+                    'token': user.token,
+                },
 
                 status=status.HTTP_201_CREATED
             )
