@@ -13,9 +13,7 @@ from requests.exceptions import HTTPError
 from authors.apps.core import client
 from .renderers import UserJSONRenderer
 
-from rest_framework.reverse import reverse
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
@@ -75,18 +73,14 @@ class RegistrationAPIView(CreateAPIView):
         if send_email:
             email = user.email
             username = user.username
-            domain = get_current_site(request).domain
             from_email = os.getenv("EMAIL_HOST_SENDER")
 
             email_subject = 'Activate your Author\'s Haven account.'
-            activation_link = "http://" + domain + reverse("authentication:activate-account",
-                                                           kwargs={"token": token, "uid": uid})
-            email_message = render_to_string('email_verification.html',
-                                             {
-                                                 'activation_link': activation_link,
-                                                 'title': email_subject,
-                                                 'username': username
-                                             })
+            email_message = render_to_string('email_verification.html', {
+                'activation_link': client.get_activate_account_link(token, uid),
+                'title': email_subject,
+                'username': username
+            })
             text_content = strip_tags(email_message)
             msg = EmailMultiAlternatives(
                 email_subject, text_content, from_email, to=[email])
