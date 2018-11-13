@@ -228,6 +228,8 @@ CORS_ORIGIN_WHITELIST += ['localhost:{}'.format(port) for port in os.getenv('LOC
 # Convert the CORS whitelist into a tuple so that it is immutable
 CORS_ORIGIN_WHITELIST = tuple(CORS_ORIGIN_WHITELIST)
 
+CORS_ORIGIN_ALLOW_ALL = True  # allow all origins for the sake of review apps !!! GET PROPER FIX !!!
+
 # Tell Django about the custom `User` model we created. The string
 # `authentication.User` tells Django we are referring to the `User` model in
 # the `authentication` module. This module is registered above in a setting
