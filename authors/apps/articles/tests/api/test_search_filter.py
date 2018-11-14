@@ -1,6 +1,9 @@
+import json
+
 from rest_framework.reverse import reverse
 
 from authors.apps.articles.tests.api.test_articles import BaseArticlesTestCase
+
 true = True
 false = False
 
@@ -42,42 +45,44 @@ class TestFavouriteArticle(BaseArticlesTestCase):
     def test_user_can_filter_article_using_tag(self):
         """any user(authorised or not) can filter an article using tags"""
         response = self.create_articles()
-        response = self.client.get(reverse("articles:search-filter"), data={"tag":'bev'})
+        response = self.client.get(reverse("articles:search-filter"), data={"tag": 'bev'})
         self.assertIn(b"never", response.content)
 
     def test_user_cant_filter_article_using_wrong_tag(self):
-       """users cannot filter article using wrong or unavailable tags"""
-       response = self.create_articles()
-       response = self.client.get(reverse("articles:search-filter"), data={"tag":'jkl'})
-       self.assertEqual(b'{"status": "success", "data": []}', response.content)
+        """users cannot filter article using wrong or unavailable tags"""
+        response = self.create_articles()
+        response = self.client.get(reverse("articles:search-filter"), data={"tag": 'jkl'})
+        data = json.loads(response.content)
+        self.assertEqual(data['data']['results'], [])
 
     def test_user_can_filter_article_using_author(self):
         """any user can filter an article using the author's username"""
         response = self.create_articles()
-        response = self.client.get(reverse("articles:search-filter"), data={"username":'beverly'})
+        response = self.client.get(reverse("articles:search-filter"), data={"username": 'beverly'})
         self.assertIn(b"love", response.content)
 
     def test_user_cant_filter_article_using_wrong_author(self):
         """user cannot filter articles using a wrong authors username"""
         response = self.create_articles()
-        response = self.client.get(reverse("articles:search-filter"), data={"username":'moses'})
-        self.assertEqual(b'{"status": "success", "data": []}', response.content)
+        response = self.client.get(reverse("articles:search-filter"), data={"username": 'moses'})
+        data = json.loads(response.content)
+        self.assertEqual(data['data']['results'], [])
 
     def test_user_can_filter_article_using_title(self):
         """user an filter existing artiles using their titles"""
         response = self.create_articles()
-        response = self.client.get(reverse("articles:search-filter"), data={"title":'greatest'})
+        response = self.client.get(reverse("articles:search-filter"), data={"title": 'greatest'})
         self.assertIn(b"bev", response.content)
 
     def test_user_cant_filter_article_using_wrong_title(self):
         """user cannot filter artiles using wrong titles"""
         response = self.create_articles()
-        response = self.client.get(reverse("articles:search-filter"), data={"title":'great'})
-        self.assertEqual(b'{"status": "success", "data": []}', response.content)
+        response = self.client.get(reverse("articles:search-filter"), data={"title": 'great'})
+        data = json.loads(response.content)
+        self.assertEqual(data['data']['results'], [])
 
     def test_user_can_search_article_content(self):
         """user can searh the contents of all articles"""
         response = self.create_articles()
-        response = self.client.get(reverse("articles:search-filter"), data={"search":'more'})
+        response = self.client.get(reverse("articles:search-filter"), data={"search": 'more'})
         self.assertIn(b"never", response.content)
-

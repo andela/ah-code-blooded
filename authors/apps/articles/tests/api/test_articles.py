@@ -128,7 +128,7 @@ class CreateArticlesTestCase(BaseArticlesTestCase):
         current_readtime = response.data["read_time"]
         res = self.client.post(self.url_list, data=article, format="json")
         updated_readtime = res.data["read_time"]
-        self.assertEqual(current_readtime-updated_readtime, 10.0)
+        self.assertEqual(current_readtime - updated_readtime, 10.0)
 
     def test_unverified_user_cannot_create_article(self):
         """
@@ -376,8 +376,8 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         self.create_random_articles()
         res = self.get_all_articles()
         self.assertIn('count', res.keys())
-        self.assertIn('previous', res.keys())
-        self.assertIn('next', res.keys())
+        self.assertIn('links', res.keys())
+        self.assertIn('total_pages', res.keys())
 
     def test_user_can_query_articles_using_page_numbers(self):
         """
@@ -386,8 +386,8 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         self.create_30_articles()
         res = self.client.get(self.url_list + '?page=2', data=None, format="json")
         self.assertEqual(10, len(res.data['results']))
-        self.assertIsNone(res.data['next'])
-        self.assertIsNotNone(res.data['previous'])
+        self.assertIsNone(res.data['links']['next'])
+        self.assertIsNotNone(res.data['links']['previous'])
 
     def test_user_can_query_articles_using_page_size(self):
         """
@@ -396,8 +396,8 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         self.create_30_articles()
         res = self.client.get(self.url_list + '?page_size=2', data=None, format="json")
         self.assertEqual(2, len(res.data['results']))
-        self.assertIsNone(res.data['previous'])
-        self.assertIsNotNone(res.data['next'])
+        self.assertIsNone(res.data['links']['previous'])
+        self.assertIsNotNone(res.data['links']['next'])
 
     def test_user_can_query_articles_using_page_size_and_page_number(self):
         """
@@ -407,8 +407,8 @@ class GetArticlesTestCase(BaseArticlesTestCase):
         self.create_30_articles()
         res = self.client.get(self.url_list + '?page_size=2', data=None, format="json")
         self.assertEqual(2, len(res.data['results']))
-        self.assertIsNone(res.data['previous'])
-        self.assertIsNotNone(res.data['next'])
+        self.assertIsNone(res.data['links']['previous'])
+        self.assertIsNotNone(res.data['links']['next'])
 
 
 class UpdateArticleTestCase(BaseArticlesTestCase):
