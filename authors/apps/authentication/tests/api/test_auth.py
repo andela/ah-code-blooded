@@ -252,3 +252,16 @@ class LoginViewTestCase(AuthenticationTestCase):
         res = self.login()
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(json.loads(res.content)['user']['token'])
+
+    def test_no_token_header(self):
+        self.register()
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token")
+        res = self.login()
+        self.assertIn(b'Invalid token header. No credentials provided', res.content)
+
+    def test_invalid_token(self):
+        self.register()
+        self.client.credentials(HTTP_AUTHORIZATION="Token akljdflk i adfjadf ajdfl")
+        res = self.login()
+        self.assertIn(b'Invalid token header. Token string should not contain spaces', res.content);

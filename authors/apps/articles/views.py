@@ -361,6 +361,7 @@ class SearchFilterListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     renderer_classes = (BaseJSONRenderer,)
     queryset = Article.objects.all()
+    pagination_class = StandardResultsSetPagination
 
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     # filter fields are used to filter the articles using the tags, author's username and title
@@ -369,6 +370,8 @@ class SearchFilterListAPIView(ListAPIView):
     search_fields = ('tags__tag', 'author__username', 'title', 'body', 'description')
     # ordering fields are used to render search outputs in a particular order e.g asending or descending order
     ordering_fields = ('author__username', 'title')
+
+
 
 
 class LikeAPIView(LikeDislikeMixin):
