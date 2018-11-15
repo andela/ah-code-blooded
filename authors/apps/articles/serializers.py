@@ -8,6 +8,7 @@ from authors.apps.profiles.serializers import ProfileSerializer
 from django.db import models
 from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, FavouriteArticle, ArticleView, Violation
 from authors.apps.authentication.models import User
+from ..core import client
 
 
 class TagField(serializers.RelatedField):
@@ -98,11 +99,25 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def get_share_article(self, instance):
         """
-        Share articles for facebook, twitter, Linkenin
-        and email.
+        This method generates links for sharing the article via Twitter, Facebook, Email
+        and Linked In. This is based on the client application.
         """
-        request = self.context.get('request')
-        return instance.get_share_article(request=request)
+        slug = instance.slug
+
+        article_link = client.get_article_link(slug)
+
+        article_uri = {
+            'Email':
+                'mailto:?subject=New Article Alert&body={}'.format(article_link),
+            'Twitter':
+                'https://twitter.com/intent/tweet?url={}'.format(article_link),
+            'Facebook':
+                'https://www.facebook.com/sharer/sharer.php?u={}'.format(article_link),
+            'LinkedIn':
+                'http://www.linkedin.com/shareArticle?mini=true&amp;url={}'.format(article_link),
+        }
+
+        return article_uri
 
     def get_author(self, obj):
         serializer = ProfileSerializer(
@@ -177,8 +192,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         if request is not None and request.user.is_authenticated:
             user_id = request.user.id
             liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
-            disliked_by_me = instance.dislikes.all().filter(
-                id=user_id).count() == 1
+            disliked_by_me = instance.dislikes.all().filter(id=user_id).count() == 1
 
         return {
             'likes': {

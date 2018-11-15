@@ -112,29 +112,6 @@ class Article(TimestampsMixin, ReactionMixin, SoftDeleteMixin):
         """
         return self.title
 
-    def get_share_article(self, request=None):
-        """
-        This method shares article through twitter, facebook, email
-        linkedin and email.
-        """
-        article = reverse(
-            "articles:articles-detail",
-            kwargs={'slug': self.slug},
-            request=request)
-
-        article_uri = {
-            'Email':
-            'mailto:?subject=New Article Alert&body={}'.format(article),
-            'Twitter':
-            'https://twitter.com/intent/tweet?url={}'.format(article),
-            'Facebook':
-            'https://www.facebook.com/sharer/sharer.php?u={}'.format(article),
-            'LinkedIn':
-            'http://www.linkedin.com/shareArticle?mini=true&amp;url={}'.format(
-                article),
-        }
-        return article_uri
-
 
 class Tag(TimestampsMixin):
     """
