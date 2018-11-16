@@ -6,7 +6,8 @@ from authors.apps.articles.views import (
     CommentAPIView, CommentCreateUpdateDestroy, DislikeAPIView,
     ReactionsAPIView, SearchFilterListAPIView, FavouriteArticleApiView,
     LikeComments, DislikeComments, ArticleStatsView, ReportViolationsAPIView,
-    ListViolationsAPIView, ProcessViolationsAPIView, ViolationTypesAPIView
+    ListViolationsAPIView, ProcessViolationsAPIView, ViolationTypesAPIView,
+    RatingsAPIView
 )
 
 app_name = "articles"
@@ -21,6 +22,7 @@ urlpatterns = [
     path('articles/<str:slug>/reactions/', ReactionsAPIView.as_view(), name='reactions'),
     path('articles/search_filter', SearchFilterListAPIView.as_view(), name='search-filter'),
     path('articles/<slug>/rate/', RatingAPIView.as_view(), name='rate-article'),
+    path('articles/<slug>/ratings/', RatingsAPIView.as_view(), name='rating-article'),
     path('articles/<slug>/favourite/', FavouriteArticleApiView.as_view(), name="favourite_article"),
     path('articles/<slug>/comments', CommentAPIView.as_view(), name='comments'),
     path('articles/<slug>/comments/<pk>', CommentCreateUpdateDestroy.as_view(), name="a-comment"),

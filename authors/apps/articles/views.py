@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView, ListCreateAPIView, UpdateAPIView,
 )
+from django.db import models
+from collections import Counter
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
@@ -437,12 +439,30 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
     queryset = ArticleRating.objects.all()
     serializer_class = RatingSerializer
     renderer_classes = (BaseJSONRenderer,)
+    lookup_field = 'slug'
+    lookup_url_kwarg = 'slug'
+    lookup_field = 'article__slug'
 
-    def post(self, request, *args, **kwargs):  # NOQA
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            article = Article.objects.get(slug=kwargs['slug'])
+        except Article.DoesNotExist:
+            data = {"errors": "This article does not exist!"}
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user.id
+        user_rating = ArticleRating.objects.filter(article=article, rated_by=user).first()
+
+        serializer = self.get_serializer(user_rating)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+    def update(self, request, *args, **kwargs):  # NOQA
         """
         Users can post article ratings
         """
-        rating = request.data.get('rating', {})
+        serializer_data = request.data.get('rating', {})
 
         try:
             article = Article.objects.get(slug=kwargs['slug'])
@@ -450,19 +470,15 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
             data = {"errors": "This article does not exist!"}
             return Response(data, status=status.HTTP_404_NOT_FOUND)
         if article:
-            rated = ArticleRating.objects.filter(
-                article=article, rated_by=request.user).first()
+            rating = ArticleRating.objects.filter(article=article, rated_by=request.user).first()
             rating_author = article.author
             rating_user = request.user
             if rating_author == rating_user:
                 data = {"errors": "You cannot rate your own article."}
                 return Response(data, status=status.HTTP_403_FORBIDDEN)
 
-            if rated:
-                data = {"errors": "You have already rated this article."}
-                return Response(data, status=status.HTTP_403_FORBIDDEN)
             else:
-                serializer = self.serializer_class(data=rating)
+                serializer = self.serializer_class(rating, data=serializer_data, partial=True)
                 serializer.is_valid(raise_exception=True)
 
                 notify.send(rating_user, verb=Verbs.ARTICLE_RATING, recipient=rating_author,
@@ -471,28 +487,39 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
                 serializer.save(rated_by=request.user, article=article)
 
                 data = serializer.data
-                data['message'] = "You have successfully rated this article"
+                data['Message'] = "You have successfully rated this article"
                 return Response(data, status=status.HTTP_201_CREATED)
 
-    def update(self, request, *args, **kwargs):
-        """users an update the ratings of articles
-        """
-        serializer_data = request.data.get('rating', {})
+
+class RatingsAPIView(RetrieveAPIView):
+    queryset = ArticleRating.objects.all()
+    serializer_class = RatingSerializer
+    renderer_classes = (BaseJSONRenderer,)
+    lookup_field = 'slug'
+    lookup_url_kwarg = 'slug'
+    lookup_field = 'article__slug'
+
+    def retrieve(self, request, *args, **kwargs):
         try:
             article = Article.objects.get(slug=kwargs['slug'])
         except Article.DoesNotExist:
             data = {"errors": "This article does not exist!"}
             return Response(data, status=status.HTTP_404_NOT_FOUND)
 
-        rating = ArticleRating.objects.filter(
-            article=article, rated_by=request.user).first()
+        avg_rating = ArticleRating.objects.filter(article=article).aggregate(
+            average_rating=models.Avg('rating'))['average_rating'] or 0
+        total_user_rated = ArticleRating.objects.filter(
+            article=article).count()
 
-        serializer = self.serializer_class(
-            rating, data=serializer_data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(rated_by=request.user, article=article)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        each_rating = Counter(
+            ArticleRating.objects.filter(article=article).values_list(
+                'rating', flat=True))
 
+        return Response({
+            'avg_rating': avg_rating,
+            'total_user': total_user_rated,
+            'each_rating': each_rating
+        },status=status.HTTP_200_OK)
 
 class CommentAPIView(ListCreateAPIView):
     queryset = Comment.objects.all()
