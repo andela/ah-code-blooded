@@ -279,13 +279,13 @@ class ResetPasswordSerializers(serializers.Serializer):
         email = data.get('email')
         user = User.objects.filter(email=email).first()
         if data.get('password') != data.get('confirm_password'):
-            msg = "Passwords do not match"
+            msg = "The passwords do not match."
             raise serializers.ValidationError(msg)
         # Confirm if token is valid
         token = data.get('token')
         validate_token = default_token_generator.check_token(user, token)
         if not validate_token:
-            msg = "Token is not valid or it has already expired"
+            msg = "Something went wrong. Try again."  # we don't want to give away security details
             raise serializers.ValidationError(msg)
         user.set_password(data.get('password'))
         user.save()

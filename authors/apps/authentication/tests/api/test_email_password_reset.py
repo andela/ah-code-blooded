@@ -127,7 +127,7 @@ class TestResetPassword(APITestCase):
         }
         response = self.client.put(self.reset_url, data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.content, b'{"errors":{"error":["Passwords do not match"]}}')
+        self.assertEqual(response.content, b'{"errors":{"error":["The passwords do not match."]}}')
 
     def test_invalid_password(self):
         """
@@ -168,5 +168,5 @@ class TestResetPassword(APITestCase):
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response2.content,
-            b'{"errors":{"error":["Token is not valid or it has already expired"]}}'
+            b'{"errors":{"error":["Something went wrong. Try again."]}}'
         )
