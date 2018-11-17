@@ -15,7 +15,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, ArticleView, Violation
+from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, ArticleView, Violation, FavouriteArticle
 from authors.apps.articles.serializers import (
     ArticleSerializer, TagSerializer, RatingSerializer, FavouriteSerializer, update, CommentSerializer,
     UpdateCommentSerializer, TagsSerializer, StatsSerializer, ViolationSerializer, ViolationListSerializer,
@@ -26,6 +26,7 @@ from .pagination import StandardResultsSetPagination
 from notifications.signals import notify
 from authors.apps.ah_notifications.notifications import Verbs
 from authors.apps.core.mail_sender import send_email
+from rest_framework.exceptions import NotFound
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -641,6 +642,7 @@ class FavouriteArticleApiView(APIView):
 
     permission_classes = (IsAuthenticated,)
     serializer_class = FavouriteSerializer
+    queryset = FavouriteArticle.favourite.all()
 
     def post(self, request, slug):
         """
@@ -648,10 +650,18 @@ class FavouriteArticleApiView(APIView):
         """
         request.data['email'] = request.user.email
         request.data['article'] = slug
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise NotFound("article does not exist")
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({'message': 'Article favourited'})
+        article_serializer = ArticleSerializer(instance=article)
+        data = {"article":article_serializer.data}
+        data["article"]["favourited"]=True
+        data["message"] = "favourited"
+        return Response(data, status.HTTP_200_OK)
 
     def delete(self, request, slug):
         """
@@ -659,13 +669,19 @@ class FavouriteArticleApiView(APIView):
         """
         data = update(request, 'email')
         data['article'] = slug
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise NotFound("article does not exist")
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         favourite = serializer.view_favourite(data)
         favourite.delete()
-        return Response({
-            'message': 'Article removed from favourites'
-        }, status.HTTP_200_OK)
+        article_serializer = ArticleSerializer(instance=article)
+        data = {"article":article_serializer.data}
+        data["article"]["favourited"]=False
+        data["message"] = "unfavourited"
+        return Response(data, status.HTTP_200_OK)
 
 
 class LikeComments(UpdateAPIView):

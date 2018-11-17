@@ -96,6 +96,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             'reactions',
             'share_article',
             'read_time',
+            'favourited',
         ]
         read_only_fields = ('slug', 'author', 'reactions')
 
@@ -220,6 +221,13 @@ class ArticleSerializer(serializers.ModelSerializer):
                 'me': disliked_by_me
             }
         }
+    favourited = serializers.SerializerMethodField(read_only=True)
+    def get_favourited(self, obj):
+        try:
+            favourite = Favourite.objects.get(user=self.context["request"].user.email, article=obj.id)
+            return True
+        except:
+            return False
 
 
 class TagsSerializer(serializers.ModelSerializer):

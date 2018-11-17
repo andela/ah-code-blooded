@@ -22,7 +22,6 @@ class TestFavouriteArticle(BaseArticlesTestCase):
         response = self.client.post(reverse(
             'articles:favourite_article', kwargs={'slug': slug}), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.content, b'{"message":"Article favourited"}')
 
     def test_user_cant_favourite_twice(self):
         """registered user cant unfavourite the same article twice"""
@@ -69,7 +68,6 @@ class TestFavouriteArticle(BaseArticlesTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response2 = self.client.delete(reverse(
             'articles:favourite_article', kwargs={'slug': slug}), format='json')
-        self.assertEqual(response2.content, b'{"message":"Article removed from favourites"}')
 
     def test_unregistered_user_cant_favourite_article(self):
         """unregistered user cant favourite an article"""
@@ -96,4 +94,4 @@ class TestFavouriteArticle(BaseArticlesTestCase):
         response = self.client.post(reverse(
             'articles:favourite_article', kwargs={'slug': slug}), format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.content, b'{"detail":"this slug doesnt match any article"}')
+        self.assertEqual(response.content, b'{"detail":"article does not exist"}')
