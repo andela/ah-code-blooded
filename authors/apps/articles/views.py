@@ -751,7 +751,7 @@ class FavouriteArticleApiView(APIView):
             raise NotFound("article does not exist")
 
         if article.author != request.user:
-            favourited = FavouriteArticle.objects.filter(article=article, user=request.user);
+            favourited = FavouriteArticle.objects.filter(article=article, user=request.user)
             favourited.delete()
             return Response({
                 'slug': article.slug,
