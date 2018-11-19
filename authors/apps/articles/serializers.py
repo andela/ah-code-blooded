@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AnonymousUser
 from django.utils.text import slugify
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
@@ -225,8 +226,12 @@ class ArticleSerializer(serializers.ModelSerializer):
     favourited = serializers.SerializerMethodField(read_only=True)
 
     def get_favourited(self, obj):  # istanbul ignore next
+        if not hasattr(self.context.get('request'), 'user'):
+            return False
+        elif isinstance(self.context.get('request').user, AnonymousUser):
+            return False
         try:
-            FavouriteArticle.objects.get(user=self.context["request"].user, article=obj.id)
+            FavouriteArticle.objects.get(user=self.context.get('request').user, article=obj.id)
             return True
         except FavouriteArticle.DoesNotExist:
             return False
