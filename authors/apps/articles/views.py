@@ -375,8 +375,6 @@ class SearchFilterListAPIView(ListAPIView):
     ordering_fields = ('author__username', 'title')
 
 
-
-
 class LikeAPIView(LikeDislikeMixin):
     """
     This view enables liking and un-liking articles.
@@ -635,53 +633,64 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             status=status.HTTP_201_CREATED)
 
 
+class FavouritesAPIView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (BaseJSONRenderer,)
+    serializer_class = ArticleSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        articles = []
+        results = FavouriteArticle.objects.filter(user=self.request.user).select_related('article')
+        for result in results:
+            articles.append(result.article)
+        return articles
+
+
 class FavouriteArticleApiView(APIView):
     """
     define method to favourite article
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = FavouriteSerializer
-    queryset = FavouriteArticle.favourite.all()
+    queryset = FavouriteArticle.objects.all()
 
     def post(self, request, slug):
         """
         a registered user can favourite an article
         """
-        request.data['email'] = request.user.email
-        request.data['article'] = slug
         try:
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
             raise NotFound("article does not exist")
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        article_serializer = ArticleSerializer(instance=article)
-        data = {"article":article_serializer.data}
-        data["article"]["favourited"]=True
-        data["message"] = "favourited"
-        return Response(data, status.HTTP_200_OK)
+
+        if article.author != request.user:
+            FavouriteArticle.objects.get_or_create(article=article, user=request.user)
+            return Response({
+                'slug': article.slug,
+                'favourited': True
+            })
+        else:
+            return Response({"message": "You cannot favourite your own article"}, status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, slug):
         """
-        a registered user can unfavourite an article
+        a registered user can favourite an article
         """
-        data = update(request, 'email')
-        data['article'] = slug
         try:
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
             raise NotFound("article does not exist")
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        favourite = serializer.view_favourite(data)
-        favourite.delete()
-        article_serializer = ArticleSerializer(instance=article)
-        data = {"article":article_serializer.data}
-        data["article"]["favourited"]=False
-        data["message"] = "unfavourited"
-        return Response(data, status.HTTP_200_OK)
+
+        if article.author != request.user:
+            favourited = FavouriteArticle.objects.filter(article=article, user=request.user);
+            favourited.delete()
+            return Response({
+                'slug': article.slug,
+                'favourited': False
+            })
+        else:
+            return Response({"message": "You cannot unfavourite your own article"}, status.HTTP_400_BAD_REQUEST)
 
 
 class LikeComments(UpdateAPIView):

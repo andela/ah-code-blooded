@@ -221,12 +221,14 @@ class ArticleSerializer(serializers.ModelSerializer):
                 'me': disliked_by_me
             }
         }
+
     favourited = serializers.SerializerMethodField(read_only=True)
-    def get_favourited(self, obj): # pragma: no cover
+
+    def get_favourited(self, obj):  # istanbul ignore next
         try:
-            favourite = Favourite.objects.get(user=self.context["request"].user.email, article=obj.id)
+            FavouriteArticle.objects.get(user=self.context["request"].user, article=obj.id)
             return True
-        except:
+        except FavouriteArticle.DoesNotExist:
             return False
 
 
