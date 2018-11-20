@@ -4,9 +4,10 @@ from .views import (
     AllNotificationsAPIView,
     UnreadNotificationsAPIView,
     ReadNotificationsAPIView,
-    UnsentNotificationsAPIView, 
+    UnsentNotificationsAPIView,
     SentNotificationsAPIView,
-    SubscribeAPIView
+    SubscribeAPIView,
+    SubscriptionStatusAPIView,
     )
 
 
@@ -19,5 +20,6 @@ urlpatterns = [
     path('read/<int:pk>/', ReadNotificationsAPIView.as_view(), name="read-notification"),
     path('unsent/', UnsentNotificationsAPIView.as_view(), name="unsent-notifications"),
     path('sent/', SentNotificationsAPIView.as_view(), name="sent-notifications"),
-    path('subscribe/', SubscribeAPIView.as_view(), name="subscribe")
+    path('subscribe/', SubscribeAPIView.as_view(), name="subscribe"),
+    path('subscription-status/', SubscriptionStatusAPIView.as_view(), name="subscription-status")
 ]

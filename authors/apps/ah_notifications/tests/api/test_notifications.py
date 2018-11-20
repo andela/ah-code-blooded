@@ -218,31 +218,54 @@ class ReadNotificationsTestCase(BaseNotificationsTestCase):
 
 class NotificationSubscriptionTestCase(AuthenticatedTestCase):
 
-    def toggle_subscription(self):
+    def subscribe(self):
         """
         Helper method to subscribe to emails
         :return:
         """
-        return self.client.post(reverse("notifications:subscribe"), data={})
+        return self.client.post(reverse("notifications:subscribe"))
+
+    def unsubscribe(self):
+        """
+        Helper method to unsubscribe from emails
+        :return:
+        """
+        return self.client.delete(reverse("notifications:subscribe"))
+
+    def subscription_status(self):
+        """
+        Helper method to fetch subscription status.
+        :return:
+        """
+        return self.client.get(reverse("notifications:subscription-status"))
+
+    def test_user_can_subscribe_to_the_notifications(self):
+        """
+        Ensure after subscription, a user can get back to subscription
+        :return:
+        """
+        response = self.subscribe()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(b'You have successfully subscribed to our notifications.', response.content)
+        self.assertTrue(response.data['message']['subscription_status'])
 
     def test_user_can_unsubscribe_from_notifications(self):
         """
         Ensure a user can opt to unsubscribe from notifications
         :return:
         """
-        response = self.toggle_subscription()
+        response = self.unsubscribe()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(b'You have successfully unsubscribed to our notifications.', response.content)
+        self.assertIn(b'You have successfully unsubscribed from our notifications.', response.content)
+        self.assertFalse(response.data['message']['subscription_status'])
 
-    def test_user_can_subscribe_back_to_the_notifications(self):
-        """
-        Ensure after subscription, a user can get back to subscription
-        :return:
-        """
-        self.toggle_subscription()
-        response = self.toggle_subscription()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(b'You have successfully subscribed from our notifications.', response.content)
+    def test_user_can_get_their_subscription_status(self):
+        self.subscribe()
+        response = self.subscription_status()
+        self.assertTrue(response.data['subscription_status'])
+        self.unsubscribe()
+        response = self.subscription_status()
+        self.assertFalse(response.data['subscription_status'])
 
 
 class ArticleNotificationTestCase(BaseArticlesTestCase, BaseNotificationsTestCase):
