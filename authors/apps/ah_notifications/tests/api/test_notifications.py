@@ -328,10 +328,9 @@ class ArticleNotificationTestCase(BaseArticlesTestCase, BaseNotificationsTestCas
             # login as second user, rating on article
             self.login(self.user2)
             rating = {"rating": {"rating": 4}}
-            response = self.client.post(reverse(
+            response = self.client.put(reverse(
                 "articles:rate-article", kwargs={'slug': slug}), data=rating, format="json")
             #login as first user and check notification
             self.login(self.user)
             status_code, data = self.get(notification_type='unsent')
             self.assertEqual(data['data']['count'], 1)
-

@@ -9,6 +9,7 @@ from django.db import models
 from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, FavouriteArticle, ArticleView, Violation
 from authors.apps.authentication.models import User
 from ..core import client
+from collections import Counter
 
 
 class TagField(serializers.RelatedField):
@@ -38,7 +39,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         error_messages={
             'blank': 'The article must have a title',
             'required': "The article must have a title",
-            'max_length': "The article title cannot be more than 255 characters"
+            'max_length':
+            "The article title cannot be more than 255 characters"
         })
     description = serializers.CharField(
         required=True,
@@ -108,13 +110,15 @@ class ArticleSerializer(serializers.ModelSerializer):
 
         article_uri = {
             'Email':
-                'mailto:?subject=New Article Alert&body={}'.format(article_link),
+            'mailto:?subject=New Article Alert&body={}'.format(article_link),
             'Twitter':
-                'https://twitter.com/intent/tweet?url={}'.format(article_link),
+            'https://twitter.com/intent/tweet?url={}'.format(article_link),
             'Facebook':
-                'https://www.facebook.com/sharer/sharer.php?u={}'.format(article_link),
+            'https://www.facebook.com/sharer/sharer.php?u={}'.format(
+                article_link),
             'LinkedIn':
-                'http://www.linkedin.com/shareArticle?mini=true&amp;url={}'.format(article_link),
+            'http://www.linkedin.com/shareArticle?mini=true&amp;url={}'.format(
+                article_link),
         }
 
         return article_uri
@@ -180,8 +184,19 @@ class ArticleSerializer(serializers.ModelSerializer):
         return instance
 
     def get_average_rating(self, instance):
-        return ArticleRating.objects.filter(article=instance).aggregate(
+        avg_rating = ArticleRating.objects.filter(article=instance).aggregate(
             average_rating=models.Avg('rating'))['average_rating'] or 0
+        total_user_rated = ArticleRating.objects.filter(
+            article=instance).count()
+        each_rating = Counter(
+            ArticleRating.objects.filter(article=instance).values_list(
+                'rating', flat=True))
+
+        return {
+            'avg_rating': avg_rating,
+            'total_user': total_user_rated,
+            'each_rating': each_rating
+        }
 
     def get_reactions(self, instance):
         request = self.context.get('request')
@@ -192,7 +207,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         if request is not None and request.user.is_authenticated:
             user_id = request.user.id
             liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
-            disliked_by_me = instance.dislikes.all().filter(id=user_id).count() == 1
+            disliked_by_me = instance.dislikes.all().filter(
+                id=user_id).count() == 1
 
         return {
             'likes': {
@@ -386,7 +402,6 @@ class StatsSerializer(serializers.ModelSerializer):
 
 
 class ReporterField(serializers.RelatedField):
-
     def get_queryset(self):
         return User.objects.all()
 
@@ -398,7 +413,6 @@ class ReporterField(serializers.RelatedField):
 
 
 class ArticleField(serializers.RelatedField):
-
     def get_queryset(self):
         return Article.objects.all()
 
@@ -423,8 +437,7 @@ class ViolationSerializer(serializers.ModelSerializer):
                 # include only violations whose article is not soft deleted
                 queryset=Violation.objects.all(),
                 fields=('article', 'reporter'),
-                message='You cannot report an article more than once.'
-            )
+                message='You cannot report an article more than once.')
         ]
 
     def create(self, validated_data):
