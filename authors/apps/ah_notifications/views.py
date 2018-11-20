@@ -97,32 +97,53 @@ class SubscribeAPIView(APIView):
     renderer_classes = (BaseJSONRenderer,)
 
     def post(self, request):
-        user = User.objects.filter(email=request.user.email).first()
-        if user.is_subscribed:
-            user.is_subscribed = False
-            user.save()
-            res_data = {"message": "You have successfully unsubscribed to our notifications."}
-            data = {
-                'username': request.user.username
+        user = request.user
+        user.is_subscribed = True
+        user.save()
+        data = {
+            'username': request.user.username
+        }
+        send_email(
+            template='email_subscribe.html',
+            data=data,
+            to_email=request.user.email,
+            subject='Email subscription activated',
+        )
+        res_data = {
+            "message": {
+                "subscription_status": request.user.is_subscribed,
+                "message": "You have successfully subscribed to our notifications.",
             }
-            send_email(
-                template='email_subscribe.html',
-                data=data,
-                to_email=request.user.email,
-                subject='Email subscription activated',
-            )
-            return Response(res_data, status=status.HTTP_200_OK)
-        if not user.is_subscribed:
-            user.is_subscribed = True
-            user.save()
-            res_data = {"message": "You have successfully subscribed from our notifications."}
-            data = {
-                'username': request.user.username,
+         }
+        return Response(res_data, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        user = request.user
+        user.is_subscribed = False
+        user.save()
+        data = {
+            'username': request.user.username,
+        }
+        send_email(
+            template='unsubscribe_email.html',
+            data=data,
+            to_email=request.user.email,
+            subject='Email subscription deactivated',
+        )
+        res_data = {
+            "message": {
+                "subscription_status": request.user.is_subscribed,
+                "message": "You have successfully unsubscribed from our notifications.",
             }
-            send_email(
-                template='unsubscribe_email.html',
-                data=data,
-                to_email=request.user.email,
-                subject='Email subscription deactivated',
-            )
-            return Response(res_data, status=status.HTTP_200_OK)
+        }
+        return Response(res_data, status=status.HTTP_200_OK)
+
+class SubscriptionStatusAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (BaseJSONRenderer,)
+
+    def get(self, request):
+        res_data = {
+            "subscription_status" : request.user.is_subscribed
+        }
+        return Response(res_data, status=status.HTTP_200_OK)
