@@ -185,3 +185,34 @@ class FollowersTestCase(FollowBaseTestCase):
         """
         response = self.followers('mr_foo')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+class FollowingUserTestCase(FollowBaseTestCase):
+    def is_following_me(self, username):
+        return self.client.get(reverse("profiles:is-following", kwargs={"username": username}))
+
+    def test_user_can_check_if_they_re_followed_by_others(self):
+        """
+        Authenticated users can check whether they're being followed.
+        """
+        # let 'mr_foo' check whether 'mr_bar' is following them
+        login(self.mr_foo)
+        response = self.is_following_me('mr_bar')
+        self.assertEqual(response.data, {"following_status": False})
+
+        # let 'mr_bar' follow 'mr_foo'
+        login(self.mr_bar)
+        self.follow('mr_foo')
+        # let 'mr_foo' check whether 'mr_bar' is following them
+        login(self.mr_foo)
+        response = self.is_following_me('mr_bar')
+        login(self.mr_bar)
+        response2 = self.is_following_me('mr_foo')
+        self.assertEqual(response.data, {"following_status": False})
+        self.assertEqual(response2.data, {"following_status": True})
+
+    def test_unauthenticated_users_cannot_check_if_they_re_followed_by_others(self):
+        """
+        Unauthenticated users cannot check whether they're being followed.
+        """
+        response = self.is_following_me('mr_bar')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
