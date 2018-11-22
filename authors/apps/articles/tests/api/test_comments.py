@@ -10,7 +10,7 @@ class TestArticleComment(BaseArticlesTestCase):
     def setUp(self):
         super().setUp()
         self.register()
-        self.comment = {"comment": {"body": "comment on this "}}
+        self.comment = {"comment": {"body": "comment on this "}, "mentions": ['tester001']}
         self.thread = {"comment": {"body": "comment on this thread "}}
         self.user = {
             "user": {
@@ -40,6 +40,10 @@ class TestArticleComment(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': slug}),
             data=comment,
             format="json")
+        response = self.client.get(
+            reverse("articles:comments", kwargs={'slug': '1j23kj2'}),
+            data=comment,
+            format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_comment_unavailable_article(self):
@@ -51,6 +55,7 @@ class TestArticleComment(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': slug}),
             data=comment,
             format="json")
+        self.client.get(reverse("articles:comments", kwargs={'slug': slug}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_thread_comment_related_article(self):
@@ -62,7 +67,7 @@ class TestArticleComment(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': slug}),
             data=comment,
             format="json")
-        pk = json.loads(response.content)['data']['id']
+        pk = json.loads(response.content)['data']['comment']['id']
         response = self.client.post(
             reverse("articles:a-comment", kwargs={
                 'slug': slug,
@@ -70,6 +75,22 @@ class TestArticleComment(BaseArticlesTestCase):
             }),
             data=self.thread,
             format="json")
+        self.client.get(
+            reverse("articles:a-comment", kwargs={
+                'slug': slug,
+                'pk': pk
+            }),
+            format="json")
+        self.client.get(
+            reverse("articles:a-comment", kwargs={
+                'slug': slug,
+                'pk': 123
+            }),
+            format="json")
+        self.client.get(reverse('articles:comment-users', kwargs={
+            'slug': slug,
+        }))
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_thread_comment_unavailable_article(self):
@@ -119,7 +140,21 @@ class TestArticleComment(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': slug}),
             data=comment,
             format="json")
-        pk = json.loads(response.content)["data"]['id']
+        pk = json.loads(response.content)["data"]["comment"]["id"]
+        self.client.put(
+            reverse("articles:a-comment", kwargs={
+                'slug': 'jsdklfjlakdf',
+                'pk': pk
+            }),
+            data=self.thread,
+            format="json")
+        self.client.put(
+            reverse("articles:a-comment", kwargs={
+                'slug': slug,
+                'pk': 123
+            }),
+            data=self.thread,
+            format="json")
         response = self.client.put(
             reverse("articles:a-comment", kwargs={
                 'slug': slug,
@@ -138,7 +173,21 @@ class TestArticleComment(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': slug}),
             data=comment,
             format="json")
-        pk = json.loads(response.content)['data']['id']
+        pk = json.loads(response.content)['data']['comment']['id']
+        self.client.delete(
+            reverse("articles:a-comment", kwargs={
+                'slug': 'jadjfadlf',
+                'pk': pk
+            }),
+            data=self.thread,
+            format="json")
+        self.client.delete(
+            reverse("articles:a-comment", kwargs={
+                'slug': slug,
+                'pk': 1223
+            }),
+            data=self.thread,
+            format="json")
         response = self.client.delete(
             reverse("articles:a-comment", kwargs={
                 'slug': slug,
@@ -146,4 +195,5 @@ class TestArticleComment(BaseArticlesTestCase):
             }),
             data=self.thread,
             format="json")
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
