@@ -162,7 +162,7 @@ class FollowingView(FollowMixin):
         serializer = self.serializer_class(profile.following(), many=True)
         data = {
             'username': username,
-            'followers': serializer.data
+            'following': serializer.data
         }
         return Response(data, status=status.HTTP_200_OK)
 
