@@ -41,7 +41,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             'blank': 'The article must have a title',
             'required': "The article must have a title",
             'max_length':
-            "The article title cannot be more than 255 characters"
+                "The article title cannot be more than 255 characters"
         })
     description = serializers.CharField(
         required=True,
@@ -112,15 +112,15 @@ class ArticleSerializer(serializers.ModelSerializer):
 
         article_uri = {
             'Email':
-            'mailto:?subject=New Article Alert&body={}'.format(article_link),
+                'mailto:?subject=New Article Alert&body={}'.format(article_link),
             'Twitter':
-            'https://twitter.com/intent/tweet?url={}'.format(article_link),
+                'https://twitter.com/intent/tweet?url={}'.format(article_link),
             'Facebook':
-            'https://www.facebook.com/sharer/sharer.php?u={}'.format(
-                article_link),
+                'https://www.facebook.com/sharer/sharer.php?u={}'.format(
+                    article_link),
             'LinkedIn':
-            'http://www.linkedin.com/shareArticle?mini=true&amp;url={}'.format(
-                article_link),
+                'http://www.linkedin.com/shareArticle?mini=true&amp;url={}'.format(
+                    article_link),
         }
 
         return article_uri
@@ -300,7 +300,6 @@ class RatingSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     """ serialize and deserialize comment model"""
     body = serializers.CharField(max_length=1200)  # remove
-    article = ArticleSerializer(read_only=True)
     author = ProfileSerializer(read_only=True)
     likes = serializers.SerializerMethodField(method_name='count_likes')
     dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
@@ -308,7 +307,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
 
-        fields = "__all__"
+        fields = ['id', 'body', 'author', 'likes', 'dislikes', 'parent', 'created_at']
 
     def count_likes(self, instance):
         """Returns the total likes of particlular comment"""
