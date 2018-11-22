@@ -165,3 +165,16 @@ class FollowingView(FollowMixin):
             'followers': serializer.data
         }
         return Response(data, status=status.HTTP_200_OK)
+
+class FollowingUserView(FollowMixin):
+    def get(self, request, username):
+        """
+        Determine whether auth user is following user with username.
+        """
+        auth_profile = request.user.profile
+        other_profile = self.get_user_profile(username)
+        is_following = other_profile.followed_by.filter(user=auth_profile.user).exists()
+        data = {
+            "following_status": is_following
+        }
+        return Response(data, status=status.HTTP_200_OK);
