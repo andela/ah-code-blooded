@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AnonymousUser
+from django.db.models import Count
 from django.utils.text import slugify
 from rest_framework import status, viewsets, generics
 from rest_framework import mixins
@@ -15,17 +16,22 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, ArticleView, Violation
+from authors.apps.articles.models import Article, Tag, ArticleRating, Comment, ArticleView, Violation, FavouriteArticle
 from authors.apps.articles.serializers import (
     ArticleSerializer, TagSerializer, RatingSerializer, FavouriteSerializer, update, CommentSerializer,
     UpdateCommentSerializer, TagsSerializer, StatsSerializer, ViolationSerializer, ViolationListSerializer,
 )
+from authors.apps.authentication.models import User
+from authors.apps.authentication.serializers import UserSerializer
 from authors.apps.core.renderers import BaseJSONRenderer
 from authors.apps.articles.permissions import IsArticleOwnerOrReadOnly, IsNotArticleOwner
+from authors.apps.profiles.models import Profile
+from authors.apps.profiles.serializers import ProfileSerializer
 from .pagination import StandardResultsSetPagination
 from notifications.signals import notify
 from authors.apps.ah_notifications.notifications import Verbs
 from authors.apps.core.mail_sender import send_email
+from rest_framework.exceptions import NotFound
 
 
 class ArticleAPIView(mixins.CreateModelMixin, mixins.UpdateModelMixin,
@@ -374,8 +380,6 @@ class SearchFilterListAPIView(ListAPIView):
     ordering_fields = ('author__username', 'title')
 
 
-
-
 class LikeAPIView(LikeDislikeMixin):
     """
     This view enables liking and un-liking articles.
@@ -456,8 +460,6 @@ class RatingAPIView(CreateAPIView, RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(user_rating)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
     def update(self, request, *args, **kwargs):  # NOQA
         """
         Users can post article ratings
@@ -519,13 +521,33 @@ class RatingsAPIView(RetrieveAPIView):
             'avg_rating': avg_rating,
             'total_user': total_user_rated,
             'each_rating': each_rating
-        },status=status.HTTP_200_OK)
+        }, status=status.HTTP_200_OK)
+
+
+class CommentUsersAPIView(ListAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = (IsArticleOwnerOrReadOnly,)
+    renderer_classes = (BaseJSONRenderer,)
+    renderer_names = ('user', 'users')
+
+    lookup_url_kwarg = 'slug'
+    lookup_field = 'article__slug'
+
+    def get_queryset(self):
+        current = self.request.user.username
+        """This method filter and get comment of an article."""
+        comments = Comment.objects.filter(article__slug=self.kwargs['slug']) \
+            .order_by('author__user_id').distinct('author__user_id')
+        return [comment.author for comment in comments if comment.author != current]
+
 
 class CommentAPIView(ListCreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     renderer_classes = (BaseJSONRenderer,)
+    pagination_class = StandardResultsSetPagination
+    renderer_names = ('comment', 'comments')
     """This class get commit for specific article and create comment"""
 
     # filter by slug from url
@@ -534,7 +556,7 @@ class CommentAPIView(ListCreateAPIView):
 
     def filter_queryset(self, queryset):
         """This method filter and get comment of an article."""
-        filters = {self.lookup_field: self.kwargs[self.lookup_url_kwarg]}
+        filters = {self.lookup_field: self.kwargs[self.lookup_url_kwarg], 'parent': None}
         return queryset.filter(**filters)
 
     def create(self, request, *args, **kwargs):
@@ -544,7 +566,7 @@ class CommentAPIView(ListCreateAPIView):
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
             return Response({
-                'Error': 'Article doesnot exist'
+                'Error': 'Article does not exist'
             }, status.HTTP_404_NOT_FOUND)
         serializer = self.serializer_class(
             data=request.data.get('comment', {}))
@@ -560,7 +582,42 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     renderer_classes = (BaseJSONRenderer,)
+    renderer_names = ['comment', 'comments']
+    pagination_class = StandardResultsSetPagination
     lookup_url_kwarg = "pk"
+
+    def retrieve(self, request, *args, **kwargs):
+        slug = self.kwargs['slug']
+
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            return Response({
+                'error': 'Article does not exist'
+            }, status.HTTP_404_NOT_FOUND)
+
+        # Get the parent comment of the thread
+        try:
+            pk = self.kwargs.get('pk')
+            parent = Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            message = {"error": "comment with this ID doesn't exist"}
+            return Response(message, status.HTTP_404_NOT_FOUND)
+
+        page = self.paginate_queryset(parent.thread.order_by('created_at').all())
+
+        serializer = self.serializer_class(
+            page,
+            context={
+                'request': request
+            },
+            many=True
+        )
+        response = self.get_paginated_response(serializer.data)
+        response.data['comment'] = self.serializer_class(instance=parent, context={
+            'request': request
+        }).data
+        return response
 
     def create(self, request, slug=None, pk=None):
         """This method creates child comment(thread-replies on the parent comment)"""
@@ -570,7 +627,7 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
             return Response({
-                'Error': 'Article does not exist'
+                'error': 'Article does not exist'
             }, status.HTTP_404_NOT_FOUND)
 
         # Get the parent commet of the thread
@@ -578,12 +635,22 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             pk = self.kwargs.get('pk')
             parent = Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
-            message = {"Error": "comment with this ID doesn't exist"}
+            message = {"error": "comment with this ID doesn't exist"}
             return Response(message, status.HTTP_404_NOT_FOUND)
 
         # validating, deserializing and  serializing comment-thread.
         serializer = self.serializer_class(
             data=request.data.get('comment', {}))
+
+        # send notifications to users mentioned in the comments
+        mentions = request.data.get('mentions', [])
+
+        for mention in mentions:
+            notify.send(request.user, verb=Verbs.COMMENT_MENTION,
+                        recipient=User.objects.get(username=mention),
+                        target=article,
+                        description="{} mentioned you in a comment".format(request.user.username))
+
         serializer.is_valid(raise_exception=True)
         serializer.save(
             article=article, parent=parent, author=request.user.profile)
@@ -597,13 +664,13 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             Article.objects.get(slug=slug)
         except Article.DoesNotExist:
             return Response({
-                'Error': 'Article doesnot exist'
+                'error': 'Article does not exist'
             }, status.HTTP_404_NOT_FOUND)
         try:
             pk = self.kwargs.get('pk')
             Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
-            message = {"Error": "comment with this ID doesn't exist"}
+            message = {"error": "comment with this ID doesn't exist"}
             return Response(message, status.HTTP_404_NOT_FOUND)
 
         super().destroy(self, request, *args, **kwargs)
@@ -618,13 +685,13 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             Article.objects.get(slug=slug)
         except Article.DoesNotExist:
             return Response({
-                'Error': 'Article doesnot exist'
+                'error': 'Article does not exist'
             }, status.HTTP_404_NOT_FOUND)
         try:
             pk = self.kwargs.get('pk')
             comment = Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
-            message = {"Error": "comment with this ID doesn't exist"}
+            message = {"error": "comment with this ID doesn't exist"}
             return Response(message, status.HTTP_404_NOT_FOUND)
 
         updated_comment = serializer_class.update(
@@ -634,38 +701,64 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             status=status.HTTP_201_CREATED)
 
 
+class FavouritesAPIView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (BaseJSONRenderer,)
+    serializer_class = ArticleSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        articles = []
+        results = FavouriteArticle.objects.filter(user=self.request.user).select_related('article')
+        for result in results:
+            articles.append(result.article)
+        return articles
+
+
 class FavouriteArticleApiView(APIView):
     """
     define method to favourite article
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = FavouriteSerializer
+    queryset = FavouriteArticle.objects.all()
 
     def post(self, request, slug):
         """
         a registered user can favourite an article
         """
-        request.data['email'] = request.user.email
-        request.data['article'] = slug
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'message': 'Article favourited'})
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise NotFound("article does not exist")
+
+        if article.author != request.user:
+            FavouriteArticle.objects.get_or_create(article=article, user=request.user)
+            return Response({
+                'slug': article.slug,
+                'favourited': True
+            })
+        else:
+            return Response({"message": "You cannot favourite your own article"}, status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, slug):
         """
-        a registered user can unfavourite an article
+        a registered user can favourite an article
         """
-        data = update(request, 'email')
-        data['article'] = slug
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        favourite = serializer.view_favourite(data)
-        favourite.delete()
-        return Response({
-            'message': 'Article removed from favourites'
-        }, status.HTTP_200_OK)
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise NotFound("article does not exist")
+
+        if article.author != request.user:
+            favourited = FavouriteArticle.objects.filter(article=article, user=request.user);
+            favourited.delete()
+            return Response({
+                'slug': article.slug,
+                'favourited': False
+            })
+        else:
+            return Response({"message": "You cannot unfavourite your own article"}, status.HTTP_400_BAD_REQUEST)
 
 
 class LikeComments(UpdateAPIView):

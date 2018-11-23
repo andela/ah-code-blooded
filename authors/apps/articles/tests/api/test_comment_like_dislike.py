@@ -17,7 +17,7 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
             reverse("articles:comments", kwargs={'slug': self.slug}),
             data=self.comment,
             format="json")
-        self.pk = json.loads(response.content)["data"]['id']
+        self.pk = json.loads(response.content)["data"]['comment']['id']
         self.user = {
             "user": {
                 "username": "tester001",
@@ -37,11 +37,12 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
         return self.client.put(self.like_url(slug=slug, pk=pk))
 
     def dislike(self, slug, pk):
-        return self.client.put(self.like_url(slug=slug, pk=pk))
+        return self.client.put(self.dislike_url(slug=slug, pk=pk))
 
     def test_user_can_like_comment(self):
         """Test like a comment"""
         self.register_and_login(self.user)
+        response = self.dislike(self.slug, self.pk)
         response = self.like(self.slug, self.pk)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -49,18 +50,20 @@ class TestCommentLikeDislike(BaseArticlesTestCase):
         """Test unlike comment updating twice """
         self.register_and_login(self.user)
         response = self.like(self.slug, self.pk)
-        response = self.like(self.slug, self.pk)
+        response = self.dislike(self.slug, self.pk)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_like_nonexisting_artilce_comment(self):
         """Test incorret slug in liking"""
         self.register_and_login(self.user)
+        response = self.dislike("fakeslug", self.pk)
         response = self.like("fakeslug", self.pk)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_like_nonexisting_pk_comment(self):
         """Test incorrect pk in liking"""
         self.register_and_login(self.user)
+        response = self.dislike(self.slug, 2)
         response = self.like(self.slug, 2)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

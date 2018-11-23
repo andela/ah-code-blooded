@@ -30,7 +30,7 @@ class ReactionMixin(models.Model):
         """
         if user != self.author:
             notify.send(user, verb=Verbs.ARTICLE_LIKE, recipient=self.author,
-                    description="{} just liked your article".format(user.username))
+                        description="{} just liked your article".format(user.username))
         self.un_dislike(user)
         # add like for the user
         self.likes.add(user)
@@ -54,7 +54,7 @@ class ReactionMixin(models.Model):
         """
         if user != self.author:
             notify.send(user, verb=Verbs.ARTICLE_DISLIKE, recipient=self.author,
-                    description="{} just disliked your article".format(user.username))
+                        description="{} just disliked your article".format(user.username))
         self.un_like(user)
         self.dislikes.add(user)
 
@@ -186,13 +186,8 @@ pre_save.connect(Article.pre_save, Article, dispatch_uid="authors.apps.articles.
 class FavouriteArticle(TimestampsMixin):
     """Allow an article to be favourited"""
 
-    article = models.ForeignKey(
-        Article, on_delete=models.CASCADE, related_name="favourites")
-    email = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-    )
-    favourite = models.Manager()
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="favourites")
+    user = models.ForeignKey(User, related_name="favourites", on_delete=models.CASCADE)
 
 
 class ArticleView(models.Model):

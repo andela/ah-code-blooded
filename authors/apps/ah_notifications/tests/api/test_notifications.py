@@ -291,69 +291,69 @@ class ArticleNotificationTestCase(BaseArticlesTestCase, BaseNotificationsTestCas
         self.assertEqual(data['data']['count'], 1)
 
     def test_author_gets_notification_upon_article_favoriting(self):
-            """
-            Ensure a author gets a notification in their unread box after his article has been rated
-            :return:
-            """
-            # login another user to favorite
-            self.register_and_login(self.user2)
+        """
+        Ensure a author gets a notification in their unread box after his article has been rated
+        :return:
+        """
+        # login another user to favorite
+        self.register_and_login(self.user2)
 
-            # login as first user and create an article
-            self.login(self.user)
-            self.create_article(published=True)
-            slug = self.create_article()['slug']
+        # login as first user and create an article
+        self.login(self.user)
+        self.create_article(published=True)
+        slug = self.create_article()['slug']
 
-            # login as second user, favorite
-            self.login(self.user2)
-            self.client.post(reverse(
-                'articles:favourite_article', kwargs={'slug': slug}), format='json')
-            #login as first user and check notification
-            self.login(self.user)
-            status_code, data = self.get(notification_type='unsent')
-            self.assertEqual(data['data']['count'], 1)
+        # login as second user, favorite
+        self.login(self.user2)
+        self.client.post(reverse(
+            'articles:favourite_article', kwargs={'slug': slug}), format='json')
+        # login as first user and check notification
+        self.login(self.user)
+        status_code, data = self.get(notification_type='unsent')
+        self.assertEqual(data['data']['count'], 1)
 
     def test_author_gets_notification_upon_article_commenting(self):
-            """
-            Ensure author gets a notification in their unread box after article has been commented on
-            :return:
-            """
-            # login another user to comment
-            self.register_and_login(self.user2)
+        """
+        Ensure author gets a notification in their unread box after article has been commented on
+        :return:
+        """
+        # login another user to comment
+        self.register_and_login(self.user2)
 
-            # login as first user and create an article
-            self.login(self.user)
-            self.create_article(published=True)
-            slug = self.create_article()['slug']
+        # login as first user and create an article
+        self.login(self.user)
+        self.create_article(published=True)
+        slug = self.create_article()['slug']
 
-            # login as second user, comment on article
-            self.login(self.user2)
-            comment = {"comment": {"body": "comment on this "}}
-            response = self.client.post(reverse(
-                "articles:comments", kwargs={'slug': slug}), data=comment, format="json")
-            #login as first user and check notification
-            self.login(self.user)
-            status_code, data = self.get(notification_type='unsent')
-            self.assertEqual(data['data']['count'], 1)
+        # login as second user, comment on article
+        self.login(self.user2)
+        comment = {"comment": {"body": "comment on this "}}
+        response = self.client.post(reverse(
+            "articles:comments", kwargs={'slug': slug}), data=comment, format="json")
+        # login as first user and check notification
+        self.login(self.user)
+        status_code, data = self.get(notification_type='unsent')
+        self.assertEqual(data['data']['count'], 1)
 
     def test_author_gets_notification_upon_article_rating(self):
-            """
-            Ensure author gets a notification in their unread box after artile has been rated
-            :return:
-            """
-            # login another user to rating
-            self.register_and_login(self.user2)
+        """
+        Ensure author gets a notification in their unread box after artile has been rated
+        :return:
+        """
+        # login another user to rating
+        self.register_and_login(self.user2)
 
-            # login as first user and rating an article
-            self.login(self.user)
-            self.create_article(published=True)
-            slug = self.create_article()['slug']
+        # login as first user and rating an article
+        self.login(self.user)
+        self.create_article(published=True)
+        slug = self.create_article()['slug']
 
-            # login as second user, rating on article
-            self.login(self.user2)
-            rating = {"rating": {"rating": 4}}
-            response = self.client.put(reverse(
-                "articles:rate-article", kwargs={'slug': slug}), data=rating, format="json")
-            #login as first user and check notification
-            self.login(self.user)
-            status_code, data = self.get(notification_type='unsent')
-            self.assertEqual(data['data']['count'], 1)
+        # login as second user, rating on article
+        self.login(self.user2)
+        rating = {"rating": {"rating": 4}}
+        response = self.client.post(reverse(
+            "articles:rate-article", kwargs={'slug': slug}), data=rating, format="json")
+        # login as first user and check notification
+        self.login(self.user)
+        status_code, data = self.get(notification_type='unsent')
+        self.assertEqual(data['data']['count'], 0)

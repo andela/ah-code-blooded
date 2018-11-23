@@ -39,6 +39,7 @@ class ActorField(serializers.RelatedField):
 
 class NotificationSerializer(serializers.ModelSerializer):
     actor = ActorField(read_only=True)
+    target = ActorField(read_only=True)
 
     class Meta:
         model = Notification
