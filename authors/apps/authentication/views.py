@@ -4,13 +4,16 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.db import IntegrityError
 from django.utils.encoding import force_bytes, force_text
 from rest_framework import status
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from requests.exceptions import HTTPError
 
+from authors.apps.articles.pagination import StandardResultsSetPagination
 from authors.apps.core import client
+from authors.apps.core.renderers import BaseJSONRenderer
 from .renderers import UserJSONRenderer
 
 from django.contrib.auth.tokens import default_token_generator
@@ -321,7 +324,6 @@ class SocialSignUp(CreateAPIView):
             serializer.instance = user
             user.save()
 
-
             return Response(
                 {
                     'token': user.token,
@@ -352,3 +354,17 @@ class LogoutView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"success": "Succesfully logged out"}, status=status.HTTP_200_OK)
+
+
+class UsersAPIView(ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
+    renderer_classes = (BaseJSONRenderer,)
+    queryset = User.objects.all()
+    pagination_class = StandardResultsSetPagination
+
+    filter_backends = (SearchFilter, OrderingFilter)
+    # search fields search all articles' parameters for the searched character
+    search_fields = ('username', 'email')
+    # ordering fields are used to render search outputs in a particular order e.g asending or descending order
+    ordering_fields = ('username',)
