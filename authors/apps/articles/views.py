@@ -613,7 +613,11 @@ class CommentCreateUpdateDestroy(CreateAPIView, RetrieveUpdateDestroyAPIView):
             },
             many=True
         )
-        return self.get_paginated_response(serializer.data)
+        response = self.get_paginated_response(serializer.data)
+        response.data['comment'] = self.serializer_class(instance=parent, context={
+            'request': request
+        }).data
+        return response
 
     def create(self, request, slug=None, pk=None):
         """This method creates child comment(thread-replies on the parent comment)"""
