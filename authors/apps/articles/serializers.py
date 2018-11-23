@@ -403,6 +403,9 @@ def update(request, key):
 class StatsSerializer(serializers.ModelSerializer):
     view_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    dislike_count = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
 
     def get_comment_count(self, value):
         return Comment.objects.filter(article=value).count()
@@ -410,9 +413,19 @@ class StatsSerializer(serializers.ModelSerializer):
     def get_view_count(self, value):
         return ArticleView.objects.filter(article=value).count()
 
+    def get_like_count(self, value):
+        return value.likes.count()
+
+    def get_dislike_count(self, value):
+        return value.dislikes.count()
+
+    def get_average_rating(self, value):
+        return ArticleRating.objects.filter(article=value).aggregate(
+            average_rating=models.Avg('rating'))['average_rating'] or 0
+
     class Meta:
         model = Article
-        fields = ['slug', 'title', 'view_count', 'comment_count']
+        fields = ['slug', 'title', 'view_count', 'comment_count', 'like_count', 'dislike_count', 'average_rating']
 
 
 class ReporterField(serializers.RelatedField):

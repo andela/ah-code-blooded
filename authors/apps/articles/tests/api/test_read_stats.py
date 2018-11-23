@@ -26,6 +26,25 @@ class BaseReadStatsTestCase(BaseArticlesTestCase):
             format='json'
         )
 
+    def like_article(self, slug):
+        return self.client.post(
+            reverse('articles:like', kwargs={'slug': slug})
+        )
+
+    def dislike_article(self, slug):
+        return self.client.post(
+            reverse('articles:dislike', kwargs={'slug': slug})
+        )
+
+    def rate_article(self, slug, rating):
+        return self.client.put(
+            reverse('articles:rate-article', kwargs={'slug': slug}),
+            {
+                'rating': {'rating': rating}
+            },
+            format='json'
+        )
+
     def article_stats(self):
         return self.client.get(reverse('articles:stats'))
 
@@ -34,7 +53,7 @@ class ReadStatsTestCase(BaseReadStatsTestCase):
     def setUp(self):
         super().setUp()
 
-    def assertStatsEqual(self, stats, article=None, views=0, comments=0):
+    def assertStatsEqual(self, stats, article=None, views=0, comments=0, likes=0, dislikes=0, rating=0.0):
         if article is None:
             article = self.article
         stats_list = json.loads(json.dumps(stats))
@@ -43,6 +62,9 @@ class ReadStatsTestCase(BaseReadStatsTestCase):
             "title": article['title'],
             "view_count": views,
             "comment_count": comments,
+            "like_count": likes,
+            "dislike_count": dislikes,
+            "average_rating": rating,
         }
         self.assertIn(data, stats_list)
 
@@ -50,7 +72,7 @@ class ReadStatsTestCase(BaseReadStatsTestCase):
         # owner logs in
         login(self.owner)
         response = self.article_stats()
-        self.assertStatsEqual(response.data, views=0, comments=0)
+        self.assertStatsEqual(response.data, views=0, comments=0, likes=0, dislikes=0, rating=0.0)
 
     def test_owner_view_is_not_added_to_stats(self):
         # owner logs in and views article
@@ -109,3 +131,47 @@ class ReadStatsTestCase(BaseReadStatsTestCase):
         response = self.article_stats()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertStatsEqual(response.data, comments=3)
+
+    def test_likes_on_articles_are_added_to_stats(self):
+        # owner likes article
+        login(self.owner)
+        self.like_article(self.slug)
+        # 2 other users like article
+        login()
+        self.like_article(self.slug)
+        login()
+        self.like_article(self.slug)
+        # owner logs in
+        login(self.owner)
+        response = self.article_stats()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertStatsEqual(response.data, likes=3)
+
+    def test_dislikes_on_articles_are_added_to_stats(self):
+        # owner dislikes article
+        login(self.owner)
+        self.dislike_article(self.slug)
+        # other users rate article
+        login()
+        self.dislike_article(self.slug)
+        login()
+        self.dislike_article(self.slug)
+        # owner logs in
+        login(self.owner)
+        response = self.article_stats()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertStatsEqual(response.data, dislikes=3)
+
+    def test_ratings_on_articles_are_added_to_stats(self):
+        # other users rate article
+        login()
+        self.rate_article(self.slug, 4)
+        login()
+        self.rate_article(self.slug, 2)
+        login()
+        self.rate_article(self.slug, 3)
+        # owner logs in - avg rating should be (4 + 2 + 3)/3 = 3
+        login(self.owner)
+        response = self.article_stats()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertStatsEqual(response.data, rating=3)

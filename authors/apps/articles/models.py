@@ -8,7 +8,6 @@ from authors.apps.authentication.models import User
 from authors.apps.core.models import TimestampsMixin, SoftDeleteMixin
 from notifications.signals import notify
 from authors.apps.ah_notifications.notifications import Verbs
-from rest_framework.reverse import reverse
 
 
 class ReactionMixin(models.Model):
