@@ -706,6 +706,7 @@ class FavouritesAPIView(ListAPIView):
     renderer_classes = (BaseJSONRenderer,)
     serializer_class = ArticleSerializer
     pagination_class = StandardResultsSetPagination
+    renderer_names = ['article', 'articles']
 
     def get_queryset(self):
         articles = []
