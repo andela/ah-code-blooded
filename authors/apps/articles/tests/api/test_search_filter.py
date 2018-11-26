@@ -53,7 +53,7 @@ class TestFavouriteArticle(BaseArticlesTestCase):
         response = self.create_articles()
         response = self.client.get(reverse("articles:search-filter"), data={"tag": 'jkl'})
         data = json.loads(response.content)
-        self.assertEqual(data['data']['results'], [])
+        self.assertEqual(data['data']['article']['results'], [])
 
     def test_user_can_filter_article_using_author(self):
         """any user can filter an article using the author's username"""
@@ -66,7 +66,7 @@ class TestFavouriteArticle(BaseArticlesTestCase):
         response = self.create_articles()
         response = self.client.get(reverse("articles:search-filter"), data={"username": 'moses'})
         data = json.loads(response.content)
-        self.assertEqual(data['data']['results'], [])
+        self.assertEqual(data['data']['article']['results'], [])
 
     def test_user_can_filter_article_using_title(self):
         """user an filter existing artiles using their titles"""
@@ -79,7 +79,7 @@ class TestFavouriteArticle(BaseArticlesTestCase):
         response = self.create_articles()
         response = self.client.get(reverse("articles:search-filter"), data={"title": 'great'})
         data = json.loads(response.content)
-        self.assertEqual(data['data']['results'], [])
+        self.assertEqual(data['data']['article']['results'], [])
 
     def test_user_can_search_article_content(self):
         """user can searh the contents of all articles"""
