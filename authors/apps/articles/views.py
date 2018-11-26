@@ -368,6 +368,7 @@ class SearchFilterListAPIView(ListAPIView):
     serializer_class = ArticleSerializer
     permission_classes = (AllowAny,)
     renderer_classes = (BaseJSONRenderer,)
+    renderer_names = ("article", "articles",)
     queryset = Article.objects.all()
     pagination_class = StandardResultsSetPagination
 
