@@ -31,6 +31,7 @@ from .serializers import (
 )
 from authors.apps.profiles.serializers import ProfileSerializer
 from .models import User, BlacklistedToken
+from authors.apps.profiles.models import Profile
 from rest_framework import authentication
 
 
@@ -357,14 +358,7 @@ class LogoutView(APIView):
 
 
 class UsersAPIView(ListAPIView):
-    serializer_class = UserSerializer
+    serializer_class = ProfileSerializer
     permission_classes = (AllowAny,)
     renderer_classes = (BaseJSONRenderer,)
-    queryset = User.objects.all()
-    pagination_class = StandardResultsSetPagination
-
-    filter_backends = (SearchFilter, OrderingFilter)
-    # search fields search all articles' parameters for the searched character
-    search_fields = ('username', 'email')
-    # ordering fields are used to render search outputs in a particular order e.g asending or descending order
-    ordering_fields = ('username',)
+    queryset = Profile.objects.all()
