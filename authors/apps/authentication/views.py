@@ -31,6 +31,7 @@ from .serializers import (
 )
 from authors.apps.profiles.serializers import ProfileSerializer
 from .models import User, BlacklistedToken
+from authors.apps.profiles.models import Profile
 from rest_framework import authentication
 
 
@@ -240,20 +241,21 @@ class SocialSignUp(CreateAPIView):
     serializer_class = SocialSignUpSerializer
 
     def create(self, request, *args, **kwargs):
-        """Overides `create` to access request
-        request is neccessary for `load_strategy`
         """
-
-        serializer = self.serializer_class(data=request.data)
+        Override `create` instead of `perform_create` to access request
+        request is necessary for `load_strategy`
+        """
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         provider = serializer.data.get('provider', None)
 
-        # associates the social account if the request comes
-        # from an authenticated user
+       # associates the social account if the request comes
+         # from an authenticated user
         authed_user = request.user if not request.user.is_anonymous else None
 
-        # By loading `request` to `load_strategy` `social-app-auth-django`
+
+       # By loading `request` to `load_strategy` `social-app-auth-django`
         # will know to use Django
         strategy = load_strategy(request)
 
@@ -301,43 +303,33 @@ class SocialSignUp(CreateAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         if user and user.is_active:
             user.is_verified = True
+        if user:
+            serializer = UserSerializer(user)
+            # if the access token was set to an empty string, then save the access token
+            # from the request
+            auth_created = user.social_auth.get(provider=provider)
+            if not auth_created.extra_data['access_token']:
+                auth_created.extra_data['access_token'] = token
+                auth_created.save()
+                serializer.save()
 
-            # token = jwt.encode({
-            #     "username": user.username,
-            #     "id": user.pk,
-            #     "email": user.email,
-            #     "iat": datetime.utcnow(),
-            #     "exp": datetime.utcnow() + timedelta(minutes=int(os.getenv('TIME_DELTA')))
-            # }, settings.SECRET_KEY)
+            try:
+                Profile.objects.create(user=user)
+            except:
+                pass
+            user_data = serializer.data
+            user_in_db = User.objects.get(username=user_data['username'])
+            user_in_db.is_active = True
+            user_data["token"] = user_in_db.token
 
-            # # if the access_token was set to an empty string,
-            # # then save the access_token from the request
-            # auth_created = user.social_auth.get(provider=provider)
-            # if not auth_created.extra_data["access_token"]:
-            #     # Facebook will return the access token in its request
-            #     # the token is then saved for future use
-            #     auth_created.extra_data["access_token"] = token
-            #     auth_created.save()
+            user_in_db.save()
 
-            # set instance since we are not calling `serializer.save()`
-
-            serializer.instance = user
-            user.save()
-
-            return Response(
-                {
-                    'token': user.token,
-                },
-
-                status=status.HTTP_201_CREATED
-            )
-            # return Response(serializer.data, status=status.HTTP_201_CREATED,
-            #                 headers=headers)
+            headers = self.get_success_headers(serializer.data)
+            return Response(user_data, status=status.HTTP_201_CREATED,
+                            headers=headers)
         else:
-            return Response({"errors": "Error with social authentication"},
+            return Response({"error": "Something went wrong with the social authentication, please try again"},
                             status=status.HTTP_400_BAD_REQUEST)
-
-
 class LogoutView(APIView):
     """this class logs out a user"""
 
