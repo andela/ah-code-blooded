@@ -303,33 +303,45 @@ class SocialSignUp(CreateAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         if user and user.is_active:
             user.is_verified = True
-        if user:
-            serializer = UserSerializer(user)
-            # if the access token was set to an empty string, then save the access token
-            # from the request
-            auth_created = user.social_auth.get(provider=provider)
-            if not auth_created.extra_data['access_token']:
-                auth_created.extra_data['access_token'] = token
-                auth_created.save()
-                serializer.save()
 
+        def get_image_url(self):
+            """
+            Get the user's current image url from the provider.
+            save/update the image field of the particular user
+            and returns the image_url.
+            """
             try:
-                Profile.objects.create(user=user)
-            except:
-                pass
-            user_data = serializer.data
-            user_in_db = User.objects.get(username=user_data['username'])
-            user_in_db.is_active = True
-            user_data["token"] = user_in_db.token
+                if provider == "google-oauth2":
+                    url = "http://picasaweb.google.com/data/entry/api/user/" \
+                          "{}?alt=json".format(user.email)
+                    data = requests.get(url).json()
+                    image_url = data["entry"]["gphoto$thumbnail"]["$t"]
 
-            user_in_db.save()
+                elif provider == "facebook":
+                    id_url = "https://graph.facebook.com/me?access_token={}" \
+                        .format(access_token)
+                    id_data = requests.get(id_url).json()
+                    user_id = id_data["id"]
+                    url = "http://graph.facebook.com/{}/picture?type=small" \
+                        .format(user_id)
+                    image_url = requests.get(url, allow_redirects=True).url
 
-            headers = self.get_success_headers(serializer.data)
-            return Response(user_data, status=status.HTTP_201_CREATED,
-                            headers=headers)
-        else:
-            return Response({"error": "Something went wrong with the social authentication, please try again"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            except BaseException:
+                image_url = ""
+
+            user.image = image_url
+            user.save()
+            return image_url
+
+        serializer = UserSerializer(user)
+        output = serializer.data
+        user_in_db = User.objects.get(username=output['username'])
+        output['image'] = get_image_url(self)
+        output["token"] = user_in_db.token
+
+        return Response(output, status=status.HTTP_200_OK)
+
+
 class LogoutView(APIView):
     """this class logs out a user"""
 
