@@ -707,6 +707,7 @@ class FavouritesAPIView(ListAPIView):
     renderer_classes = (BaseJSONRenderer,)
     serializer_class = ArticleSerializer
     pagination_class = StandardResultsSetPagination
+    renderer_names = ['article', 'articles']
 
     def get_queryset(self):
         articles = []
@@ -752,7 +753,7 @@ class FavouriteArticleApiView(APIView):
             raise NotFound("article does not exist")
 
         if article.author != request.user:
-            favourited = FavouriteArticle.objects.filter(article=article, user=request.user);
+            favourited = FavouriteArticle.objects.filter(article=article, user=request.user)
             favourited.delete()
             return Response({
                 'slug': article.slug,

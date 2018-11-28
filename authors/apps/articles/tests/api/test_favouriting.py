@@ -95,3 +95,15 @@ class TestFavouriteArticle(BaseArticlesTestCase):
             'articles:favourite_article', kwargs={'slug': slug}), format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.content, b'{"detail":"article does not exist"}')
+
+    def test_user_can_view_list_of_favourited_article(self):
+        """"registered user can view list of favourite articles"""
+        slug = self.create_article()['slug']
+        self.register_and_login(self.fav_user)
+        response = self.client.post(reverse(
+            'articles:favourite_article', kwargs={'slug': slug}), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(b"true", response.content)
+        response = self.client.get(reverse(
+            'articles:article-favourites'), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
