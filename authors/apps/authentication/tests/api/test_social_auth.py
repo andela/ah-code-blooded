@@ -2,8 +2,10 @@
 Test for the social authentication with Google
 """
 from django.urls import reverse
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from unittest.mock import patch
+from authors.apps.authentication.models import User
 
 access_token = '''
 EAAJrz4Wyof4BALP69kKhbavn0orNiZACWttkmT
@@ -18,6 +20,23 @@ class SocialAuthTest(APITestCase):
     """
     Base Test Class for the Social Authentication
     """
+    def setUp(self):
+        """
+        Setup for tests
+        """
+        # Set up the social_auth url.
+        self.auth_url = reverse("authentication:social")
+
+        self.client = APIClient()
+
+        self.user = User(
+            username='Foo',
+            email='bar@example.com',
+            password='123qwerty',
+            is_active=True)
+        self.user.save()
+
+
     def test_provider_in_payload(self):
         """
         Test that the OAuth provider is included in request
@@ -62,3 +81,30 @@ class SocialAuthTest(APITestCase):
             format='json'
         )
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_missing_provider(self):
+        """
+        Test request without passing the provider
+        """
+        access_token = "EAAexjwrTz4IBAC2T3cPCtLdLS3fUGVEz9Ma37"
+        data = {"access_token": access_token}
+        response = self.client.post(self.auth_url, data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_invalid_provider(self):
+        """
+        Test giving a non-existent provider
+        """
+        access_token = "EAAexjwrTz4IBAC2T3cPCtLdLS3fUGVEz9Ma37"
+        data = {"access_token": access_token, "provider": "facebook-oauth23"}
+        response = self.client.post(self.auth_url, data=data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_invalid_token(self):
+        """
+        Test an invalid access token
+        """
+        access_token = "Invalid token"
+        data = {"access_token": access_token, "provider": "goolgle"}
+        response = self.client.post(self.auth_url, data=data)
+        self.assertEqual(response.status_code, 400)
