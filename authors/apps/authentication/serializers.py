@@ -303,7 +303,7 @@ class SocialSignUpSerializer(serializers.Serializer):
 class LogoutSerializer(serializers.ModelSerializer):
     """Performs logout serializer"""
     token = serializers.CharField(max_length=500)
-    # user = serializers.CharField(max_length=500)
+
 
     class Meta:
         model = BlacklistedToken

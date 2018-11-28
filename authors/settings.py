@@ -96,26 +96,6 @@ AUTHENTICATION_BACKENDS = (
 
     'django.contrib.auth.backends.ModelBackend',
 )
-# pipelines
-SOCIAL_AUTH_PIPELINE = (
-    'social_core.pipeline.social_auth.social_details',
-    'social_core.pipeline.social_auth.social_uid',
-    'social_core.pipeline.social_auth.auth_allowed',
-    'social_core.pipeline.social_auth.social_user',
-    'social_core.pipeline.user.get_username',
-    'social_core.pipeline.social_auth.associate_by_email',
-    'social_core.pipeline.user.create_user',
-    'social_core.pipeline.social_auth.associate_user',
-    'social_core.pipeline.social_auth.load_extra_data',
-    'social_core.pipeline.user.user_details',
-)
-
-# The social-auth-app-django has a default namespace "social", to override it
-# and create a custom namespace, this setting is needed:
-SOCIAL_AUTH_URL_NAMESPACE = 'social-auth'
-
-# PostgreSQL has a JSONB field built-in to store unpacked data. This allows us to use it
-# SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 
 
 # pipelines

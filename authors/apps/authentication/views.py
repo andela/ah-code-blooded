@@ -31,6 +31,7 @@ from .serializers import (
 )
 from authors.apps.profiles.serializers import ProfileSerializer
 from .models import User, BlacklistedToken
+from authors.apps.profiles.models import Profile
 from rest_framework import authentication
 
 
@@ -240,20 +241,21 @@ class SocialSignUp(CreateAPIView):
     serializer_class = SocialSignUpSerializer
 
     def create(self, request, *args, **kwargs):
-        """Overides `create` to access request
-        request is neccessary for `load_strategy`
         """
-
-        serializer = self.serializer_class(data=request.data)
+        Override `create` instead of `perform_create` to access request
+        request is necessary for `load_strategy`
+        """
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         provider = serializer.data.get('provider', None)
 
-        # associates the social account if the request comes
-        # from an authenticated user
+       # associates the social account if the request comes
+         # from an authenticated user
         authed_user = request.user if not request.user.is_anonymous else None
 
-        # By loading `request` to `load_strategy` `social-app-auth-django`
+
+       # By loading `request` to `load_strategy` `social-app-auth-django`
         # will know to use Django
         strategy = load_strategy(request)
 
@@ -302,40 +304,42 @@ class SocialSignUp(CreateAPIView):
         if user and user.is_active:
             user.is_verified = True
 
-            # token = jwt.encode({
-            #     "username": user.username,
-            #     "id": user.pk,
-            #     "email": user.email,
-            #     "iat": datetime.utcnow(),
-            #     "exp": datetime.utcnow() + timedelta(minutes=int(os.getenv('TIME_DELTA')))
-            # }, settings.SECRET_KEY)
+        def get_image_url(self):
+            """
+            Get the user's current image url from the provider.
+            save/update the image field of the particular user
+            and returns the image_url.
+            """
+            try:
+                if provider == "google-oauth2":
+                    url = "http://picasaweb.google.com/data/entry/api/user/" \
+                          "{}?alt=json".format(user.email)
+                    data = requests.get(url).json()
+                    image_url = data["entry"]["gphoto$thumbnail"]["$t"]
 
-            # # if the access_token was set to an empty string,
-            # # then save the access_token from the request
-            # auth_created = user.social_auth.get(provider=provider)
-            # if not auth_created.extra_data["access_token"]:
-            #     # Facebook will return the access token in its request
-            #     # the token is then saved for future use
-            #     auth_created.extra_data["access_token"] = token
-            #     auth_created.save()
+                elif provider == "facebook":
+                    id_url = "https://graph.facebook.com/me?access_token={}" \
+                        .format(access_token)
+                    id_data = requests.get(id_url).json()
+                    user_id = id_data["id"]
+                    url = "http://graph.facebook.com/{}/picture?type=small" \
+                        .format(user_id)
+                    image_url = requests.get(url, allow_redirects=True).url
 
-            # set instance since we are not calling `serializer.save()`
+            except BaseException:
+                image_url = ""
 
-            serializer.instance = user
+            user.image = image_url
             user.save()
+            return image_url
 
-            return Response(
-                {
-                    'token': user.token,
-                },
+        serializer = UserSerializer(user)
+        output = serializer.data
+        user_in_db = User.objects.get(username=output['username'])
+        output['image'] = get_image_url(self)
+        output["token"] = user_in_db.token
 
-                status=status.HTTP_201_CREATED
-            )
-            # return Response(serializer.data, status=status.HTTP_201_CREATED,
-            #                 headers=headers)
-        else:
-            return Response({"errors": "Error with social authentication"},
-                            status=status.HTTP_400_BAD_REQUEST)
+        return Response(output, status=status.HTTP_200_OK)
 
 
 class LogoutView(APIView):
