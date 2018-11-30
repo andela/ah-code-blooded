@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Great+Vibes&subset=latin-ext');
+
 * {
     font-weight: 100;
     font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica, helvetica neue, ubuntu, roboto, noto, segoe ui, arial, sans-serif;
@@ -15,13 +17,14 @@ body, html, h2, h3 {
 h2 {
     font-size: 3em;
     color: #ffffff;
+    font-family: 'Great Vibes', cursive;
 }
 
 header {
     text-align: center;
     z-index: 1;
     padding: 2em;
-    background: #00695c;
+    background: #475ab8;
 }
 
 .card {
@@ -60,7 +63,7 @@ header {
     cursor: pointer;
     display: inline-block;
     border: none;
-    background: #00695c none;
+    background: #f06292 none;
     color: rgba(255, 255, 255, 0.8);
     padding: 0.8em 1.5em 0.8em;
     font-weight: normal;

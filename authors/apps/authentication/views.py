@@ -333,6 +333,7 @@ class SocialSignUp(CreateAPIView):
             user.save()
             return image_url
 
+        Profile.objects.get_or_create(user=user)
         serializer = UserSerializer(user)
         output = serializer.data
         user_in_db = User.objects.get(username=output['username'])
